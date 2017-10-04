@@ -1,0 +1,29 @@
+﻿namespace Arke.SipEngine.FSM
+{
+    public enum Trigger
+    {
+        Answered,
+        BadConfig,
+        PlayLanguagePrompts,
+        GetLanguageInput,
+        StartCallFlow,
+        ConnectedOutbound,
+        DialingOutbound,
+        InvalidCallFlowChoice,
+        CouldNotConnectOutbound,
+        FailedCallFlow,
+        FinishCall,
+        CallRejected,
+        InputReceived,
+        FinishedPrompt,
+        PromptInterrupted,
+        PlayInterruptiblePrompt,
+        PlayPrompt,
+        PlayNextPrompt,
+        CaptureInput,
+        FailedInputCapture,
+        NextCallFlowStep,
+        PlaceOnHold,
+        StartRecording
+    }
+}

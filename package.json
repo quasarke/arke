@@ -1,0 +1,12 @@
+{
+  "name": "arke",
+  "version": "1.0.0",
+  "description": "Arke Workflow Platform",
+  "repository": {
+    "type": "git",
+    "url": "git+https://"
+  },
+  "author": "Zachary Way",
+  "license": "ISC",
+  "homepage": ""
+}
