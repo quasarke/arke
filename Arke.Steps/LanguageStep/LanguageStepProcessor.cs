@@ -67,7 +67,10 @@ namespace Arke.Steps.LanguageStep
 
             try
             {
-                if (_call.GetCurrentState() != State.LanguageInput && _call.GetCurrentState() != State.LanguagePrompts)
+                var currentState = _call.GetCurrentState();
+                if (currentState != State.LanguageInput && 
+                    currentState != State.LanguagePrompts &&
+                    currentState != State.CallFlow)
                     return;
                 if (_call.GetCurrentState() == State.LanguagePrompts)
                     _call.FireStateChange(Trigger.GetLanguageInput);
