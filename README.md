@@ -24,3 +24,28 @@ Arke is an IVR written using .NET Core 2.0 for Asterisk using the ARI interface 
 * Settings should inherit the Arke.DSL.Step.Settings.ISettings interface
 * Steps should inherit the Arke.SipEngine.Processors.IStepProcessor interface
 * Compile and copy your new binary to the plugin directory (or use Visual Studio post-build scripts to do so for you)
+
+## Features
+* Playback sound files
+* Get input with timeouts and fail / success steps
+* DSL for building a call flow using JSON
+* Extensible DSL for building and extending new steps into the system
+* Plugin system for dynamically loading new steps at runtime
+* Step Settings API for extending steps with extra settings in the DSL
+* Async/Await Task based call processing for efficient mutli-threading and performance
+* Stateless State Machine for call controls and validating step transitions
+* Extensible Call State for holding data important to a call - can be used to build a custom CDR system
+* Tested on Windows, Linux and Docker on both platforms.
+
+## Known Issues
+* Bridge Call Step still needs work
+* Outbound calling hasn't been finalized yet. Needs some work on that as well
+* No Steps for Voicemail and a few other basic IVR functions yet
+
+## Planned Future Features
+* More base steps to be included:
+   * Voicemail
+   * Call Transfer
+* Play audio from web service
+* Voice Conferencing creation and management
+* Better outbound dialing support
