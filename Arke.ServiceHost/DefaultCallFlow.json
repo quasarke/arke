@@ -1,0 +1,28 @@
+{
+  "0": {
+    "Type": "DeviceConnectedStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "NextStep": 1
+    }
+  },
+  "1": {
+    "Type": "PlayPromptStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "IsInterruptible": false,
+      "Prompts": [
+        "offline",
+        "tryagain"
+      ],
+      "NextStep": 99
+    }
+  },
+  "99": {
+    "Type": "DeviceDisconnectedStep",
+    "Direction": "Both",
+    "Settings": {
+      "HangUp": true
+    }
+  }
+}
