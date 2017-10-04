@@ -38,39 +38,10 @@
     "Settings": {
       "IsInterruptible": true,
       "Prompts": [
-        "monrec",
-        "inmateid"
-      ],
-      "NextStep": 4
-    }
-  },
-  "4": {
-    "Type": "InputStep",
-    "Direction": "Incoming",
-    "Settings": {
-      "Options": [
-
-      ],
-      "NoAction": 5,
-      "Invalid": 5,
-      "MaxDigitTimeoutInSeconds": 10,
-      "NumberOfDigitsToWaitForNextStep": 0,
-      "NextStep": 5,
-      "TerminationDigit": "#",
-      "SetValueAsDestination": true,
-      "MaxAttempts": 3,
-      "MaxAttemptsReachedStep": 99
-    }
-  },
-  "5": {
-    "Type": "PlayPromptStep",
-    "Direction": "Incoming",
-    "Settings": {
-      "IsInterruptible": true,
-      "Prompts": [
-        "onemoment",
-        "collectcall",
-        "commis"
+        "for-tech-support",
+        "press-1",
+        "for-accounting",
+        "press-9"
       ],
       "NextStep": 6
     }
@@ -106,9 +77,9 @@
     "Settings": {
       "IsInterruptible": true,
       "Prompts": [
-        "dialnow"
+        "technical-support"
       ],
-      "NextStep": 8
+      "NextStep": 99
     }
   },
   "8": {
@@ -164,10 +135,9 @@
     "Settings": {
       "IsInterruptible": true,
       "Prompts": [
-        "holdfordial",
-        "goahead"
+        "accounting"
       ],
-      "NextStep": 19
+      "NextStep": 99
     }
   },
   "13": {
