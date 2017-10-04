@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AsterNET.ARI" Version="1.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
+    <PackageReference Include="NLog" Version="5.0.0-beta11" />
+    <PackageReference Include="SimpleInjector" Version="4.0.11" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Arke.DependencyInjection\Arke.DependencyInjection.csproj" />
+    <ProjectReference Include="..\Arke.DSL\Arke.DSL.csproj" />
+    <ProjectReference Include="..\Arke.IVR\Arke.IVR.csproj" />
+    <ProjectReference Include="..\Arke.SipEngine\Arke.SipEngine.csproj" />
+    <ProjectReference Include="..\Arke.Steps\Arke.Steps.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="arke.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DefaultCallFlow.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="logger.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NLog.ARTEMIS.config">
+      <DependentUpon>NLog.config</DependentUpon>
+    </None>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NLog.Debug.config">
+      <DependentUpon>NLog.config</DependentUpon>
+    </None>
+    <None Update="NLog.KeefeEngine.config">
+      <DependentUpon>NLog.config</DependentUpon>
+    </None>
+    <None Update="NLog.Release.config">
+      <DependentUpon>NLog.config</DependentUpon>
+    </None>
+  </ItemGroup>
+
+</Project>

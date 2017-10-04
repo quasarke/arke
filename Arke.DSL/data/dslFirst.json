@@ -1,0 +1,212 @@
+﻿{
+  "0": {
+    "Type": "DeviceConnected",
+    "Settings": {
+      "NextStep": 1
+    }
+  },
+  "1": {
+    "Type": "GetLanguage",
+    "Settings": {
+      "Prompts": [
+        "continue-english-press",
+        "digits/1"
+      ],
+      "LanguageSettings": {
+        "1": "en",
+        "2": "es"
+      },
+      "NextStep": 2,
+      "MaxDigitTimeoutInSeconds": 10
+    }
+  },
+  "2": {
+    "Type": "StartRecordingLine",
+    "Settings": {
+      "ItemsToRecord": [
+        "InboundLine"
+      ],
+      "NextStep": 3
+    }
+  },
+  "3": {
+    "Type": "PlayPrompt",
+    "Settings": {
+      "IsInterruptible": true,
+      "Prompts": [
+        "speak-to-the-operator",
+        "press-1",
+        "for-louie-louie",
+        "digits/2",
+        "for-sales",
+        "press-3",
+        "for-accounting",
+        "press-4",
+        "for-tech-support",
+        "press-5",
+        "for-billing",
+        "press-6"
+      ],
+      "NextStep": 4
+    }
+  },
+  "4": {
+    "Type": "PlayPrompt",
+    "Settings": {
+      "IsInterruptible": false,
+      "Prompts": [
+        "lyrics-louie-louie"
+      ],
+      "NextStep": 2
+    }
+  },
+  "5": {
+    "Type": "GetInput",
+    "Settings": {
+      "Options": [
+        {
+          "Input": "1",
+          "NextStep": 5
+        },
+        {
+          "Input": "2",
+          "NextStep": 3
+        },
+        {
+          "Input": "3",
+          "NextStep": 8
+        },
+        {
+          "Input": "4",
+          "NextStep": 7
+        },
+        {
+          "Input": "5",
+          "NextStep": 6
+        },
+        {
+          "Input": "6",
+          "NextStep": 11
+        }
+      ],
+      "NoAction": 2,
+      "Invalid": 2,
+      "MaxDigitTimeoutInSeconds": 10,
+      "NumberOfDigitsToWaitForNextStep": 1,
+      "NextStep": 0,
+      "TerminationDigit": "#",
+      "SetValueAsDestination": false
+    }
+  },
+  "6": {
+    "Type": "OnHold",
+    "Settings": {
+      "HoldMusic": true,
+      "WaitPrompt": "please-hold-while-minion"
+    }
+  },
+  "7": {
+    "Type": "PlayPrompt",
+    "Settings": {
+      "IsInterruptible": false,
+      "Prompts": [
+        "we-dont-have-tech-support"
+      ],
+      "NextStep": 2
+    }
+  },
+  "8": {
+    "Type": "PlayPrompt",
+    "Settings": {
+      "IsInterruptible": false,
+      "Prompts": [
+        "lots-o-monkeys"
+      ],
+      "NextStep": 2
+    }
+  },
+  "9": {
+    "Type": "PlayPrompt",
+    "Settings": {
+      "IsInterruptible": false,
+      "Prompts": [
+        "tt-codezone"
+      ],
+      "NextStep": 2
+    }
+  },
+  "10": {
+    "Type": "PlayPrompt",
+    "Settings": {
+      "IsInterruptible": true,
+      "Prompts": [
+        "the-party-you-are-calling",
+        "teletubbie-murder",
+        "wait-offensive-sounds",
+        "to-hear-your-account-balance",
+        "press-1",
+        "T-to-rtrn-to-main-menu",
+        "press-star"
+      ],
+      "NextStep": 10
+    }
+  },
+  "11": {
+    "Type": "GetInput",
+    "Settings": {
+      "Options": [
+        {
+          "Input": "1",
+          "NextStep": 11
+        },
+        {
+          "Input": "*",
+          "NextStep": 2
+        }
+      ],
+      "NoAction": 9,
+      "Invalid": 9,
+      "MaxDigitTimeoutInSeconds": 10,
+      "NumberOfDigitsToWaitForNextStep": 1,
+      "NextStep": 0,
+      "TerminationDigit": "#",
+      "SetValueAsDestination": false
+    }
+  },
+  "12": {
+    "Type": "PlayPrompt",
+    "Settings": {
+      "IsInterruptible": true,
+      "Prompts": [
+        "enter-phone-number10",
+        "followed_pound"
+      ],
+      "NextStep": 12
+    }
+  },
+  "13": {
+    "Type": "GetInput",
+    "Settings": {
+      "Options": [ ],
+      "NoAction": 9,
+      "Invalid": 9,
+      "MaxDigitTimeoutInSeconds": 10,
+      "NumberOfDigitsToWaitForNextStep": 0,
+      "NextStep": 13,
+      "TerminationDigit": "#",
+      "SetValueAsDestination": true
+    }
+  },
+  "14": {
+    "Type": "CallOutbound",
+    "Settings": {
+
+    }
+  },
+  "99": {
+    "Type": "DisconnectDevice",
+    "Settings": {
+      "HangUp": true
+    }
+  }
+}
