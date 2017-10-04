@@ -1,0 +1,255 @@
+﻿{
+  "0": {
+    "Type": "DeviceConnectedStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "NextStep": 1
+    }
+  },
+  "1": {
+    "Type": "LanguageStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "Prompts": [
+        "continue-english-press",
+        "digits/1"
+      ],
+      "LanguageSettings": {
+        "1": "en",
+        "2": "es"
+      },
+      "NextStep": 2,
+      "MaxDigitTimeoutInSeconds": 10
+    }
+  },
+  "2": {
+    "Type": "StartRecording",
+    "Direction": "Incoming",
+    "Settings": {
+      "ItemsToRecord": [
+        "InboundLine"
+      ],
+      "NextStep": 3
+    }
+  },
+  "3": {
+    "Type": "PlayPromptStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "IsInterruptible": true,
+      "Prompts": [
+        "monrec",
+        "inmateid"
+      ],
+      "NextStep": 4
+    }
+  },
+  "4": {
+    "Type": "InputStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "Options": [
+
+      ],
+      "NoAction": 5,
+      "Invalid": 5,
+      "MaxDigitTimeoutInSeconds": 10,
+      "NumberOfDigitsToWaitForNextStep": 0,
+      "NextStep": 5,
+      "TerminationDigit": "#",
+      "SetValueAsDestination": true,
+      "MaxAttempts": 3,
+      "MaxAttemptsReachedStep": 99
+    }
+  },
+  "5": {
+    "Type": "PlayPromptStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "IsInterruptible": true,
+      "Prompts": [
+        "onemoment",
+        "collectcall",
+        "commis"
+      ],
+      "NextStep": 6
+    }
+  },
+  "6": {
+    "Type": "InputStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "Options": [
+        {
+          "Input": "1",
+          "NextStep": 7
+        },
+        {
+          "Input": "9",
+          "NextStep": 12
+        }
+      ],
+      "NoAction": 7,
+      "Invalid": 7,
+      "MaxDigitTimeoutInSeconds": 10,
+      "NumberOfDigitsToWaitForNextStep": 1,
+      "NextStep": 7,
+      "TerminationDigit": "#",
+      "SetValueAsDestination": false,
+      "MaxAttempts": 3,
+      "MaxAttemptsReachedStep": 99
+    }
+  },
+  "7": {
+    "Type": "PlayPromptStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "IsInterruptible": true,
+      "Prompts": [
+        "dialnow"
+      ],
+      "NextStep": 8
+    }
+  },
+  "8": {
+    "Type": "InputStep",
+    "Direction": "Outgoing",
+    "Settings": {
+      "Options": [
+      ],
+      "NoAction": 8,
+      "Invalid": 8,
+      "MaxDigitTimeoutInSeconds": 20,
+      "NumberOfDigitsToWaitForNextStep": 11,
+      "NextStep": 9,
+      "TerminationDigit": "",
+      "SetValueAsDestination": true,
+      "MaxAttempts": 3,
+      "MaxAttemptsReachedStep": 99
+    }
+  },
+  "9": {
+    "Type": "OutboundCallStep",
+    "Direction": "Outgoing",
+    "Settings": {
+      "NextStep": 10
+    }
+  },
+  "10": {
+    "Type": "PlayPromptStep",
+    "Direction": "Outgoing",
+    "Settings": {
+      "IsInterruptible": true,
+      "Prompts": [
+        "holdfordial",
+        "goahead"
+      ],
+      "NextStep": 19
+    }
+  },
+  "11": {
+    "Type": "PlayPromptStep",
+    "Direction": "Outgoing",
+    "Settings": {
+      "IsInterruptible": true,
+      "Prompts": [
+        "howtoblock"
+      ],
+      "NextStep": 12
+    }
+  },
+  "12": {
+    "Type": "PlayPromptStep",
+    "Direction": "Outgoing",
+    "Settings": {
+      "IsInterruptible": true,
+      "Prompts": [
+        "holdfordial",
+        "goahead"
+      ],
+      "NextStep": 19
+    }
+  },
+  "13": {
+    "Type": "PlayPromptStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "IsInterruptible": true,
+      "Prompts": [
+        "enter-phone-number10",
+        "followed_pound"
+      ],
+      "NextStep": 13
+    }
+  },
+  "14": {
+    "Type": "InputStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "Options": [],
+      "NoAction": 10,
+      "Invalid": 10,
+      "MaxDigitTimeoutInSeconds": 10,
+      "NumberOfDigitsToWaitForNextStep": 0,
+      "NextStep": 14,
+      "TerminationDigit": "#",
+      "SetValueAsDestination": true,
+      "MaxAttempts": 3,
+      "MaxAttemptsReachedStep": 99
+    }
+  },
+  "15": {
+    "Type": "OutboundCallStep",
+    "Direction": "Outgoing",
+    "Settings": {
+      "NextStep": 16,
+      "SkipCallerPresentataion":  19 
+    }
+  },
+  "16": {
+    "Type": "StartRecording",
+    "Direction": "Outgoing",
+    "Settings": {
+      "ItemsToRecord": [
+        "OutboundLine"
+      ],
+      "NextStep": 99
+    }
+  },
+  "18": {
+    "Type": "ParallelStep",
+    "Direction": "Both",
+    "Settings": {
+      "IncomingNextStep": 6,
+      "OutgoingNextStep": 14
+    }
+  },
+  "19": {
+    "Type": "BridgeCallStep",
+    "Direction": "Both",
+    "Settings": {
+      "NextStep": 99
+    }
+  },
+  "20": {
+    "Type": "HoldStep",
+    "Direction": "Incoming",
+    "Settings": {
+      "HoldMusic": false,
+      "WaitPrompt": "prompt1",
+      "PromptChanges": {
+        "16": "prompt2"
+      },
+      "Triggers": {
+        "15": 3 
+      }
+    } 
+  },
+  "99": {
+    "Type": "DeviceDisconnectedStep",
+    "Direction": "Both",
+    "Settings": {
+      "HangUp": true
+    }
+  }
+}
