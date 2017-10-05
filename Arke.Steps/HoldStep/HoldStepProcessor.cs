@@ -20,11 +20,7 @@ namespace Arke.Steps.HoldStep
         private HoldStepSettings _settings;
         public Dictionary<string, string> LogData = new Dictionary<string, string>();
         public string Name => "HoldStep";
-
-        public HoldStepProcessor()
-        {
-        }
-
+        
         public string HoldPrompt { get; private set; }
 
         public async Task DoStep(ISettings settings, ICall call)

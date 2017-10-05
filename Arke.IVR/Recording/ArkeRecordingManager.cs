@@ -15,7 +15,7 @@ namespace Arke.IVR.Recording
         public ArkeRecordingManager(ISipRecordingApi ariClient)
         {
             _ariClient = ariClient;
-            _creationDateTime = DateTime.Now.ToString("yyyyMMddHHmmss").ToString();
+            _creationDateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
         }
 
         public async Task StartRecordingOnLine(string lineId, string direction, ICallInfo callState)

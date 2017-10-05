@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using Newtonsoft.Json;
 using NLog;
 using NLog.LayoutRenderers;
 
-namespace ARTEMIS.ServiceHost.Logging
+namespace Arke.ServiceHost.Logging
 {
     [LayoutRenderer("json-event-properties")]
     public class JsonEventPropertiesLayoutRenderer : LayoutRenderer

@@ -23,7 +23,7 @@ namespace Arke.IVR.CallObjects
 {
     public class ArkeCall : ICall
     {
-        private readonly AsteriskBridgeFactory _asteriskBridgeFactory;
+        private readonly ArkeBridgeFactory _arkeBridgeFactory;
         private readonly AsteriskPhoneInputHandler _asteriskPhoneInputHandler;
         private readonly IRecordingManager _asteriskRecordingManager;
         private readonly DslProcessor _dslProcessor;
@@ -47,7 +47,7 @@ namespace Arke.IVR.CallObjects
             _asteriskPhoneInputHandler = new AsteriskPhoneInputHandler(this, _promptPlayer);
             _asteriskRecordingManager = recordingmanager;
             _dslProcessor = new DslProcessor(this);
-            _asteriskBridgeFactory = new AsteriskBridgeFactory(_sipBridgeApi);
+            _arkeBridgeFactory = new ArkeBridgeFactory(_sipBridgeApi);
             _callStateMachine = new CallStateMachine(this, _promptPlayer);
             _callStateMachine.SetupFiniteStateMachine();
             LanguageSelectionPromptPlayer = new AsteriskLanguageSelectionPromptPlayer(this, sipPromptApi, sipApiClient);
@@ -80,7 +80,7 @@ namespace Arke.IVR.CallObjects
 
         public async Task AddLineToBridge(string lineId, string bridgeId)
         {
-            await _asteriskBridgeFactory.AddLineToBridge(lineId, bridgeId);
+            await _arkeBridgeFactory.AddLineToBridge(lineId, bridgeId);
         }
 
         public void AddOrUpdateStepIdToLogFields(int stepId)
@@ -124,7 +124,7 @@ namespace Arke.IVR.CallObjects
 
         public async Task<IBridge> CreateBridge(BridgeType bridgeType)
         {
-            return await _asteriskBridgeFactory.CreateBridge(bridgeType);
+            return await _arkeBridgeFactory.CreateBridge(bridgeType);
         }
 
         private void DisposeOfBridgeApi()
@@ -296,7 +296,7 @@ namespace Arke.IVR.CallObjects
 
         public async Task StopHoldingBridge()
         {
-            await _asteriskBridgeFactory.StopHoldingBridge(CallState);
+            await _arkeBridgeFactory.StopHoldingBridge(CallState);
         }
     }
 }

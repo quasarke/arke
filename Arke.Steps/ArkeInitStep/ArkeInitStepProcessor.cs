@@ -4,10 +4,9 @@ using System.Threading.Tasks;
 using Arke.DSL.Step.Settings;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.CallObjects;
-using Arke.SipEngine.Exceptions;
 using Arke.SipEngine.Processors;
 
-namespace Arke.Steps.ArtemisInitStep
+namespace Arke.Steps.ArkeInitStep
 {
     public class ArkeInitStepProcessor : IStepProcessor
     {
