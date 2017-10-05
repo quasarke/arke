@@ -1,7 +1,7 @@
 ﻿using Arke.DSL.Step.Settings;
 using Newtonsoft.Json.Linq;
 
-namespace Arke.Steps.ArtemisInitStep
+namespace Arke.Steps.ArkeInitStep
 {
     public class ArkeInitStepSettings : ISettings
     {

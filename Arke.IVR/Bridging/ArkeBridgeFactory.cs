@@ -6,10 +6,10 @@ using Arke.SipEngine.CallObjects;
 
 namespace Arke.IVR.Bridging
 {
-    public class AsteriskBridgeFactory
+    public class ArkeBridgeFactory
     {
         private readonly ISipBridgingApi _ariClient;
-        public AsteriskBridgeFactory(ISipBridgingApi ariClient)
+        public ArkeBridgeFactory(ISipBridgingApi ariClient)
         {
             _ariClient = ariClient;
         }

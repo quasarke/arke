@@ -14,10 +14,6 @@ namespace Arke.Steps.OutboundCallStep
         private OutboundCallStepSettings _settings;
         public string Name => "OutboundCallStep";
 
-        public OutboundCallStepProcessor()
-        {
-        }
-
         public async Task DoStep(ISettings settings, ICall call)
         {
             _settings = (OutboundCallStepSettings)settings;
