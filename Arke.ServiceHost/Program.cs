@@ -72,8 +72,8 @@ namespace Arke.ServiceHost
             var endpoint = new StasisEndpoint(
                 ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskHost").Value,
                 8088,
-                "asterisk",
-                "asterisk"
+                ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskUser").Value,
+                ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskPassword").Value
                 );
             _logger.Info("Registering endpoint with AriClient");
             _ariClient = new AriClient(endpoint,

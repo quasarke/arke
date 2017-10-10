@@ -4,7 +4,7 @@ using NLog;
 
 namespace Arke.SipEngine.Utility
 {
-    public class NumbersToPrompts
+    public class MoneyValueToPrompts
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         public List<string> GetPromptsForValue(decimal value)
