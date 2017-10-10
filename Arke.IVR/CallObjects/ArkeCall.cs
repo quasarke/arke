@@ -33,12 +33,11 @@ namespace Arke.IVR.CallObjects
         private readonly ISipBridgingApi _sipBridgeApi;
         private readonly ISipLineApi _sipLineApi;
         private ArkeCallState _callState;
-        private CallStateMachine _callStateMachine;
+        private readonly CallStateMachine _callStateMachine;
         
         public ArkeCall(ISipApiClient sipApiClient, ISipLineApi sipLineApi, ISipBridgingApi sipBridgeApi,
             ISipPromptApi sipPromptApi, IRecordingManager recordingmanager)
         {
-            Logger = LogManager.GetCurrentClassLogger();
             _sipApiClient = sipApiClient;
             _sipLineApi = sipLineApi;
             _sipBridgeApi = sipBridgeApi;
@@ -70,7 +69,7 @@ namespace Arke.IVR.CallObjects
         public IPhoneInputHandler InputProcessor => _asteriskPhoneInputHandler;
         public ILanguageSelectionPromptPlayer LanguageSelectionPromptPlayer { get; private set; }
         public Dictionary<string, string> LogData => _logFields;
-        public virtual Logger Logger { get; set; }
+        public virtual Logger Logger { get; set; } = LogManager.GetCurrentClassLogger();
         public IPromptPlayer PromptPlayer => _promptPlayer;
         public IRecordingManager RecordingManager => _asteriskRecordingManager;
         public ISettings StepSettings { get; set; }

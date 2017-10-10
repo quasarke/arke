@@ -15,7 +15,7 @@ namespace Arke.Steps.PlayValueStep
             var stepSettings = settings as PlayValueStepSettings;
             if (stepSettings == null)
                 throw new ArgumentException("PlayValueStepProcessor called with invalid Step settings");
-            var numbersToPromptsConverter = new NumbersToPrompts();
+            var numbersToPromptsConverter = new MoneyValueToPrompts();
             var valueToPlay = (decimal?)call.CallState.GetType().GetProperty(stepSettings.Value)?.GetValue(call.CallState);
 
             if (valueToPlay == null)

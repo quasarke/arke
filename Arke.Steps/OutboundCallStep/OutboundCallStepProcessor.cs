@@ -29,7 +29,6 @@ namespace Arke.Steps.OutboundCallStep
 
         public async Task CallOutbound(string dialingId)
         {
-            dialingId = RemoveTheFirstLetterFromDialingIdBecauseItStartsWithZero(dialingId);
             _call.Logger.Info("Outbound start " + dialingId);
             _call.CallState.CreateOutgoingLine(
                 await _call.SipLineApi.CreateOutboundCall(dialingId));
@@ -59,11 +58,6 @@ namespace Arke.Steps.OutboundCallStep
 
             GoToNextStep();
             _call.Logger.Info("Outbound end, go to next step " + dialingId);
-        }
-
-        private string RemoveTheFirstLetterFromDialingIdBecauseItStartsWithZero(string dialingId)
-        {
-            return dialingId.Substring(1);
         }
     }
 }
