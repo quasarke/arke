@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Arke.DSL.Step.Settings;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.Bridging;
+using Arke.SipEngine.Device;
 using Arke.SipEngine.Events;
 using Arke.SipEngine.FSM;
 using Arke.SipEngine.Processors;
@@ -43,5 +44,6 @@ namespace Arke.SipEngine.CallObjects
         Task AddLineToBridge(string lineId, string bridgeId);
         Task StartRecordingOnLine(string lineId, string direction);
         Task StartRecordingOnBridge(string bridgeId);
+        void SetWorkflow(Workflow deviceWorkflow);
     }
 }

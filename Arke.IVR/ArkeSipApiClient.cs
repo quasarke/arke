@@ -181,10 +181,19 @@ namespace Arke.IVR
 
         public async Task<object> CreateOutboundCall(string numberToDial)
         {
-            return await _ariClient.Channels.OriginateAsync(
-                $"PJSIP/+{numberToDial}@siptest",
-                //app: _appName, // need to test if this is needed
-                appArgs: "dialed");
+            try
+            {
+                return _ariClient.Channels.Originate(
+                    "PJSIP/sipoutbound",
+                    numberToDial,
+                    app: _appName, // need to test if this is needed
+                    appArgs: "dialed");
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "Error creating an outbound call");
+                throw;
+            }
         }
 
         public async Task<string> GetLineState(string lineId)

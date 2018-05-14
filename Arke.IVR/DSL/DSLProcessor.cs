@@ -27,7 +27,7 @@ namespace Arke.IVR.DSL
             var step = Dsl[stepIndex];
             
             var stepName = step.Type + "Processor";
-            var stepType = AssemblyTools.GetReferencingAssemblies("Arke")
+            var stepType = AppDomain.CurrentDomain.GetAssemblies()
                 // Xunit assemblies cause issues during unit tests, so omit from assembly search.
                 .Where(assembly => !assembly.FullName.Contains("xunit"))
                 .SelectMany(assembly => assembly.GetTypes())

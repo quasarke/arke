@@ -10,6 +10,7 @@ using Arke.SipEngine;
 using Arke.SipEngine.CallObjects;
 using AsterNET.ARI;
 using AsterNET.ARI.Models;
+using Datadog.Trace;
 using Microsoft.Extensions.Configuration;
 using NLog;
 
@@ -26,7 +27,7 @@ namespace Arke.IVR
         public static IConfiguration Configuration { get; set; }
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly ArkeSipApiClient _sipApi;
-
+        
         public ArkeCallFlowService()
 
         {
@@ -112,15 +113,30 @@ namespace Arke.IVR
         [SuppressMessage("ReSharper", "FormatStringProblem", Justification = "NLog will use args in the output format instead of string format.")]
         private async void AriClientOnStasisStartEvent(IAriClient sender, StasisStartEvent e)
         {
-            if (e.Args.Contains("dialed") || e.Args.Contains("SnoopChannel"))
-                return;
-
-            _logger.Info("Line Offhook", new { ChannelId = e.Channel.Id, CallerIdName = e.Channel.Caller.Number, CallerIdNumber = e.Channel.Caller.Name });
-            var line = ArkeCallFactory.CreateArkeCall(e.Channel);
-            ConnectedLines.Add(e.Channel.Id, line);
-            _logger.Info("Starting Call Script", new { ChannelId = e.Channel.Id });
+            var callScope = Tracer.Instance.StartActive("NewCall");
+            ICall line;
+            using (var answerScope = Tracer.Instance.StartActive("AnswerCall"))
+            {
+                if (e.Args.Contains("dialed") || e.Args.Contains("SnoopChannel"))
+                    return;
+                callScope.Span.SetTag("ChannelId", e.Channel.Id);
+                _logger.Info("Line Offhook", new
+                {
+                    ChannelId = e.Channel.Id,
+                    CallerIdName = e.Channel.Caller.Number,
+                    CallerIdNumber = e.Channel.Caller.Name
+                });
+                line = ArkeCallFactory.CreateArkeCall(e.Channel, callScope);
+                ConnectedLines.Add(e.Channel.Id, line);
+                _logger.Info("Starting Call Script", new
+                {
+                    ChannelId = e.Channel.Id
+                });
+            }
+            // call answered and started
             await line.RunCallScript();
             _logger.Info("Call Script Complete", new { ChannelId = e.Channel.Id });
+            callScope.Close();
         }
 
         private async void AriClientOnStasisEndEvent(IAriClient sender, StasisEndEvent stasisEndEvent)
@@ -129,6 +145,7 @@ namespace Arke.IVR
             if (!ConnectedLines.ContainsKey(stasisEndEvent.Channel.Id))
                 return;
             ConnectedLines[stasisEndEvent.Channel.Id].Hangup();
+            
             while (!ConnectedLines[stasisEndEvent.Channel.Id].CallState.CallCanBeAbandoned)
             {
                 await Task.Delay(1000);

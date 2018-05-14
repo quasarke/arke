@@ -44,6 +44,7 @@ namespace Arke.Steps.LanguageStep
             _call.Logger.Info("Get Language Step Start");
             _settings = (LanguageStepSettings)settings;
             call.SipApiClient.OnDtmfReceivedEvent += DTMF_ReceivedEvent;
+            call.FireStateChange(Trigger.PlayLanguagePrompts);
             _promptPlayer.AddPromptsToQueue(_settings.Prompts);
             await _promptPlayer.PlayNextPromptInQueue();
             _inputTimeout = new Timer(InputTimeout, _resetEvent,  _settings.MaxDigitTimeoutInSeconds * 1000, int.MaxValue);

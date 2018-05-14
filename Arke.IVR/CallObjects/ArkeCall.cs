@@ -11,10 +11,12 @@ using Arke.IVR.Prompts;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.Bridging;
 using Arke.SipEngine.CallObjects;
+using Arke.SipEngine.Device;
 using Arke.SipEngine.Events;
 using Arke.SipEngine.FSM;
 using Arke.SipEngine.Processors;
 using Arke.SipEngine.Prompts;
+using Datadog.Trace;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json;
 using NLog;
@@ -102,7 +104,6 @@ namespace Arke.IVR.CallObjects
             var answerCall = _sipLineApi.AnswerLine(_callState.IncomingSipChannel.Channel.Id);
             await answerCall;
             Logger.Debug("Channel Answered");
-
             _callState.TimeOffHook = DateTimeOffset.Now;
             _logFields.Add("TimeDeviceOffHook", _callState.TimeOffHook.ToString("s"));
             CallStateMachine.Fire(Trigger.Answered);
@@ -119,6 +120,7 @@ namespace Arke.IVR.CallObjects
             CallStateMachine.Fire(Trigger.FinishCall);
             _sipApiClient.OnDtmfReceivedEvent -= _asteriskPhoneInputHandler.AriClient_OnChannelDtmfReceivedEvent;
             _sipApiClient.OnPromptPlaybackFinishedEvent -= _promptPlayer.AriClient_OnPlaybackFinishedEvent;
+            
         }
 
         public async Task<IBridge> CreateBridge(BridgeType bridgeType)
@@ -258,6 +260,11 @@ namespace Arke.IVR.CallObjects
             {
                 Logger.Error(ex, "Invalid CallFlow DSL");
             }
+        }
+
+        public void SetWorkflow(Workflow deviceWorkflow)
+        {
+            DslProcessor.Dsl = deviceWorkflow.Value as Dictionary<int, DslStep>;
         }
 
         public async Task StartCallRecording()

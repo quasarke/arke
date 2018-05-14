@@ -2,6 +2,6 @@
 {
     public interface ILanguageStepProcessor
     {
-        
+        void StartTimeoutTimer();
     }
 }
