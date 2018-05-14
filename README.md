@@ -1,6 +1,9 @@
 # Arke for Asterisk ARI
 Arke is an IVR written using .NET Core 2.0 for Asterisk using the ARI interface through AsterNET.ARI. It is built to be extensible and with easily modifiable call flows. It's cross platform, supporting Linux, Raspberry Pi, and Windows.
 
+## Find the developers
+[![Join the chat at https://gitter.im/arkeivr/Lobby](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/arkeivr/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## Setup
 * Clone the repo and run `dotnet restore` then `dotnet build`
 * Setup the appsettings.json:
