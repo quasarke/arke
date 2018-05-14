@@ -128,6 +128,7 @@ namespace Arke.IVR.Prompts
             {
                 if (_asteriskCall.GetCurrentState() != State.LanguageInput)
                     _asteriskCall.FireStateChange(Trigger.GetLanguageInput);
+                _stepProcessor.StartTimeoutTimer();
             }
             else
                 await PlayNextPromptInQueue();

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Arke.DependencyInjection;
 using Newtonsoft.Json.Linq;
 
@@ -9,7 +10,7 @@ namespace Arke.DSL.Step.Settings
         public virtual object GetSettings(string stepType)
         {
             var settingsName = stepType + "Settings";
-            var settingsType = AssemblyTools.GetReferencingAssemblies("Arke")
+            var settingsType = AppDomain.CurrentDomain.GetAssemblies()
                 // Xunit assemblies cause issues during unit tests, so omit from assembly search.
                 .Where(assembly => !assembly.FullName.Contains("xunit"))
                 .SelectMany(assembly => assembly.GetTypes())

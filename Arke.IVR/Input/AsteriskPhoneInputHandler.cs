@@ -1,5 +1,5 @@
+using System.Timers;
 using System.Linq;
-using System.Threading;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.Events;
@@ -12,14 +12,14 @@ namespace Arke.IVR.Input
         private readonly ICall _call;
         private readonly IPromptPlayer _promptPlayer;
         private PhoneInputHandlerSettings _settings;
-        private readonly AutoResetEvent _resetEvent;
+
         public AsteriskPhoneInputHandler(ICall call, IPromptPlayer promptPlayer)
         {
             _call = call;
             _promptPlayer = promptPlayer;
             DigitsReceived = "";
-            _resetEvent = new AutoResetEvent(false);
-            DigitTimeoutTimer = new Timer(DigitTimeoutEvent,_resetEvent, int.MaxValue, int.MaxValue);
+            DigitTimeoutTimer = new Timer();
+            DigitTimeoutTimer.Elapsed += DigitTimeoutEvent;
             MaxDigitTimeoutInSeconds = 0;
             NumberOfDigitsToWaitForNextStep = 0;
             TerminationDigit = "#";
@@ -35,8 +35,17 @@ namespace Arke.IVR.Input
         {
             _settings = settings;
             MaxDigitTimeoutInSeconds = _settings.MaxDigitTimeoutInSeconds;
+            SetTimerInterval();
             NumberOfDigitsToWaitForNextStep = _settings.NumberOfDigitsToWaitForNextStep;
             TerminationDigit = _settings.TerminationDigit;
+        }
+
+        private void SetTimerInterval()
+        {
+            if (MaxDigitTimeoutInSeconds > 0)
+            {
+                DigitTimeoutTimer.Interval = MaxDigitTimeoutInSeconds * 1000;
+            }
         }
 
         public void StartUserInput(bool reset)
@@ -46,13 +55,14 @@ namespace Arke.IVR.Input
                 DigitsReceived = "";
             }
             _call.CallState.InputRetryCount++;
+            SetTimerInterval();
             if (MaxDigitTimeoutInSeconds > 0)
-                DigitTimeoutTimer = new Timer(DigitTimeoutEvent, _resetEvent, MaxDigitTimeoutInSeconds * 1000, int.MaxValue);
+                DigitTimeoutTimer.Start();
         }
 
         public void AriClient_OnChannelDtmfReceivedEvent(ISipApiClient sipApiClient, DtmfReceivedEvent dtmfReceivedEvent)
         {
-            DigitTimeoutTimer.Change(int.MaxValue, int.MaxValue);
+            DigitTimeoutTimer.Stop();
             _call.Logger.Debug($"OnChannel Dtmf Received Event {dtmfReceivedEvent.LineId}");
             if (_call.GetCurrentState() == State.LanguagePrompts)
                 return;
@@ -69,7 +79,7 @@ namespace Arke.IVR.Input
             ProcessDigitsReceived();
         }
 
-        private void DigitTimeoutEvent(object sender)
+        private void DigitTimeoutEvent(object sender, ElapsedEventArgs e)
         {
             FailCaptureWhenTimeoutExpires();
         }
@@ -116,14 +126,14 @@ namespace Arke.IVR.Input
             if (_call.GetCurrentState() != State.CapturingInput ||
                 DigitsReceived.Length < NumberOfDigitsToWaitForNextStep)
             {
-                DigitTimeoutTimer = new Timer(DigitTimeoutEvent, _resetEvent, MaxDigitTimeoutInSeconds * 1000, int.MaxValue);
+                DigitTimeoutTimer.Start();
                 return;
             }
 
             if (NumberOfDigitsToWaitForNextStep == 0
                 && !DigitsReceived.EndsWith(TerminationDigit))
             {
-                DigitTimeoutTimer = new Timer(DigitTimeoutEvent, _resetEvent, MaxDigitTimeoutInSeconds * 1000, int.MaxValue);
+                DigitTimeoutTimer.Start();
                 return;
             }
 
@@ -152,7 +162,7 @@ namespace Arke.IVR.Input
             }
             if (NumberOfDigitsToWaitForNextStep == 0)
             {
-                DigitTimeoutTimer = new Timer(DigitTimeoutEvent, _resetEvent, MaxDigitTimeoutInSeconds * 1000, int.MaxValue);
+                DigitTimeoutTimer.Start();
                 return;
             }
 

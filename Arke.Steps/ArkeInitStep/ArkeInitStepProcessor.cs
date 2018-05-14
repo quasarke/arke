@@ -36,6 +36,7 @@ namespace Arke.Steps.ArkeInitStep
             }
             
             _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
+            _call.FireStateChange(SipEngine.FSM.Trigger.NextCallFlowStep);
         }
 
         

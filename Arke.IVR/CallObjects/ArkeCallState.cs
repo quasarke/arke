@@ -7,6 +7,7 @@ using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.Device;
 using Arke.SipEngine.FSM;
 using AsterNET.ARI.Models;
+using Datadog.Trace;
 
 namespace Arke.IVR.CallObjects
 {
@@ -32,6 +33,8 @@ namespace Arke.IVR.CallObjects
         public string FileName { get; set; }
         public ArkeSipChannel IncomingSipChannel { get; set; }
         public string InputData { get; set; }
+        private string _languageCode = "";
+
         public string LanguageCode { get; set; }
         public ArkeSipChannel MonitoringSipChannel { get; set; }
         public ArkeSipChannel OutgoingSipChannel { get; set; }
@@ -45,6 +48,7 @@ namespace Arke.IVR.CallObjects
         
         public bool CallCanBeAbandoned { get; set; }
         public int AttemptCount { get; set; }
+        public Scope TraceScope { get; set; }
 
         public void AddStepToIncomingQueue(int stepId)
         {
