@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Timers;
 using System.Threading.Tasks;
 using Arke.DSL.Step.Settings;
 using Arke.SipEngine.Api;
@@ -20,20 +20,21 @@ namespace Arke.Steps.LanguageStep
         private const int MaxRetries = 3;
 
         private ICall _call;
-        private Timer _inputTimeout;
+        private readonly Timer _inputTimeout;
         private ILanguageSelectionPromptPlayer _promptPlayer;
 
         private int _currentRetryCount;
         private LanguageStepSettings _settings;
-        private AutoResetEvent _resetEvent;
         public Dictionary<string, string> LogData = new Dictionary<string, string>();
 
         public string Name => "LanguageStep";
 
         public LanguageStepProcessor()
         {
+            _inputTimeout = new Timer();
+            _inputTimeout.Elapsed += InputTimeout;
+            _inputTimeout.AutoReset = false;
             _currentRetryCount = 0;
-            _resetEvent = new AutoResetEvent(false);
         }
 
         public async Task DoStep(ISettings settings, ICall call)
@@ -47,36 +48,40 @@ namespace Arke.Steps.LanguageStep
             call.FireStateChange(Trigger.PlayLanguagePrompts);
             _promptPlayer.AddPromptsToQueue(_settings.Prompts);
             await _promptPlayer.PlayNextPromptInQueue();
-            _inputTimeout = new Timer(InputTimeout, _resetEvent,  _settings.MaxDigitTimeoutInSeconds * 1000, int.MaxValue);
+            _inputTimeout.Interval = _settings.MaxDigitTimeoutInSeconds * 1000;
             _call.Logger.Info("Get Language Step End");
         }
 
-        private async void InputTimeout(object sender)
+        private void InputTimeout(object sender, ElapsedEventArgs elapsedEventArgs)
         {
             _call.FireStateChange(_currentRetryCount > MaxRetries
                 ? Trigger.FailedCallFlow
                 : Trigger.PlayLanguagePrompts);
             _currentRetryCount++;
-            await DoStep(_settings, _call);
+            DoStep(_settings, _call).Start();
         }
-        
+
+        public void StartTimeoutTimer()
+        {
+            _inputTimeout.Start();
+        }
+
         private void DTMF_ReceivedEvent(ISipApiClient sipApiClient, DtmfReceivedEvent e)
         {
-            LogData.Add(e.LineId, _call.CallState.GetIncomingLineId());
+            if (!LogData.ContainsKey(e.LineId))
+                LogData.Add(e.LineId, _call.CallState.GetIncomingLineId());
+
             if (_call.CallState != null && e.LineId != _call.CallState.GetIncomingLineId())
                 return;
 
             try
             {
-                var currentState = _call.GetCurrentState();
-                if (currentState != State.LanguageInput && 
-                    currentState != State.LanguagePrompts &&
-                    currentState != State.CallFlow)
+                if (_call.GetCurrentState() != State.LanguageInput && _call.GetCurrentState() != State.LanguagePrompts)
                     return;
                 if (_call.GetCurrentState() == State.LanguagePrompts)
                     _call.FireStateChange(Trigger.GetLanguageInput);
                 GetLanguageChoiceForDigit(e.Digit);
-                _inputTimeout.Change(int.MaxValue, int.MaxValue);
+                _inputTimeout.Stop();
                 _call.Logger.Info("DTMF Event", LogData);
                 GoToNextStep();
             }
