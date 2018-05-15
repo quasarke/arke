@@ -41,7 +41,7 @@ namespace Arke.IVR.CallObjects
         public int PortId { get; set; }
         public bool ProcessOutgoingQueue { get; set; }
         public int StepAttempts { get; set; }
-        public TerminationCode TerminationCode { get; set; }
+        public string TerminationCode { get; set; }
         public DateTimeOffset TimeOffHook { get; set; }
         
         public int InputRetryCount { get; set; }

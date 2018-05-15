@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Arke.SipEngine.Device
 {
-    public class DeviceConfig
+    public abstract class DeviceConfig
     {
         public int Id { get; set; }
         public string IpAddress { get; set; }
@@ -13,7 +13,6 @@ namespace Arke.SipEngine.Device
         public DeviceType DeviceType { get; set; }
         public List<Feature> Features { get; set; }
         public List<Setting> Settings { get; set; }
-        public List<Facility> Facilities { get; set; }
         public List<Workflow> Workflows { get; set; }
     }
 
