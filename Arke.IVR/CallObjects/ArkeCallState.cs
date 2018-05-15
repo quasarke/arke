@@ -7,7 +7,6 @@ using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.Device;
 using Arke.SipEngine.FSM;
 using AsterNET.ARI.Models;
-using Datadog.Trace;
 
 namespace Arke.IVR.CallObjects
 {
@@ -48,7 +47,6 @@ namespace Arke.IVR.CallObjects
         
         public bool CallCanBeAbandoned { get; set; }
         public int AttemptCount { get; set; }
-        public Scope TraceScope { get; set; }
 
         public void AddStepToIncomingQueue(int stepId)
         {
@@ -62,8 +60,7 @@ namespace Arke.IVR.CallObjects
 
         public void CreateOutgoingLine(object sipLine)
         {
-            var channel = sipLine as Channel;
-            if (channel != null)
+            if (sipLine is Channel channel)
             {
                 OutgoingSipChannel = new ArkeSipChannel
                 {

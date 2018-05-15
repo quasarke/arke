@@ -16,7 +16,6 @@ using Arke.SipEngine.Events;
 using Arke.SipEngine.FSM;
 using Arke.SipEngine.Processors;
 using Arke.SipEngine.Prompts;
-using Datadog.Trace;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json;
 using NLog;
