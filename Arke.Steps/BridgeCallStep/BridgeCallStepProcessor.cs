@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Arke.SipEngine.Bridging;
 using Arke.SipEngine.CallObjects;
@@ -9,6 +10,7 @@ namespace Arke.Steps.BridgeCallStep
 {
     public class BridgeCallStepProcessor : IStepProcessor
     {
+        private const string NextStep = "NextStep";
         private IBridge _callBridge;
 
         public string Name => "BridgeCallStep";
@@ -18,7 +20,7 @@ namespace Arke.Steps.BridgeCallStep
             return _callBridge?.Id;
         }
 
-        public async Task DoStep(ISettings settings, ICall call)
+        public async Task DoStep(Step step, ICall call)
         {
             await call.StopHoldingBridge();
             _callBridge = await call.CreateBridge(BridgeType.NoDTMF);
@@ -28,8 +30,7 @@ namespace Arke.Steps.BridgeCallStep
             await call.AddLineToBridge(call.CallState.GetIncomingLineId(), _callBridge.Id);
             await call.AddLineToBridge(call.CallState.GetOutgoingLineId(), _callBridge.Id);
 
-            var stepSettings = (BridgeCallStepSettings) settings;
-            call.AddStepToProcessQueue(stepSettings.NextStep);
+            call.AddStepToProcessQueue(step.GetStepFromConnector(NextStep));
             call.FireStateChange(Trigger.NextCallFlowStep);
         }
     }

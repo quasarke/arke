@@ -6,12 +6,13 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.StartRecordingStep
 {
-    public class StartRecordingSettings : ISettings
+    public class StartRecordingSettings : NodeProperties
     {
-        public List<RecordingItems> ItemsToRecord { get; set; } 
-        public int NextStep { get; set; }
-        public ISettings ConvertFromJObject(JObject jObject)
+        public List<RecordingItems> ItemsToRecord { get; set; }
+
+        public override NodeProperties ConvertFromJObject(JObject jObject)
         {
+            base.ConvertFromJObject(jObject);
             ItemsToRecord = new List<RecordingItems>();
 
             var itemsToRecord = jObject.GetValue("ItemsToRecord").Value<JArray>();
@@ -19,7 +20,6 @@ namespace Arke.Steps.StartRecordingStep
             {
                 ItemsToRecord.Add((RecordingItems)Enum.Parse(typeof(RecordingItems), i.ToString()));
             }
-            NextStep = jObject.GetValue("NextStep").Value<int>();
             return this;
         }
     }

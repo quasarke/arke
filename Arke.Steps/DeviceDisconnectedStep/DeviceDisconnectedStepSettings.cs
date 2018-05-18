@@ -1,12 +1,14 @@
+using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.DeviceDisconnectedStep
 {
-    public class DeviceDisconnectedStepSettings : ISettings
+    public class DeviceDisconnectedStepSettings : NodeProperties
     {
-        public ISettings ConvertFromJObject(JObject jObject)
+        public override NodeProperties ConvertFromJObject(JObject jObject)
         {
+            base.ConvertFromJObject(jObject);
             HangUp = jObject.GetValue("HangUp").Value<bool>();
             return this;
         }

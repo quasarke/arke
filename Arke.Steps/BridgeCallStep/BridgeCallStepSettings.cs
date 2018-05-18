@@ -1,15 +1,9 @@
-﻿using Arke.DSL.Step.Settings;
-using Newtonsoft.Json.Linq;
+﻿using Arke.DSL.Step;
 
 namespace Arke.Steps.BridgeCallStep
 {
-    public class BridgeCallStepSettings : ISettings
+    public class BridgeCallStepSettings : NodeProperties
     {
-        public int NextStep { get; set; }
-        public ISettings ConvertFromJObject(JObject jObject)
-        {
-            NextStep = jObject.GetValue("NextStep").Value<int>();
-            return this;
-        }
+        
     }
 }
