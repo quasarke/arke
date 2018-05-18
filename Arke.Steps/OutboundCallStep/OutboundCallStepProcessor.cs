@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Arke.SipEngine.Bridging;
 using Arke.SipEngine.CallObjects;
@@ -10,20 +11,22 @@ namespace Arke.Steps.OutboundCallStep
 {
     public class OutboundCallStepProcessor : IStepProcessor
     {
+        private const string NextStep = "NextStep";
+        private const string FailedStep = "FailedStep";
         private ICall _call;
-        private OutboundCallStepSettings _settings;
+        private Step _step;
         public string Name => "OutboundCallStep";
 
-        public async Task DoStep(ISettings settings, ICall call)
+        public async Task DoStep(Step step, ICall call)
         {
-            _settings = (OutboundCallStepSettings)settings;
+            _step = step;
             _call = call;
             await CallOutbound(_call.CallState.Destination);
         }
 
         public void GoToNextStep()
         {
-            _call.CallState.AddStepToOutgoingQueue(_settings.NextStep);
+            _call.CallState.AddStepToOutgoingQueue(_step.GetStepFromConnector(NextStep));
             _call.FireStateChange(Trigger.NextCallFlowStep);
         }
 
@@ -45,7 +48,7 @@ namespace Arke.Steps.OutboundCallStep
             catch (Exception ex)
             {
                 _call.Logger.Error(ex, "Outbound call can't get through ");
-                _call.AddStepToProcessQueue(_settings.FailedStep);
+                _call.AddStepToProcessQueue(_step.GetStepFromConnector(FailedStep));
                 _call.FireStateChange(Trigger.NextCallFlowStep);
                 return;
             }

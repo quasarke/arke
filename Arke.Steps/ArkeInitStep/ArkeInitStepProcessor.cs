@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ServiceModel;
 using System.Threading.Tasks;
-using Arke.DSL.Step.Settings;
+using Arke.DSL.Step;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.Processors;
@@ -10,6 +10,8 @@ namespace Arke.Steps.ArkeInitStep
 {
     public class ArkeInitStepProcessor : IStepProcessor
     {
+        private const string FailStep = "FailStep";
+        private const string NextStep = "NextStep";
         private readonly ISipLineApi _sipLineApi;
         private ICall _call;
         private ArkeInitStepSettings _settings;
@@ -21,9 +23,9 @@ namespace Arke.Steps.ArkeInitStep
             _sipLineApi = sipLineApi;
         }
 
-        public async Task DoStep(ISettings settings, ICall call)
+        public async Task DoStep(Step step, ICall call)
         {
-            _settings = (ArkeInitStepSettings) settings;
+            _settings = (ArkeInitStepSettings) step.NodeData.Properties;
             _call = call;
             try
             {
@@ -32,10 +34,10 @@ namespace Arke.Steps.ArkeInitStep
             catch (Exception ex) when (ex is EndpointNotFoundException)
             {
                 _call.CallState.TerminationCode = TerminationCode.InvalidDeviceConfig;
-                _call.CallState.AddStepToIncomingQueue(_settings.FailStep);
+                _call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(FailStep));
             }
             
-            _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
+            _call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
             _call.FireStateChange(SipEngine.FSM.Trigger.NextCallFlowStep);
         }
 

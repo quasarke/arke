@@ -6,12 +6,13 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.StopRecordingStep
 {
-    public class StopRecordingSettings : ISettings
+    public class StopRecordingSettings : NodeProperties
     {
         public List<RecordingItems> ItemsToStop { get; set; }
-        public int NextStep { get; set; }
-        public ISettings ConvertFromJObject(JObject jObject)
+        
+        public override NodeProperties ConvertFromJObject(JObject jObject)
         {
+            base.ConvertFromJObject(jObject);
             ItemsToStop = new List<RecordingItems>();
 
             var itemsToStop = jObject.GetValue("ItemsToStop").Value<JArray>();
@@ -20,7 +21,6 @@ namespace Arke.Steps.StopRecordingStep
                 ItemsToStop.Add((RecordingItems)Enum.Parse(typeof(RecordingItems), i.ToString()));
             }
 
-            NextStep = jObject.GetValue("NextStep").Value<int>();
             return this;
         }
     }

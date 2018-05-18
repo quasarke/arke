@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Arke.DSL.Step;
 using Newtonsoft.Json;
 
 namespace Arke.SipEngine.Device
@@ -18,7 +19,7 @@ namespace Arke.SipEngine.Device
 
     public class Workflow
     {
-        private Dsl _value;
+        private CallFlowDsl _value;
         public int Id { get; set; }
         public string Key { get; set; }
         public object Value {
@@ -28,11 +29,11 @@ namespace Arke.SipEngine.Device
                 var s = value as string;
                 if (s != null)
                 {
-                    _value = JsonConvert.DeserializeObject<Dsl>(s);
+                    _value = JsonConvert.DeserializeObject<CallFlowDsl>(s);
                 }
-                else if (value is Dsl)
+                else if (value is CallFlowDsl)
                 {
-                    _value = (Dsl) value;
+                    _value = (CallFlowDsl) value;
                 }
             } 
         }
