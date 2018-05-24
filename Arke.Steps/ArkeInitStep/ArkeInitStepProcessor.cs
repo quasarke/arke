@@ -54,6 +54,9 @@ namespace Arke.Steps.ArkeInitStep
             {
                 _call.CallState.Endpoint =
                     await _sipLineApi.GetEndpoint(_call.CallState.GetIncomingLineId());
+                _call.CallState.PortId =
+                    await _sipLineApi.GetLineVariable(_call.CallState.GetIncomingLineId(),
+                    "CALLERID(num)");
             }
             catch (Exception ex)
             {

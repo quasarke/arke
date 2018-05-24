@@ -179,12 +179,12 @@ namespace Arke.IVR
             await _ariClient.Bridges.StartMohAsync(bridgeId);
         }
 
-        public async Task<object> CreateOutboundCall(string numberToDial)
+        public async Task<object> CreateOutboundCall(string numberToDial, string outboundEndpoint)
         {
             try
             {
-                return _ariClient.Channels.Originate(
-                    "PJSIP/sipoutbound",
+                return await _ariClient.Channels.OriginateAsync(
+                    outboundEndpoint,
                     numberToDial,
                     app: _appName, // need to test if this is needed
                     appArgs: "dialed");

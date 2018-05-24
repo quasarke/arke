@@ -8,7 +8,7 @@ namespace Arke.SipEngine.Device
     {
         public int Id { get; set; }
         public string IpAddress { get; set; }
-        public int Port { get; set; }
+        public string Port { get; set; }
         public string Name { get; set; }
         
         public DeviceType DeviceType { get; set; }

@@ -14,7 +14,7 @@ namespace Arke.SipEngine.CallObjects
         string FileName { get; set; }
         string InputData { get; set; }
         string LanguageCode { get; set; }
-        int PortId { get; set; }
+        string PortId { get; set; }
         bool ProcessOutgoingQueue { get; set; }
         string TerminationCode { get; set; }
         DateTimeOffset TimeOffHook { get; set; }
@@ -30,7 +30,7 @@ namespace Arke.SipEngine.CallObjects
         int GetNextIncomingStep();
         int GetNextOutgoingStep();
         string GetOutgoingLineId();
-        int GetPortId();
+        string GetPortId();
         int GetStepsOnIncomingQueue();
         int GetStepsOnOutgoingQueue();
         void SetBridge(IBridge bridge);
