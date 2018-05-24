@@ -37,7 +37,7 @@ namespace Arke.IVR.CallObjects
         public string LanguageCode { get; set; }
         public ArkeSipChannel MonitoringSipChannel { get; set; }
         public ArkeSipChannel OutgoingSipChannel { get; set; }
-        public int PortId { get; set; }
+        public string PortId { get; set; }
         public bool ProcessOutgoingQueue { get; set; }
         public int StepAttempts { get; set; }
         public string TerminationCode { get; set; }
@@ -143,12 +143,9 @@ namespace Arke.IVR.CallObjects
             return OutgoingSipChannel != null ? OutgoingSipChannel.Channel.Id : string.Empty;
         }
 
-        public int GetPortId()
+        public string GetPortId()
         {
-            int port;
-            if (!int.TryParse(IncomingSipChannel.Channel.Caller.Number, out port))
-                port = 1;
-            return port;
+            return IncomingSipChannel.Channel.Caller.Number;
         }
 
         public int GetStepsOnIncomingQueue()
