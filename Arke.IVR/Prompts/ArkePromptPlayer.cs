@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Arke.DSL.Step;
 using Arke.IVR.CallObjects;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.CallObjects;
@@ -37,21 +38,22 @@ namespace Arke.IVR.Prompts
             {
                 _arkeCall.InputProcessor.StartUserInput(true);
             }
-            
-            AddPromptsToQueue(settings.Prompts);
+
+            AddPromptsToQueue(settings.Prompts, settings.Direction);
 
             _arkeCall.CallStateMachine.Fire(settings.IsInterruptible
                 ? Trigger.PlayInterruptiblePrompt
                 : Trigger.PlayPrompt);
         }
 
-        public void AddPromptsToQueue(List<string> prompts)
+        public void AddPromptsToQueue(List<string> prompts, Direction direction)
         {
             foreach (var prompt in prompts)
             {
                 _promptQueue.Enqueue(new Prompt()
                 {
-                    PromptFile = prompt
+                    PromptFile = prompt,
+                    Direction = direction
                 });
             }
             _arkeCall.Logger.Debug($"Added prompts to queue, queue size: {_promptQueue.Count}", _arkeCall.LogData);
@@ -73,7 +75,20 @@ namespace Arke.IVR.Prompts
                 var prompt = _promptQueue.Dequeue();
 
                 if (prompt != null)
-                    await PlayPromptFile(prompt.PromptFile);
+                {
+                    switch (prompt.Direction)
+                    {
+                        case Direction.Incoming:
+                            await PlayPromptToIncomingLine(prompt.PromptFile).ConfigureAwait(false);
+                            break;
+                        case Direction.Outgoing:
+                            await PlayPromptToOutgoingLine(prompt.PromptFile).ConfigureAwait(false);
+                            break;
+                        default:
+                            await PlayPromptToBridge(prompt.PromptFile).ConfigureAwait(false);
+                            break;
+                    }
+                }
             }
             catch (Exception)
             {
@@ -92,13 +107,49 @@ namespace Arke.IVR.Prompts
             _arkeCall.CallStateMachine.Fire(Trigger.FinishedPrompt);
         }
 
-        public async Task PlayPromptFile(string promptFile)
+        public async Task PlayPromptToBridge(string promptFile)
+        {
+            try
+            {
+                _currentPlaybackId = (await _sipPromptApi.PlayPromptToBridge(
+                    _arkeCall.CallState.GetBridgeId(),
+                    promptFile, _languageData.FolderName).ConfigureAwait(false));
+                _arkeCall.Logger.Debug($"Prompt file is: {promptFile}");
+                _arkeCall.Logger.Debug($"Prompt ID: {_currentPlaybackId}", _arkeCall.LogData);
+            }
+            catch (Exception ex)
+            {
+                _arkeCall.Logger.Error(ex, $"Error Playing Prompt: {ex.Message}");
+                if (_arkeCall.GetCurrentState() != State.HangUp)
+                    _arkeCall.CallStateMachine.Fire(Trigger.FinishCall);
+            }
+        }
+
+        public async Task PlayPromptToOutgoingLine(string promptFile)
+        {
+            try
+            {
+                _currentPlaybackId = (await _sipPromptApi.PlayPromptToLine(
+                    _arkeCall.CallState.GetOutgoingLineId(),
+                    promptFile, _languageData.FolderName).ConfigureAwait(false));
+                _arkeCall.Logger.Debug($"Prompt file is: {promptFile}");
+                _arkeCall.Logger.Debug($"Prompt ID: {_currentPlaybackId}", _arkeCall.LogData);
+            }
+            catch (Exception ex)
+            {
+                _arkeCall.Logger.Error(ex, $"Error Playing Prompt: {ex.Message}");
+                if (_arkeCall.GetCurrentState() != State.HangUp)
+                    _arkeCall.CallStateMachine.Fire(Trigger.FinishCall);
+            }
+        }
+
+        public async Task PlayPromptToIncomingLine(string promptFile)
         {
             try
             {
                 _currentPlaybackId = (await _sipPromptApi.PlayPromptToLine(
                     _arkeCall.CallState.GetIncomingLineId(),
-                    promptFile, _languageData.FolderName));
+                    promptFile, _languageData.FolderName).ConfigureAwait(false));
                 _arkeCall.Logger.Debug($"Prompt file is: {promptFile}");
                 _arkeCall.Logger.Debug($"Prompt ID: {_currentPlaybackId}", _arkeCall.LogData);
             }

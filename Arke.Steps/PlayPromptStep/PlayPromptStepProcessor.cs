@@ -10,6 +10,7 @@ namespace Arke.Steps.PlayPromptStep
     {
         private const string NextStep = "NextStep";
         public string Name => "PlayPromptStep";
+
         public Task DoStep(Step step, ICall call)
         {
             var stepSettings = (PlayPromptStepSettings) step.NodeData.Properties;

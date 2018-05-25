@@ -11,6 +11,7 @@ namespace Arke.Steps.PlayPromptStep
         private const string NextStep = "NextStep";
         public bool IsInterruptible { get; set; }
         public List<string> Prompts { get; set; }
+
         public override NodeProperties ConvertFromJObject(JObject jObject)
         {
             base.ConvertFromJObject(jObject);

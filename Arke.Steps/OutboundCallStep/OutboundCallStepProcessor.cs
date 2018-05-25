@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Timers;
 using Arke.DSL.Step;
-using Arke.DSL.Step.Settings;
 using Arke.SipEngine.Bridging;
 using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.FSM;
@@ -24,12 +22,14 @@ namespace Arke.Steps.OutboundCallStep
         {
             _step = step;
             _call = call;
-            await CallOutbound(_call.CallState.Destination);
+            await CallOutbound(_call.CallState.Destination).ConfigureAwait(false);
         }
 
         public void GoToNextStep()
         {
-            _call.CallState.AddStepToOutgoingQueue(_step.GetStepFromConnector(NextStep));
+            var next = _step.GetStepFromConnector(NextStep);
+            _call.Logger.Info("Outbound connected, go to next step " + next);
+            _call.CallState.AddStepToOutgoingQueue(next);
             _call.FireStateChange(Trigger.NextCallFlowStep);
         }
 
@@ -39,9 +39,9 @@ namespace Arke.Steps.OutboundCallStep
             try
             {
                 _call.CallState.CreateOutgoingLine(
-                await _call.SipLineApi.CreateOutboundCall($"1{dialingId}", "PJSIP/100"));
+                await _call.SipLineApi.CreateOutboundCall($"1{dialingId}", "Telnyx").ConfigureAwait(false));
                 var outgoingLineId = _call.CallState.GetOutgoingLineId();
-                var currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId);
+                var currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
                 var noAnswerTimeout = new Stopwatch();
                 noAnswerTimeout.Start();
                 while (currentCallState != "Up")
@@ -52,8 +52,8 @@ namespace Arke.Steps.OutboundCallStep
                         _call.FireStateChange(Trigger.NextCallFlowStep);
                         return;
                     }
-                    await Task.Delay(100);
-                    currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId);
+                    await Task.Delay(100).ConfigureAwait(false);
+                    currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -63,15 +63,9 @@ namespace Arke.Steps.OutboundCallStep
                 _call.FireStateChange(Trigger.NextCallFlowStep);
                 return;
             }
-            
-            var bridge = await _call.CreateBridge(BridgeType.WithDTMF);
-            await _call.SipBridgingApi.AddLineToBridge(
-                _call.CallState.GetIncomingLineId(), bridge.Id);
-            await _call.SipBridgingApi.AddLineToBridge(
-                _call.CallState.GetOutgoingLineId(), bridge.Id);
-
+            await _call.SipLineApi.AnswerLine(_call.CallState.GetOutgoingLineId()).ConfigureAwait(false);
+            _call.CallState.ProcessOutgoingQueue = true;
             GoToNextStep();
-            _call.Logger.Info("Outbound end, go to next step " + dialingId);
         }
     }
 }
