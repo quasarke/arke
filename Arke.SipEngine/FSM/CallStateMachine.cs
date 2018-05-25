@@ -34,6 +34,7 @@ namespace Arke.SipEngine.FSM
                 .PermitReentry(Trigger.FailedInputCapture)
                 .Ignore(Trigger.FinishedPrompt)
                 .Ignore(Trigger.PlayNextPrompt)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
                 .Permit(Trigger.FinishCall, State.HangUp)
                 .Permit(Trigger.StartRecording, State.StartingRecording)
                 .OnEntry(_call.ProcessCallLogic);
@@ -51,6 +52,7 @@ namespace Arke.SipEngine.FSM
                 .Ignore(Trigger.PlayInterruptiblePrompt)
                 .Ignore(Trigger.PlayPrompt)
                 .Ignore(Trigger.PlayNextPrompt)
+                .Ignore(Trigger.FailedCallFlow)
                 .Ignore(Trigger.FinishedPrompt)
                 .Ignore(Trigger.StartCallFlow)
                 .Ignore(Trigger.PlaceOnHold)
@@ -61,11 +63,10 @@ namespace Arke.SipEngine.FSM
                 .OnEntry(_call.Hangup);
 
             StateMachine.Configure(State.InCall);
-            
+
             StateMachine.Configure(State.StartingRecording)
                 .Permit(Trigger.NextCallFlowStep, State.CallFlow)
                 .Permit(Trigger.FinishCall, State.HangUp);
-
         }
 
         private void SetupDigitCaptureEvents()

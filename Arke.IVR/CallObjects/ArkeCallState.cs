@@ -22,7 +22,7 @@ namespace Arke.IVR.CallObjects
             _outgoingStepQueue = new Queue<int>();
             ProcessOutgoingQueue = false;
         }
-        
+
         public ArkeBridge Bridge { get; set; }
         public Guid CallId { get; set; }
         public bool CallStarted { get; set; }
@@ -32,8 +32,6 @@ namespace Arke.IVR.CallObjects
         public string FileName { get; set; }
         public ArkeSipChannel IncomingSipChannel { get; set; }
         public string InputData { get; set; }
-        private string _languageCode = "";
-
         public string LanguageCode { get; set; }
         public ArkeSipChannel MonitoringSipChannel { get; set; }
         public ArkeSipChannel OutgoingSipChannel { get; set; }
@@ -42,9 +40,9 @@ namespace Arke.IVR.CallObjects
         public int StepAttempts { get; set; }
         public string TerminationCode { get; set; }
         public DateTimeOffset TimeOffHook { get; set; }
-        
+
         public int InputRetryCount { get; set; }
-        
+
         public bool CallCanBeAbandoned { get; set; }
         public int AttemptCount { get; set; }
 
@@ -80,20 +78,20 @@ namespace Arke.IVR.CallObjects
 
             if (other.LanguageCode != LanguageCode)
                 return false;
-            
+
             if (!other.IncomingSipChannel.Equals(IncomingSipChannel))
                 return false;
 
             if (other.OutgoingSipChannel == null ^ OutgoingSipChannel == null)
                 return false;
 
-            if (other.OutgoingSipChannel != null && !other.OutgoingSipChannel.Equals(OutgoingSipChannel))
+            if (other.OutgoingSipChannel?.Equals(OutgoingSipChannel) == false)
                 return false;
 
             if (other.MonitoringSipChannel == null ^ MonitoringSipChannel == null)
                 return false;
 
-            if (other.MonitoringSipChannel != null && !other.MonitoringSipChannel.Equals(MonitoringSipChannel))
+            if (other.MonitoringSipChannel?.Equals(MonitoringSipChannel) == false)
                 return false;
 
             if (other.Endpoint != Endpoint)
@@ -126,14 +124,14 @@ namespace Arke.IVR.CallObjects
 
         public virtual int GetNextIncomingStep()
         {
-            if (!_incomingStepQueue.Any())
+            if (_incomingStepQueue.Count == 0)
                 throw new Exception("No More incoming steps remaining.");
             return _incomingStepQueue.Dequeue();
         }
 
         public virtual int GetNextOutgoingStep()
         {
-            if (!_outgoingStepQueue.Any())
+            if (_outgoingStepQueue.Count == 0)
                 throw new Exception("No More outgoing steps remaining.");
             return _outgoingStepQueue.Dequeue();
         }
@@ -157,7 +155,7 @@ namespace Arke.IVR.CallObjects
         {
             return _outgoingStepQueue.Count;
         }
-        
+
         public void SetBridge(IBridge bridge)
         {
             Bridge = bridge as ArkeBridge;
