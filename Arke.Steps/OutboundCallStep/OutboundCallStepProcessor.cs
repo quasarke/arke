@@ -39,7 +39,7 @@ namespace Arke.Steps.OutboundCallStep
             try
             {
                 _call.CallState.CreateOutgoingLine(
-                await _call.SipLineApi.CreateOutboundCall($"1{dialingId}", "Telnyx").ConfigureAwait(false));
+                await _call.SipLineApi.CreateOutboundCall($"1{dialingId}", (_step.NodeData.Properties as OutboundCallStepSettings)?.OutboundEndpointName).ConfigureAwait(false));
                 var outgoingLineId = _call.CallState.GetOutgoingLineId();
                 var currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
                 var noAnswerTimeout = new Stopwatch();
