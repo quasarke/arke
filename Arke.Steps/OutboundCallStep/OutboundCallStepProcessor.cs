@@ -33,13 +33,13 @@ namespace Arke.Steps.OutboundCallStep
             _call.FireStateChange(Trigger.NextCallFlowStep);
         }
 
-        public async Task CallOutbound(string dialingId)
+        public async Task CallOutbound(string dialString)
         {
-            _call.Logger.Info("Outbound start " + dialingId);
+            _call.Logger.Info("Outbound start " + dialString);
             try
             {
                 _call.CallState.CreateOutgoingLine(
-                await _call.SipLineApi.CreateOutboundCall($"1{dialingId}", (_step.NodeData.Properties as OutboundCallStepSettings)?.OutboundEndpointName).ConfigureAwait(false));
+                await _call.SipLineApi.CreateOutboundCall(dialString, (_step.NodeData.Properties as OutboundCallStepSettings)?.OutboundEndpointName).ConfigureAwait(false));
                 var outgoingLineId = _call.CallState.GetOutgoingLineId();
                 var currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
                 var noAnswerTimeout = new Stopwatch();
