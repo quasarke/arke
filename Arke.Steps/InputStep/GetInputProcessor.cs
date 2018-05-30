@@ -7,13 +7,13 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.InputStep
 {
-    public class InputStepProcessor : IStepProcessor
+    public class GetInputProcessor : IStepProcessor
     {
-        public string Name => "InputStep";
+        public string Name => "GetInput";
         public Task DoStep(Step step, ICall call)
         {
             call.CallState.InputRetryCount++;
-            var inputHandlerSettings = (InputStepSettings) step.NodeData.Properties;
+            var inputHandlerSettings = (GetInputSettings) step.NodeData.Properties;
             
             call.FireStateChange(Trigger.CaptureInput);
             call.InputProcessor.ChangeInputSettings(inputHandlerSettings.GetPhoneInputHandlerSettings(step));

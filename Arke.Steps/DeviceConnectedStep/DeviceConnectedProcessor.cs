@@ -5,9 +5,9 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.DeviceConnectedStep
 {
-    public class DeviceConnectedStepProcessor : IStepProcessor
+    public class DeviceConnectedProcessor : IStepProcessor
     {
-        public string Name => "DeviceConnectedStep";
+        public string Name => "DeviceConnected";
         private const string NextStep = "NextStep";
 
         public virtual Task DoStep(Step step, ICall call)

@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.OutboundCallStep
 {
-    public class OutboundCallStepSettings : NodeProperties
+    public class CallOutboundSettings : NodeProperties
     {
         public string OutboundEndpointName { get; set; }
         public override NodeProperties ConvertFromJObject(JObject jObject)

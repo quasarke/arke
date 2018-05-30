@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.PlayPromptStep
 {
-    public class PlayPromptStepSettings : NodeProperties
+    public class PlayPromptSettings : NodeProperties
     {
         private const string NextStep = "NextStep";
         public bool IsInterruptible { get; set; }

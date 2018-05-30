@@ -2,7 +2,7 @@
 
 namespace Arke.Steps.DeviceConnectedStep
 {
-    public class DeviceConnectedStepSettings : NodeProperties
+    public class DeviceConnectedSettings : NodeProperties
     {
         
     }

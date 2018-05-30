@@ -3,7 +3,7 @@
 namespace Arke.Steps.ParallelStep
 {
 
-    public class ParallelStepSettings : NodeProperties
+    public class ParallelStartSettings : NodeProperties
     {
         
     }

@@ -2,7 +2,7 @@
 
 namespace Arke.Steps.BridgeCallStep
 {
-    public class BridgeCallStepSettings : NodeProperties
+    public class BridgeCallSettings : NodeProperties
     {
         
     }

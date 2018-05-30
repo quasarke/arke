@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.InputStep
 {
-    public class InputStepSettings : NodeProperties
+    public class GetInputSettings : NodeProperties
     {
         private const string NextStep = "NextStep";
         private const string NoAction = "NoAction";

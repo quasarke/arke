@@ -6,9 +6,9 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.ParallelStep
 {
-    public class ParallelStepProcessor : IStepProcessor
+    public class ParallelStartProcessor : IStepProcessor
     {
-        public string Name => "ParallelStep";
+        public string Name => "ParallelStart";
         private const string IncomingNextStep = "IncomingNextStep";
         private const string OutgoingNextStep = "OutgoingNextStep";
 

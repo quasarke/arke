@@ -17,16 +17,16 @@ namespace Arke.Steps
 
         private void RegisterProcessors(Container container)
         {
-            container.Register<DeviceConnectedStepProcessor>();
-            container.Register<DeviceDisconnectedStepProcessor>();
+            container.Register<DeviceConnectedProcessor>();
+            container.Register<DisconnectDeviceProcessor>();
             container.Register<HoldStepProcessor>();
-            container.Register<InputStepProcessor>();
+            container.Register<GetInputProcessor>();
         }
 
         private void RegisterSettings(Container container)
         {
-            container.Register<DeviceConnectedStepSettings>();
-            container.Register<DeviceDisconnectedStepSettings>();
+            container.Register<DeviceConnectedSettings>();
+            container.Register<DisconnectDeviceSettings>();
             container.Register<HoldStepSettings>();
         }
     }
