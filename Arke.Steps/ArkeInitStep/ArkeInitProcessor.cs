@@ -8,24 +8,24 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.ArkeInitStep
 {
-    public class ArkeInitStepProcessor : IStepProcessor
+    public class ArkeInitProcessor : IStepProcessor
     {
         private const string FailStep = "FailStep";
         private const string NextStep = "NextStep";
         private readonly ISipLineApi _sipLineApi;
         private ICall _call;
-        private ArkeInitStepSettings _settings;
+        private ArkeInitSettings _settings;
 
-        public string Name => "ArtemisInitStep";
+        public string Name => "ArkeInit";
 
-        public ArkeInitStepProcessor(ISipLineApi sipLineApi)
+        public ArkeInitProcessor(ISipLineApi sipLineApi)
         {
             _sipLineApi = sipLineApi;
         }
 
         public async Task DoStep(Step step, ICall call)
         {
-            _settings = (ArkeInitStepSettings) step.NodeData.Properties;
+            _settings = (ArkeInitSettings) step.NodeData.Properties;
             _call = call;
             try
             {

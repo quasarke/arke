@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.StartRecordingStep
 {
-    public class StartRecordingSettings : NodeProperties
+    public class StartRecordingLineSettings : NodeProperties
     {
         public List<RecordingItems> ItemsToRecord { get; set; }
 

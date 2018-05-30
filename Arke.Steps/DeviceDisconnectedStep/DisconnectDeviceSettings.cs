@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.DeviceDisconnectedStep
 {
-    public class DeviceDisconnectedStepSettings : NodeProperties
+    public class DisconnectDeviceSettings : NodeProperties
     {
         public override NodeProperties ConvertFromJObject(JObject jObject)
         {

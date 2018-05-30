@@ -6,14 +6,14 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.PlayPromptStep
 {
-    public class PlayPromptStepProcessor : IStepProcessor
+    public class PlayPromptProcessor : IStepProcessor
     {
         private const string NextStep = "NextStep";
-        public string Name => "PlayPromptStep";
+        public string Name => "PlayPrompt";
 
         public Task DoStep(Step step, ICall call)
         {
-            var stepSettings = (PlayPromptStepSettings) step.NodeData.Properties;
+            var stepSettings = (PlayPromptSettings) step.NodeData.Properties;
             call.StepSettings = stepSettings;
             var nextStep = step.GetStepFromConnector(NextStep);
             call.Logger.Debug("Next step " + nextStep);

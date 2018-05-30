@@ -8,13 +8,13 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.StartRecordingStep
 {
-    public class StartRecordingProcessor : IStepProcessor
+    public class StartRecordingLineProcessor : IStepProcessor
     {
         private ICall _call;
         private Step _step;
         private const string NextStep = "NextStep";
 
-        public string Name => "StartRecordingStep";
+        public string Name => "StartRecordingLine";
         
         public async Task DoStep(Step step, ICall call)
         {
@@ -36,7 +36,7 @@ namespace Arke.Steps.StartRecordingStep
 
         protected virtual async Task StartAllRecordings()
         {
-            foreach (var recordingItem in ((StartRecordingSettings)_step.NodeData.Properties).ItemsToRecord)
+            foreach (var recordingItem in ((StartRecordingLineSettings)_step.NodeData.Properties).ItemsToRecord)
             {
                 await StartRecording(recordingItem);
             }

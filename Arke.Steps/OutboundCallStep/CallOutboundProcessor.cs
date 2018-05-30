@@ -9,14 +9,14 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.OutboundCallStep
 {
-    public class OutboundCallStepProcessor : IStepProcessor
+    public class CallOutboundProcessor : IStepProcessor
     {
         private const string NextStep = "NextStep";
         private const string FailedStep = "Error";
         private const string NoAnswer = "NoAnswer";
         private ICall _call;
         private Step _step;
-        public string Name => "OutboundCallStep";
+        public string Name => "CallOutbound";
 
         public async Task DoStep(Step step, ICall call)
         {
@@ -39,7 +39,7 @@ namespace Arke.Steps.OutboundCallStep
             try
             {
                 _call.CallState.CreateOutgoingLine(
-                await _call.SipLineApi.CreateOutboundCall(dialString, (_step.NodeData.Properties as OutboundCallStepSettings)?.OutboundEndpointName).ConfigureAwait(false));
+                await _call.SipLineApi.CreateOutboundCall(dialString, (_step.NodeData.Properties as CallOutboundSettings)?.OutboundEndpointName).ConfigureAwait(false));
                 var outgoingLineId = _call.CallState.GetOutgoingLineId();
                 var currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
                 var noAnswerTimeout = new Stopwatch();

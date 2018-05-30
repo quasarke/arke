@@ -8,12 +8,12 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.BridgeCallStep
 {
-    public class BridgeCallStepProcessor : IStepProcessor
+    public class BridgeCallProcessor : IStepProcessor
     {
         private const string NextStep = "NextStep";
         private IBridge _callBridge;
 
-        public string Name => "BridgeCallStep";
+        public string Name => "BridgeCall";
 
         public string GetBridgeId()
         {

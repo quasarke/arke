@@ -7,9 +7,9 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.DeviceDisconnectedStep
 {
-    public class DeviceDisconnectedStepProcessor : IStepProcessor
+    public class DisconnectDeviceProcessor : IStepProcessor
     {
-        public string Name => "DeviceDisconnectedStep";
+        public string Name => "DisconnectDevice";
         public Task DoStep(Step step, ICall call)
         {
             call.FireStateChange(Trigger.FinishCall);
