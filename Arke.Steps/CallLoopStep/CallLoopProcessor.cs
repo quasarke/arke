@@ -7,9 +7,9 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.CallLoopStep
 {
-    public class CallLoopStepProcessor : IStepProcessor
+    public class CallLoopProcessor : IStepProcessor
     {
-        public string Name => "CallLoopStep";
+        public string Name => "CallLoop";
         private ICall _call;
         private Step _step;
 

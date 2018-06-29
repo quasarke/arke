@@ -15,8 +15,11 @@ using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.Interfaces;
 using Arke.SipEngine.Services;
 using AsterNET.ARI;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using NLog;
+using NLog.Web;
 using SimpleInjector;
 
 namespace Arke.ServiceHost
@@ -45,8 +48,23 @@ namespace Arke.ServiceHost
             service.Start();
             
             _logger.Info("Service running, press CTRL-C to terminate.");
-            Console.ReadLine();
+
+            try
+            {
+                _logger.Info("Starting Web Host services.");
+                BuildWebHost(args).Run();
+            }
+            catch (Exception e)
+            {
+                _logger.Fatal(e, "Host terminated unexpectedly.");
+            }
         }
+
+        private static IWebHost BuildWebHost(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
+                .UseStartup<WebApiStartup>()
+                .UseNLog()
+                .Build();
 
         private static void LoadPlugins()
         {
@@ -91,6 +109,7 @@ namespace Arke.ServiceHost
             container.RegisterSingleton<ISipLineApi>(_sipApi);
             container.RegisterSingleton<ISipPromptApi>(_sipApi);
             container.RegisterSingleton<ISipRecordingApi>(_sipApi);
+            container.RegisterSingleton<ISoundsApi>(_sipApi);
         }
 
         private static void RegisterDependencies()

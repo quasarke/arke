@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Arke.IVR.Bridging;
 using Arke.SipEngine.Api;
+using Arke.SipEngine.Api.Models;
 using Arke.SipEngine.Bridging;
 using Arke.SipEngine.CallObjects.RecordingFiles;
 using Arke.SipEngine.Events;
@@ -13,7 +15,7 @@ using NLog;
 namespace Arke.IVR
 {
     [SuppressMessage("ReSharper", "FormatStringProblem", Justification = "NLog will use args in the output format instead of string format.")]
-    public class ArkeSipApiClient : ISipApiClient, ISipBridgingApi, ISipLineApi, ISipPromptApi, ISipRecordingApi
+    public class ArkeSipApiClient : ISipApiClient, ISipBridgingApi, ISipLineApi, ISipPromptApi, ISipRecordingApi, ISoundsApi
     {
         private readonly IAriClient _ariClient;
         private string _appName;
@@ -194,6 +196,25 @@ namespace Arke.IVR
                 _logger.Error(e, "Error creating an outbound call");
                 throw;
             }
+        }
+
+        public async Task<ICollection<Sound>> GetSoundsOnEngine()
+        {
+            var sounds = await _ariClient.Sounds.ListAsync().ConfigureAwait(false);
+            var soundsResponse = new List<Sound>();
+            foreach (var sound in sounds)
+            {
+                var soundObj = new Sound()
+                {
+                    Id = sound.Id,
+                    Text = sound.Text,
+                    Formats = new List<SoundFormat>()
+                };
+                foreach (var format in sound.Formats)
+                    soundObj.Formats.Add(new SoundFormat() { Format = format.Format, Language = format.Language });
+                soundsResponse.Add(soundObj);
+            }
+            return soundsResponse;
         }
 
         public async Task<string> GetLineState(string lineId)

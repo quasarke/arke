@@ -64,7 +64,6 @@ namespace Arke.Steps.OutboundCallStep
                 return;
             }
             await _call.SipLineApi.AnswerLine(_call.CallState.GetOutgoingLineId()).ConfigureAwait(false);
-            _call.CallState.ProcessOutgoingQueue = true;
             GoToNextStep();
         }
     }
