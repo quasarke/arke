@@ -1,5 +1,6 @@
 ﻿using System;
 using SimpleInjector;
+using SimpleInjector.Lifestyles;
 
 namespace Arke.DependencyInjection
 {
@@ -12,6 +13,7 @@ namespace Arke.DependencyInjection
         public ObjectContainer()
         {
             _container = new Container();
+            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
             _lifecycleConverter = new SimpleInjectorLifecycleConverter();
         }
 

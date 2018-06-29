@@ -5,7 +5,7 @@ using Arke.DSL.Step;
 
 namespace Arke.Steps.CallLoopStep
 {
-    public class CallLoopStepSettings : NodeProperties
+    public class CallLoopSettings : NodeProperties
     {
     }
 }
