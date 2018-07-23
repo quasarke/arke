@@ -16,7 +16,7 @@ namespace Arke.SipEngine.CallObjects
         string LanguageCode { get; set; }
         int PortId { get; set; }
         bool ProcessOutgoingQueue { get; set; }
-        TerminationCode TerminationCode { get; set; }
+        string TerminationCode { get; set; }
         DateTimeOffset TimeOffHook { get; set; }
         int InputRetryCount { get; set; }
         bool CallCanBeAbandoned { get; set; }
