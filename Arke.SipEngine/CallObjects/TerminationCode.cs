@@ -1,8 +1,8 @@
 namespace Arke.SipEngine.CallObjects
 {
-    public enum TerminationCode
+    public class TerminationCode
     {
-        NormalCallCompletion,
-        InvalidDeviceConfig
+        public const string NormalCallCompletion = "NormalCallCompletion";
+        public const string InvalidDeviceConfig = "InvalidDeviceConfig";
     }
 }
