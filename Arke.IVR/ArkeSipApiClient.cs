@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Arke.IVR.Bridging;
 using Arke.SipEngine.Api;
+using Arke.SipEngine.Api.Models;
 using Arke.SipEngine.Bridging;
 using Arke.SipEngine.CallObjects.RecordingFiles;
 using Arke.SipEngine.Events;
@@ -13,7 +15,7 @@ using NLog;
 namespace Arke.IVR
 {
     [SuppressMessage("ReSharper", "FormatStringProblem", Justification = "NLog will use args in the output format instead of string format.")]
-    public class ArkeSipApiClient : ISipApiClient, ISipBridgingApi, ISipLineApi, ISipPromptApi, ISipRecordingApi
+    public class ArkeSipApiClient : ISipApiClient, ISipBridgingApi, ISipLineApi, ISipPromptApi, ISipRecordingApi, ISoundsApi
     {
         private readonly IAriClient _ariClient;
         private string _appName;
@@ -31,14 +33,14 @@ namespace Arke.IVR
 
         public async Task AnswerLine(string lineId)
         {
-            await _ariClient.Channels.AnswerAsync(lineId);
+            await _ariClient.Channels.AnswerAsync(lineId).ConfigureAwait(false);
         }
 
         public async Task PlayMusicOnHoldToLine(string channelId)
         {
             try
             {
-                await _ariClient.Channels.StartMohAsync(channelId);
+                await _ariClient.Channels.StartMohAsync(channelId).ConfigureAwait(false);
             }
             catch (HttpRequestException e)
             {
@@ -50,7 +52,7 @@ namespace Arke.IVR
         {
             try
             {
-                await _ariClient.Channels.StopMohAsync(channelId);
+                await _ariClient.Channels.StopMohAsync(channelId).ConfigureAwait(false);
             }
             catch (HttpRequestException e)
             {
@@ -58,22 +60,22 @@ namespace Arke.IVR
             }
         }
 
-        public async Task<string> GetLineVariable(string channelId, string variableName)
+        public async Task<string> GetLineVariable(string lineId, string variableName)
         {
-            var variable = await _ariClient.Channels.GetChannelVarAsync(channelId, variableName);
+            var variable = await _ariClient.Channels.GetChannelVarAsync(lineId, variableName).ConfigureAwait(false);
             return variable.Value;
         }
 
         public async Task<string> GetEndpoint(string lineId)
         {
-            var getChannelVarResult = await _ariClient.Channels.GetChannelVarAsync(lineId, "CHANNEL(pjsip,remote_addr)");
+            var getChannelVarResult = await _ariClient.Channels.GetChannelVarAsync(lineId, "CHANNEL(pjsip,remote_addr)").ConfigureAwait(false);
             _logger.Debug("GetEndpoint", new {LineId = lineId, Result = getChannelVarResult.Value});
             return getChannelVarResult.Value.Split(':')[0];
         }
 
         public async Task<IBridge> CreateBridge(string bridgeType, string bridgeName)
         {
-            var asteriskBridge = await _ariClient.Bridges.CreateAsync(bridgeType, Guid.NewGuid().ToString(), bridgeName);
+            var asteriskBridge = await _ariClient.Bridges.CreateAsync(bridgeType, Guid.NewGuid().ToString(), bridgeName).ConfigureAwait(false);
             var artemisBridge = new ArkeBridge()
             {
                 Id = asteriskBridge.Id,
@@ -84,24 +86,24 @@ namespace Arke.IVR
 
         public async Task AddLineToBridge(string lineId, string bridgeId)
         {
-            await _ariClient.Bridges.AddChannelAsync(bridgeId, lineId);
+            await _ariClient.Bridges.AddChannelAsync(bridgeId, lineId).ConfigureAwait(false);
         }
 
         public async Task RemoveLineFromBridge(string lineId, string bridgeId)
         {
-            await _ariClient.Bridges.RemoveChannelAsync(bridgeId, lineId);
+            await _ariClient.Bridges.RemoveChannelAsync(bridgeId, lineId).ConfigureAwait(false);
         }
 
         public async Task DestroyBridge(string bridgeId)
         {
-            await _ariClient.Bridges.DestroyAsync(bridgeId);
+            await _ariClient.Bridges.DestroyAsync(bridgeId).ConfigureAwait(false);
         }
 
         public async Task HangupLine(string lineId)
         {
             try
             {
-                await _ariClient.Channels.HangupAsync(lineId, "normal");
+                await _ariClient.Channels.HangupAsync(lineId, "normal").ConfigureAwait(false);
             }
             catch (HttpRequestException e)
             {
@@ -111,7 +113,7 @@ namespace Arke.IVR
 
         public async Task StopRecording(string recordingId)
         {
-            await _ariClient.Recordings.StopAsync(recordingId);
+            await _ariClient.Recordings.StopAsync(recordingId).ConfigureAwait(false);
         }
 
         public async Task<string> StartRecordingOnLine(string lineId, string fileName)
@@ -120,9 +122,9 @@ namespace Arke.IVR
                 _appName,
                 "in",
                 null,
-                "SnoopChannel");
+                "SnoopChannel").ConfigureAwait(false);
             var channelRecording = await _ariClient.Channels.RecordAsync(snoopingChannel.Id, fileName,
-                new ArkeFileFormatFactory().GetFileFormat(), 0, 0, "fail", false, "none");
+                new ArkeFileFormatFactory().GetFileFormat(), 0, 0, "fail", false, "none").ConfigureAwait(false);
             return channelRecording.Name;
         }
 
@@ -135,20 +137,20 @@ namespace Arke.IVR
                 0,
                 "fail",
                 false,
-                "none");
+                "none").ConfigureAwait(false);
             return recording.Name;
         }
 
         public async Task StopRecordingOnBridge(string recordingId)
         {
-            await _ariClient.Recordings.StopAsync(recordingId);
+            await _ariClient.Recordings.StopAsync(recordingId).ConfigureAwait(false);
         }
 
         public async Task<string> PlayPromptToLine(string lineId, string promptFile, string languageCode)
         {
             try
             {
-                return (await _ariClient.Channels.PlayAsync(lineId, $"sound:{promptFile}", languageCode)).Id;
+                return (await _ariClient.Channels.PlayAsync(lineId, $"sound:{promptFile}", languageCode).ConfigureAwait(false)).Id;
             }
             catch (HttpRequestException e)
             {
@@ -159,14 +161,14 @@ namespace Arke.IVR
 
         public async Task<string> PlayPromptToBridge(string bridgeId, string promptFile, string languageCode)
         {
-            return (await _ariClient.Bridges.PlayAsync(bridgeId, $"sound:{promptFile}", languageCode)).Id;
+            return (await _ariClient.Bridges.PlayAsync(bridgeId, $"sound:{promptFile}", languageCode).ConfigureAwait(false)).Id;
         }
 
         public async Task StopPrompt(string playbackId)
         {
             try
             {
-                await _ariClient.Playbacks.StopAsync(playbackId);
+                await _ariClient.Playbacks.StopAsync(playbackId).ConfigureAwait(false);
             }
             catch (HttpRequestException e)
             {
@@ -176,18 +178,18 @@ namespace Arke.IVR
 
         public async Task PlayMusicOnHoldToBridge(string bridgeId)
         {
-            await _ariClient.Bridges.StartMohAsync(bridgeId);
+            await _ariClient.Bridges.StartMohAsync(bridgeId).ConfigureAwait(false);
         }
 
-        public async Task<object> CreateOutboundCall(string numberToDial)
+        public async Task<object> CreateOutboundCall(string numberToDial, string outboundEndpoint)
         {
             try
             {
-                return _ariClient.Channels.Originate(
-                    "PJSIP/sipoutbound",
+                return await _ariClient.Channels.OriginateAsync(
+                    outboundEndpoint,
                     numberToDial,
                     app: _appName, // need to test if this is needed
-                    appArgs: "dialed");
+                    appArgs: "dialed").ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -196,9 +198,28 @@ namespace Arke.IVR
             }
         }
 
+        public async Task<ICollection<Sound>> GetSoundsOnEngine()
+        {
+            var sounds = await _ariClient.Sounds.ListAsync().ConfigureAwait(false);
+            var soundsResponse = new List<Sound>();
+            foreach (var sound in sounds)
+            {
+                var soundObj = new Sound()
+                {
+                    Id = sound.Id,
+                    Text = sound.Text,
+                    Formats = new List<SoundFormat>()
+                };
+                foreach (var format in sound.Formats)
+                    soundObj.Formats.Add(new SoundFormat() { Format = format.Format, Language = format.Language });
+                soundsResponse.Add(soundObj);
+            }
+            return soundsResponse;
+        }
+
         public async Task<string> GetLineState(string lineId)
         {
-            return (await _ariClient.Channels.GetAsync(lineId)).State;
+            return (await _ariClient.Channels.GetAsync(lineId).ConfigureAwait(false)).State;
         }
 
         public void SubscribeToDtmfReceivedEvents()

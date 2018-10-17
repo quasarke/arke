@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Arke.DSL.Step.Settings;
+using Arke.DSL.Step;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.Bridging;
 using Arke.SipEngine.Device;
@@ -19,7 +19,7 @@ namespace Arke.SipEngine.CallObjects
         ICallInfo CallState { get; set; }
         Dictionary<string,string> LogData { get; }
         Logger Logger { get; }
-        ISettings StepSettings { get; set; }
+        NodeProperties StepSettings { get; set; }
         IPromptPlayer PromptPlayer { get; }
         IPhoneInputHandler InputProcessor { get; }
         ILanguageSelectionPromptPlayer LanguageSelectionPromptPlayer { get; }

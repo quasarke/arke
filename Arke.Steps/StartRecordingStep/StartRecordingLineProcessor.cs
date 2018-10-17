@@ -8,17 +8,18 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.StartRecordingStep
 {
-    public class StartRecordingProcessor : IStepProcessor
+    public class StartRecordingLineProcessor : IStepProcessor
     {
         private ICall _call;
-        private StartRecordingSettings _settings;
+        private Step _step;
+        private const string NextStep = "NextStep";
 
-        public string Name => "StartRecordingStep";
+        public string Name => "StartRecordingLine";
         
-        public async Task DoStep(ISettings settings, ICall call)
+        public async Task DoStep(Step step, ICall call)
         {
             _call = call;
-            _settings = (StartRecordingSettings)settings;
+            _step = step;
             try
             {
                 await StartAllRecordings();
@@ -35,7 +36,7 @@ namespace Arke.Steps.StartRecordingStep
 
         protected virtual async Task StartAllRecordings()
         {
-            foreach (var recordingItem in _settings.ItemsToRecord)
+            foreach (var recordingItem in ((StartRecordingLineSettings)_step.NodeData.Properties).ItemsToRecord)
             {
                 await StartRecording(recordingItem);
             }
@@ -61,7 +62,7 @@ namespace Arke.Steps.StartRecordingStep
 
         public void GoToNextStep()
         {
-            _call.AddStepToProcessQueue(_settings.NextStep);
+            _call.AddStepToProcessQueue(_step.GetStepFromConnector(NextStep));
             _call.FireStateChange(Trigger.NextCallFlowStep);
         }
 

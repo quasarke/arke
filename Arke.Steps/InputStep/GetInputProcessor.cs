@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.FSM;
@@ -6,16 +7,16 @@ using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.InputStep
 {
-    public class InputStepProcessor : IStepProcessor
+    public class GetInputProcessor : IStepProcessor
     {
-        public string Name => "InputStep";
-        public Task DoStep(ISettings settings, ICall call)
+        public string Name => "GetInput";
+        public Task DoStep(Step step, ICall call)
         {
             call.CallState.InputRetryCount++;
-            var inputHandlerSettings = (InputStepSettings) settings;
+            var inputHandlerSettings = (GetInputSettings) step.NodeData.Properties;
             
             call.FireStateChange(Trigger.CaptureInput);
-            call.InputProcessor.ChangeInputSettings(inputHandlerSettings.GetPhoneInputHandlerSettings());
+            call.InputProcessor.ChangeInputSettings(inputHandlerSettings.GetPhoneInputHandlerSettings(step));
             call.InputProcessor.StartUserInput(false);
             return Task.CompletedTask;
         }

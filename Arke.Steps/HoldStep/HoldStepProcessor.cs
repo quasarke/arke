@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Arke.DSL.Step.Settings;
+using Arke.DSL.Step;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.Bridging;
 using Arke.SipEngine.CallObjects;
@@ -23,12 +23,12 @@ namespace Arke.Steps.HoldStep
         
         public string HoldPrompt { get; private set; }
 
-        public async Task DoStep(ISettings settings, ICall call)
+        public async Task DoStep(Step step, ICall call)
         {
             _call = call;
             _call.OnWorkflowStep += OnWorkflowStep;
             _call.Logger.Info("Hold processor start");
-            _settings = (HoldStepSettings)settings;
+            _settings = (HoldStepSettings)step.NodeData.Properties;
             var holdingBridge = await call.CreateBridge(BridgeType.Holding);
             _call.CallState.SetBridge(holdingBridge);
             await _call.SipBridgingApi.AddLineToBridge(_call.CallState.GetIncomingLineId(), _call.CallState.GetBridgeId());

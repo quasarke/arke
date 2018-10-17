@@ -1,62 +1,52 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Arke.SipEngine.CallObjects;
 using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.InputStep
 {
-    public class InputStepSettings : ISettings
+    public class GetInputSettings : NodeProperties
     {
-        public List<InputOptions> Options { get; set; }
-        public int NoAction { get; set; }
-        public int Invalid { get; set; }
+        private const string NextStep = "NextStep";
+        private const string NoAction = "NoAction";
+        private const string Invalid = "Invalid";
+        private const string MaxAttemptsReachedStep = "MaxAttemptsReachedStep";
+        private const string PhoneInputs = "0123456789*#";
+
         public int MaxDigitTimeoutInSeconds { get; set; }
         public int NumberOfDigitsToWaitForNextStep { get; set; }
         public string TerminationDigit { get; set; }
-        public int NextStep { get; set; }
         public bool SetValueAsDestination { get; set; }
-        public int MaxAttemptsReachedStep { get; set; }
         public int MaxAttempts { get; set; }
 
-        public ISettings ConvertFromJObject(JObject jObject)
+        public override NodeProperties ConvertFromJObject(JObject jObject)
         {
-            Invalid = jObject.GetValue("Invalid").Value<int>();
-            NoAction = jObject.GetValue("NoAction").Value<int>();
+            base.ConvertFromJObject(jObject);
             MaxDigitTimeoutInSeconds = jObject.GetValue("MaxDigitTimeoutInSeconds").Value<int>();
             NumberOfDigitsToWaitForNextStep = jObject.GetValue("NumberOfDigitsToWaitForNextStep").Value<int>();
             TerminationDigit = jObject.GetValue("TerminationDigit").Value<string>();
-            NextStep = jObject.GetValue("NextStep").Value<int>();
             SetValueAsDestination = jObject.GetValue("SetValueAsDestination").Value<bool>();
             MaxAttempts = jObject.GetValue("MaxAttempts").Value<int>();
-            MaxAttemptsReachedStep = jObject.GetValue("MaxAttemptsReachedStep").Value<int>();
-            Options = new List<InputOptions>();
-
-            var options = jObject.GetValue("Options").Value<JArray>();
-            foreach (var option in options.Select(o => new InputOptions()
-            {
-                Input = o.Value<JObject>().GetValue("Input").Value<string>(),
-                NextStep = o.Value<JObject>().GetValue("NextStep").Value<int>()
-            }))
-            {
-                Options.Add(option);
-            }
             return this;
         }
 
-        public PhoneInputHandlerSettings GetPhoneInputHandlerSettings()
+        public PhoneInputHandlerSettings GetPhoneInputHandlerSettings(Step step)
         {
             return new PhoneInputHandlerSettings()
             {
-                Invalid = Invalid,
+                Invalid = step.GetStepFromConnector(Invalid),
                 MaxDigitTimeoutInSeconds = MaxDigitTimeoutInSeconds,
-                NextStep = NextStep,
-                NoAction = NoAction,
+                NextStep = step.GetStepFromConnector(NextStep),
+                NoAction = step.GetStepFromConnector(NoAction),
                 NumberOfDigitsToWaitForNextStep = NumberOfDigitsToWaitForNextStep,
-                Options = Options,
+                Options = step.LinkedSteps
+                    .Where(s => PhoneInputs.Contains(s.FromPort))
+                    .Select(s => new InputOptions { Input = s.FromPort, NextStep = s.To }).ToList(),
                 SetValueAsDestination = SetValueAsDestination,
                 TerminationDigit = TerminationDigit,
-                MaxAttemptsReachedStep = MaxAttemptsReachedStep,
+                MaxAttemptsReachedStep = step.GetStepFromConnector(MaxAttemptsReachedStep),
                 MaxRetryCount = MaxAttempts
             };
         }

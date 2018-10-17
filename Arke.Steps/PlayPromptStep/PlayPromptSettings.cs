@@ -1,19 +1,21 @@
 ﻿using System.Collections.Generic;
+using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Arke.SipEngine.CallObjects;
 using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.PlayPromptStep
 {
-    public class PlayPromptStepSettings : ISettings
+    public class PlayPromptSettings : NodeProperties
     {
-        public int NextStep { get; set; }
+        private const string NextStep = "NextStep";
         public bool IsInterruptible { get; set; }
         public List<string> Prompts { get; set; }
-        public ISettings ConvertFromJObject(JObject jObject)
+
+        public override NodeProperties ConvertFromJObject(JObject jObject)
         {
+            base.ConvertFromJObject(jObject);
             IsInterruptible = jObject.GetValue("IsInterruptible").Value<bool>();
-            NextStep = jObject.GetValue("NextStep").Value<int>();
             Prompts = new List<string>();
 
             var prompts = jObject.GetValue("Prompts").Value<JArray>();
@@ -24,13 +26,13 @@ namespace Arke.Steps.PlayPromptStep
             return this;
         }
 
-        public PlayerPromptSettings GetPromptPlayerSettings()
+        public PlayerPromptSettings GetPromptPlayerSettings(Step step)
         {
             return new PlayerPromptSettings()
             {
                 IsInterruptible = IsInterruptible,
                 Prompts = Prompts,
-                NextStep = NextStep
+                NextStep = step.GetStepFromConnector(NextStep)
             };
         }
     }

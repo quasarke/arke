@@ -6,6 +6,6 @@ namespace Arke.SipEngine.Api
     {
         Task<string> StartRecordingOnLine(string lineId, string fileName);
         Task StopRecording(string recordingId);
-        Task<string> StartRecordingOnBridge(string bridgeId, string getFileName);
+        Task<string> StartRecordingOnBridge(string bridgeId, string fileName);
     }
 }
