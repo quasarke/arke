@@ -7,27 +7,26 @@ namespace Arke.DSL.Step.Settings
 {
     public class SettingsFactory
     {
-        public virtual object GetSettings(string stepType)
+        public NodeProperties CreateProperties(string category, JObject jObject)
         {
-            var settingsName = stepType + "Settings";
-            var settingsType = AppDomain.CurrentDomain.GetAssemblies()
-                // Xunit assemblies cause issues during unit tests, so omit from assembly search.
+            var properties = CreatePropertiesObject(category);
+            return ((NodeProperties) properties).ConvertFromJObject(jObject);
+        }
+        
+        public virtual object CreatePropertiesObject(string category)
+        {
+            var propertiesName = category + "Settings";
+            var propertiesType = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(assembly => !assembly.FullName.Contains("xunit"))
                 .SelectMany(assembly => assembly.GetTypes())
-                .Where(type => typeof(ISettings).IsAssignableFrom(type))
-                .SingleOrDefault(type => type.Name == settingsName);
+                .Where(type => typeof(NodeProperties).IsAssignableFrom(type))
+                .SingleOrDefault(type => type.Name == propertiesName);
 
-            if (settingsType == null)
-                throw new StepNotFoundException($"Step {stepType} is missing from Assembly.");
+            if (propertiesType == null)
+                throw new StepNotFoundException($"Step {category} is missing from Assembly");
 
-            var settings = ObjectContainer.GetInstance().GetObjectInstance(settingsType);
-            return settings;
-        }
-
-        public ISettings CopyJObject(string stepType, JObject jObject)
-        {
-            var settings = GetSettings(stepType);
-            return ((ISettings) settings).ConvertFromJObject(jObject);
+            var property = ObjectContainer.GetInstance().GetObjectInstance(propertiesType);
+            return property;
         }
     }
 }

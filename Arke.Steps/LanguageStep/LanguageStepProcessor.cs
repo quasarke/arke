@@ -10,6 +10,7 @@ using Arke.SipEngine.Events;
 using Arke.SipEngine.FSM;
 using Arke.SipEngine.Processors;
 using Arke.SipEngine.Prompts;
+using Arke.DSL.Step;
 
 // ReSharper disable FormatStringProblem - Disabled as NLog has a format extension
 
@@ -18,13 +19,15 @@ namespace Arke.Steps.LanguageStep
     public class LanguageStepProcessor : IStepProcessor, ILanguageStepProcessor
     {
         private const int MaxRetries = 3;
+        private const string NextStep = "NextStep";
 
         private ICall _call;
         private readonly Timer _inputTimeout;
         private ILanguageSelectionPromptPlayer _promptPlayer;
-
         private int _currentRetryCount;
         private LanguageStepSettings _settings;
+        private Step _step;
+
         public Dictionary<string, string> LogData = new Dictionary<string, string>();
 
         public string Name => "LanguageStep";
@@ -37,13 +40,14 @@ namespace Arke.Steps.LanguageStep
             _currentRetryCount = 0;
         }
 
-        public async Task DoStep(ISettings settings, ICall call)
+        public async Task DoStep(Step step, ICall call)
         {
             _promptPlayer = call.LanguageSelectionPromptPlayer;
             _promptPlayer.SetStepProcessor(this);
             _call = call;
             _call.Logger.Info("Get Language Step Start");
-            _settings = (LanguageStepSettings)settings;
+            _step = step;
+            _settings = (LanguageStepSettings)step.NodeData.Properties;
             call.SipApiClient.OnDtmfReceivedEvent += DTMF_ReceivedEvent;
             call.FireStateChange(Trigger.PlayLanguagePrompts);
             _promptPlayer.AddPromptsToQueue(_settings.Prompts);
@@ -58,7 +62,7 @@ namespace Arke.Steps.LanguageStep
                 ? Trigger.FailedCallFlow
                 : Trigger.PlayLanguagePrompts);
             _currentRetryCount++;
-            DoStep(_settings, _call).Start();
+            DoStep(_step, _call).Start();
         }
 
         public void StartTimeoutTimer()
@@ -95,7 +99,7 @@ namespace Arke.Steps.LanguageStep
         {
             _promptPlayer.HaltPromptPlayback();
             CleanupEventHooks();
-            _call.AddStepToProcessQueue(_settings.NextStep);
+            _call.AddStepToProcessQueue(_step.GetStepFromConnector(NextStep));
             _call.FireStateChange(Trigger.NextCallFlowStep);
         }
 

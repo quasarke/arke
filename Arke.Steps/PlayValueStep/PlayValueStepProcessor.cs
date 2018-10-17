@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.Processors;
@@ -9,10 +10,11 @@ namespace Arke.Steps.PlayValueStep
 {
     public class PlayValueStepProcessor : IStepProcessor
     {
+        private const string NextStep = "NextStep";
         public string Name => "PlayValueStep";
-        public Task DoStep(ISettings settings, ICall call)
+        public Task DoStep(Step step, ICall call)
         {
-            var stepSettings = settings as PlayValueStepSettings;
+            var stepSettings = step.NodeData.Properties as PlayValueStepSettings;
             if (stepSettings == null)
                 throw new ArgumentException("PlayValueStepProcessor called with invalid Step settings");
             var numbersToPromptsConverter = new MoneyValueToPrompts();
@@ -26,12 +28,12 @@ namespace Arke.Steps.PlayValueStep
             var promptSettings = new PlayerPromptSettings()
             {
                 IsInterruptible = stepSettings.IsInterruptible,
-                NextStep = stepSettings.NextStep,
+                NextStep = step.GetStepFromConnector(NextStep),
                 Prompts = prompts
             };
 
             call.PromptPlayer.DoStep(promptSettings);
-            call.AddStepToProcessQueue(stepSettings.NextStep);
+            call.AddStepToProcessQueue(step.GetStepFromConnector(NextStep));
             return Task.CompletedTask;
         }
     }

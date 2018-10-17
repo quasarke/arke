@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Arke.DSL.Step;
-using Arke.DSL.Step.Settings;
 using Arke.IVR.Bridging;
 using Arke.IVR.DSL;
 using Arke.IVR.Input;
@@ -73,7 +72,7 @@ namespace Arke.IVR.CallObjects
         public virtual Logger Logger { get; set; } = LogManager.GetCurrentClassLogger();
         public IPromptPlayer PromptPlayer => _promptPlayer;
         public IRecordingManager RecordingManager => _asteriskRecordingManager;
-        public ISettings StepSettings { get; set; }
+        public NodeProperties StepSettings { get; set; }
         public ISipApiClient SipApiClient => _sipApiClient;
         public ISipBridgingApi SipBridgingApi => _sipBridgeApi;
         public ISipLineApi SipLineApi => _sipLineApi;
@@ -251,8 +250,8 @@ namespace Arke.IVR.CallObjects
                     File.ReadAllText(PlatformServices.Default.Application.ApplicationBasePath +
                                      $"\\{ArkeCallFlowService.GetConfigValue("appSettings:Application")}.json");
                 DslProcessor.Dsl = await Task.Factory
-                    .StartNew(() => JsonConvert.DeserializeObject<Dictionary<int, DslStep>>(
-                        jsonObject))
+                    .StartNew(() => JsonConvert.DeserializeObject<CallFlowDsl>(
+                        jsonObject).GetStepsFromDsl())
                     .ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -263,7 +262,7 @@ namespace Arke.IVR.CallObjects
 
         public void SetWorkflow(Workflow deviceWorkflow)
         {
-            DslProcessor.Dsl = deviceWorkflow.Value as Dictionary<int, DslStep>;
+            DslProcessor.Dsl = deviceWorkflow.Value as Dictionary<int, Step>;
         }
 
         public async Task StartCallRecording()

@@ -8,6 +8,7 @@ namespace Arke.SipEngine.BridgeName
     public class BridgeNameGenerator
     {
         private static readonly Random Random = new Random();
+
         public string[] GetAnimalName()
         {
 #if DEBUG
@@ -59,6 +60,7 @@ namespace Arke.SipEngine.BridgeName
     public static class GetAllWords
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         public static string[] GetWordsFromTextFile(this string fileName)
         {
             var file = GetFilePathForWordFiles();
@@ -84,7 +86,7 @@ namespace Arke.SipEngine.BridgeName
         private static string GetFilePathForWordFiles()
         {
             var path = PlatformServices.Default.Application.ApplicationBasePath;
-            var textFilesFolder = "TextFilesForBridgeName";
+            const string textFilesFolder = "TextFilesForBridgeName";
             var workingFolder = path + "\\" + textFilesFolder;
             var file = Path.Combine(path, workingFolder);
             return file;

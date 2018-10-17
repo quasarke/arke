@@ -7,10 +7,16 @@
 
   <ItemGroup>
     <PackageReference Include="AsterNET.ARI" Version="1.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.8" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.2" />
     <PackageReference Include="NLog" Version="4.5.4" />
-    <PackageReference Include="SimpleInjector" Version="4.2.3" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.5.4" />
+    <PackageReference Include="SimpleInjector" Version="4.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="2.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="2.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="2.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUi" Version="2.4.0" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
   </ItemGroup>
 
@@ -18,6 +24,7 @@
     <ProjectReference Include="..\Arke.DependencyInjection\Arke.DependencyInjection.csproj" />
     <ProjectReference Include="..\Arke.DSL\Arke.DSL.csproj" />
     <ProjectReference Include="..\Arke.IVR\Arke.IVR.csproj" />
+    <ProjectReference Include="..\Arke.ManagementApi\Arke.ManagementApi.csproj" />
     <ProjectReference Include="..\Arke.SipEngine\Arke.SipEngine.csproj" />
     <ProjectReference Include="..\Arke.Steps\Arke.Steps.csproj" />
   </ItemGroup>
