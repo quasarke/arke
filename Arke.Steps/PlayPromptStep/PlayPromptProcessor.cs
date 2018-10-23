@@ -17,7 +17,7 @@ namespace Arke.Steps.PlayPromptStep
             call.StepSettings = stepSettings;
             var nextStep = step.GetStepFromConnector(NextStep);
             call.Logger.Debug("Next step " + nextStep);
-            call.PromptPlayer.DoStep(stepSettings.GetPromptPlayerSettings(step));
+            call.PromptPlayer.DoStep(stepSettings.GetPromptPlayerSettings(step, stepSettings.Direction));
             call.CallState.AddStepToIncomingQueue(nextStep);
             return Task.CompletedTask;
         }
