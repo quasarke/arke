@@ -31,7 +31,7 @@ namespace Arke.Steps.BridgeCallStep
             await call.AddLineToBridge(call.CallState.GetIncomingLineId(), _callBridge.Id).ConfigureAwait(false);
             await call.AddLineToBridge(call.CallState.GetOutgoingLineId(), _callBridge.Id).ConfigureAwait(false);
 
-            call.AddStepToProcessQueue(step.GetStepFromConnector(NextStep));
+            call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
             call.FireStateChange(Trigger.NextCallFlowStep);
         }
     }

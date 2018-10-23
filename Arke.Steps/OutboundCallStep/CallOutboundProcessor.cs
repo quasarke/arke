@@ -30,6 +30,7 @@ namespace Arke.Steps.OutboundCallStep
             var next = _step.GetStepFromConnector(NextStep);
             _call.Logger.Info("Outbound connected, go to next step " + next);
             _call.CallState.AddStepToOutgoingQueue(next);
+            _call.CallState.ProcessOutgoingQueue = true;
             _call.FireStateChange(Trigger.NextCallFlowStep);
         }
 
@@ -63,7 +64,7 @@ namespace Arke.Steps.OutboundCallStep
                 _call.FireStateChange(Trigger.NextCallFlowStep);
                 return;
             }
-            await _call.SipLineApi.AnswerLine(_call.CallState.GetOutgoingLineId()).ConfigureAwait(false);
+            //await _call.SipLineApi.AnswerLine(_call.CallState.GetOutgoingLineId()).ConfigureAwait(false);
             GoToNextStep();
         }
     }
