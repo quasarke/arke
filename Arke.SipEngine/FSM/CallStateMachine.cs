@@ -125,6 +125,7 @@ namespace Arke.SipEngine.FSM
                 .Ignore(Trigger.NextCallFlowStep)
                 .Permit(Trigger.FinishedPrompt, State.CallFlow)
                 .Permit(Trigger.FinishCall, State.HangUp)
+                .Ignore(Trigger.PlayPrompt)
                 .OnEntry(_promptPlayer.PlayPromptsInQueue);
         }
     }
