@@ -56,7 +56,7 @@ namespace Arke.Steps.HoldStep
             if (_settings.Triggers.ContainsKey(onWorkflowStepEvent.StepId.ToString()))
             {
                 _call.CallState.AddStepToIncomingQueue(
-                    _settings.Triggers[onWorkflowStepEvent.StepId.ToString()]);
+                    int.Parse(_settings.Triggers[onWorkflowStepEvent.StepId.ToString()]));
             }
 
             if (_settings.PromptChanges.ContainsKey(onWorkflowStepEvent.StepId.ToString()))
