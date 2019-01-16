@@ -39,8 +39,11 @@ namespace Arke.Steps.OutboundCallStep
             _call.Logger.Info("Outbound start " + dialString);
             try
             {
+                var outboundEndpoint = GetOutboundEndpoint(dialString);
+                if (outboundEndpoint.Contains("cci") && !dialString.StartsWith("1"))
+                    dialString = $"1{dialString}";
                 _call.CallState.CreateOutgoingLine(
-                await _call.SipLineApi.CreateOutboundCall(dialString, (_step.NodeData.Properties as CallOutboundSettings)?.OutboundEndpointName).ConfigureAwait(false));
+                    await _call.SipLineApi.CreateOutboundCall(dialString, outboundEndpoint).ConfigureAwait(false));
                 var outgoingLineId = _call.CallState.GetOutgoingLineId();
                 var currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
                 var noAnswerTimeout = new Stopwatch();
@@ -66,6 +69,11 @@ namespace Arke.Steps.OutboundCallStep
             }
             //await _call.SipLineApi.AnswerLine(_call.CallState.GetOutgoingLineId()).ConfigureAwait(false);
             GoToNextStep();
+        }
+
+        public string GetOutboundEndpoint(string dialstring)
+        {
+            return (_step.NodeData.Properties as CallOutboundSettings)?.OutboundEndpointName;
         }
     }
 }

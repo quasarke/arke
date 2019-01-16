@@ -30,7 +30,7 @@ namespace Arke.ServiceHost
         private static Logger _logger;
         private static AriClient _ariClient;
         private static ArkeSipApiClient _sipApi;
-        private static string _pluginDirectory = "c:\\Arke\\Plugins";
+        private static string _pluginDirectory = "/app";
 
         public static void Main(string[] args)
         {
