@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 
 namespace Arke.SipEngine.CallObjects
 {
     public class PhoneInputHandlerSettings
     {
+        public Direction Direction { get; set; }
         public int Invalid { get; set; }
         public int MaxDigitTimeoutInSeconds { get; set; }
         public int NextStep { get; set; }

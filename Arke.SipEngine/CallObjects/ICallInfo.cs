@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Arke.SipEngine.Bridging;
 using Arke.SipEngine.Device;
 
@@ -21,6 +22,7 @@ namespace Arke.SipEngine.CallObjects
         int InputRetryCount { get; set; }
         bool CallCanBeAbandoned { get; set; }
         int AttemptCount { get; set; }
+        Queue<string> OutboundEndpoint { get; set; }
 
         void AddStepToIncomingQueue(int stepId);
         void AddStepToOutgoingQueue(int stepId);

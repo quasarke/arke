@@ -20,6 +20,9 @@ namespace Arke.IVR
         private readonly IAriClient _ariClient;
         private string _appName;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        
+        [SuppressMessage("NDepend", "ND1901:AvoidNonReadOnlyStaticFields", Justification="Singleton Pattern")]
+        private static ArkeSipApiClient _instance;
 
         public ArkeSipApiClient(IAriClient ariClient)
         {
@@ -30,6 +33,11 @@ namespace Arke.IVR
         public event DtmfReceivedEventHandler OnDtmfReceivedEvent;
         public event LineHangupEventHandler OnLineHangupEvent;
         public event PromptPlaybackFinishedEventHandler OnPromptPlaybackFinishedEvent;
+
+        public static ArkeSipApiClient GetInstance(IAriClient ariClient)
+        {
+            return _instance ?? (_instance = new ArkeSipApiClient(ariClient));
+        }
 
         public async Task AnswerLine(string lineId)
         {
