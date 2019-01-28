@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
 
@@ -7,6 +8,8 @@ namespace Arke.DependencyInjection
     public class ObjectContainer
     {
         private readonly Container _container;
+
+        [SuppressMessage("NDepend", "ND1901:AvoidNonReadOnlyStaticFields", Justification="Allows for unit testing.")]
         private static ObjectContainer _instance;
         private readonly ILifecycleConverter _lifecycleConverter;
 
@@ -16,7 +19,7 @@ namespace Arke.DependencyInjection
             _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
             _lifecycleConverter = new SimpleInjectorLifecycleConverter();
         }
-
+        
         public static void SetTestInstance(ObjectContainer container)
         {
             _instance = container;

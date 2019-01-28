@@ -31,6 +31,7 @@ namespace Arke.SipEngine.FSM
                 .Permit(Trigger.PlaceOnHold, State.OnHold)
                 .Permit(Trigger.PlayLanguagePrompts, State.LanguagePrompts)
                 .PermitReentry(Trigger.NextCallFlowStep)
+                .PermitReentry(Trigger.InputReceived)
                 .PermitReentry(Trigger.FailedInputCapture)
                 .Ignore(Trigger.FinishedPrompt)
                 .Ignore(Trigger.PlayNextPrompt)
@@ -42,6 +43,7 @@ namespace Arke.SipEngine.FSM
             StateMachine.Configure(State.OnHold)
                 .Permit(Trigger.FinishCall, State.HangUp)
                 .Permit(Trigger.NextCallFlowStep, State.CallFlow)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
                 .Ignore(Trigger.FinishedPrompt);
 
             SetupPromptStates();
@@ -75,6 +77,7 @@ namespace Arke.SipEngine.FSM
                 .Permit(Trigger.InputReceived, State.CallFlow)
                 .Permit(Trigger.NextCallFlowStep, State.CallFlow)
                 .Permit(Trigger.FailedInputCapture, State.CallFlow)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
                 .Permit(Trigger.FinishCall, State.HangUp)
                 .Ignore(Trigger.FinishedPrompt)
                 .Ignore(Trigger.PlayNextPrompt)
@@ -123,6 +126,7 @@ namespace Arke.SipEngine.FSM
             StateMachine.Configure(State.PlayingPrompt)
                 .PermitReentry(Trigger.PlayNextPrompt)
                 .Ignore(Trigger.NextCallFlowStep)
+                .Permit(Trigger.InputReceived, State.CallFlow)
                 .Permit(Trigger.FinishedPrompt, State.CallFlow)
                 .Permit(Trigger.FinishCall, State.HangUp)
                 .Ignore(Trigger.PlayPrompt)

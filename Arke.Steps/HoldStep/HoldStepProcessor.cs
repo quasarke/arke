@@ -73,8 +73,8 @@ namespace Arke.Steps.HoldStep
 
             await Task.Delay(TimeSpan.FromSeconds(5));
 
-            if (_call.GetCurrentState() != State.OnHold)
-                return;
+            //if (_call.GetCurrentState() != State.OnHold)
+            //    return;
 
             _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridge(_call.CallState.GetBridgeId(), HoldPrompt, "en");
             _call.Logger.Info("Playback finished", LogData);

@@ -40,10 +40,10 @@ namespace Arke.DSL.Step
         {
             switch (direction)
             {
-                case "Incoming":
+                case "INCOMING":
                     Direction = Direction.Incoming;
                     break;
-                case "Outgoing":
+                case "OUTGOING":
                     Direction = Direction.Outgoing;
                     break;
                 default:

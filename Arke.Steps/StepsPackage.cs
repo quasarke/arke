@@ -1,9 +1,18 @@
 ﻿using Arke.Steps.ArkeInitStep;
 using Arke.Steps.BridgeCallStep;
+using Arke.Steps.CallLoopStep;
+using Arke.Steps.CheckAttemptStep;
 using Arke.Steps.DeviceConnectedStep;
 using Arke.Steps.DeviceDisconnectedStep;
 using Arke.Steps.HoldStep;
 using Arke.Steps.InputStep;
+using Arke.Steps.LanguageStep;
+using Arke.Steps.OutboundCallStep;
+using Arke.Steps.ParallelStep;
+using Arke.Steps.PlayPromptStep;
+using Arke.Steps.PlayValueStep;
+using Arke.Steps.StartRecordingStep;
+using Arke.Steps.StopRecordingStep;
 using SimpleInjector;
 using SimpleInjector.Packaging;
 
@@ -25,15 +34,15 @@ namespace Arke.Steps
             container.Register<GetInputProcessor>();
             container.Register<ArkeInitProcessor>();
             container.Register<BridgeCallProcessor>();
-            container.Register<CallLoopStep.CallLoopProcessor>();
-            container.Register<CheckAttemptStep.CheckAttemptStepProcessor>();
-            container.Register<LanguageStep.LanguageStepProcessor>();
-            container.Register<OutboundCallStep.CallOutboundProcessor>();
-            container.Register<ParallelStep.ParallelStartProcessor>();
-            container.Register<PlayPromptStep.PlayPromptProcessor>();
-            container.Register<PlayValueStep.PlayValueStepProcessor>();
-            container.Register<StartRecordingStep.StartRecordingLineProcessor>();
-            container.Register<StopRecordingStep.StopRecordingProcessor>();
+            container.Register<CallLoopProcessor>();
+            container.Register<CheckAttemptStepProcessor>();
+            container.Register<LanguageStepProcessor>();
+            container.Register<CallOutboundProcessor>();
+            container.Register<ParallelStartProcessor>();
+            container.Register<PlayPromptProcessor>();
+            container.Register<PlayValueStepProcessor>();
+            container.Register<StartRecordingLineProcessor>();
+            container.Register<StopRecordingProcessor>();
         }
 
         private void RegisterSettings(Container container)
@@ -41,6 +50,18 @@ namespace Arke.Steps
             container.Register<DeviceConnectedSettings>();
             container.Register<DisconnectDeviceSettings>();
             container.Register<HoldStepSettings>();
+            container.Register<GetInputSettings>();
+            container.Register<ArkeInitSettings>();
+            container.Register<BridgeCallSettings>();
+            container.Register<CallLoopSettings>();
+            container.Register<CheckAttemptStepSettings>();
+            container.Register<LanguageStepSettings>();
+            container.Register<CallOutboundSettings>();
+            container.Register<ParallelStartSettings>();
+            container.Register<PlayPromptSettings>();
+            container.Register<PlayValueStepSettings>();
+            container.Register<StartRecordingLineSettings>();
+            container.Register<StopRecordingSettings>();
         }
     }
 }

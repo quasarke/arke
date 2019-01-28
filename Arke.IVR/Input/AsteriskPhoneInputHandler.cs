@@ -54,7 +54,6 @@ namespace Arke.IVR.Input
             {
                 DigitsReceived = "";
             }
-            _call.CallState.InputRetryCount++;
             SetTimerInterval();
             if (MaxDigitTimeoutInSeconds > 0)
                 DigitTimeoutTimer.Start();

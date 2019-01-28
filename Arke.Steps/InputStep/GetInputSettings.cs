@@ -36,6 +36,7 @@ namespace Arke.Steps.InputStep
         {
             return new PhoneInputHandlerSettings()
             {
+                Direction = Direction,
                 Invalid = step.GetStepFromConnector(Invalid),
                 MaxDigitTimeoutInSeconds = MaxDigitTimeoutInSeconds,
                 NextStep = step.GetStepFromConnector(NextStep),

@@ -45,6 +45,7 @@ namespace Arke.IVR.CallObjects
 
         public bool CallCanBeAbandoned { get; set; }
         public int AttemptCount { get; set; }
+        public Queue<string> OutboundEndpoint { get; set; }
 
         public void AddStepToIncomingQueue(int stepId)
         {
