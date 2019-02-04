@@ -62,7 +62,11 @@ namespace Arke.Steps.StartRecordingStep
 
         public void GoToNextStep()
         {
-            _call.AddStepToProcessQueue(_step.GetStepFromConnector(NextStep));
+            var stepSettings = _step.NodeData.Properties as StartRecordingLineSettings;
+            if (stepSettings.Direction != Direction.Outgoing)
+                _call.CallState.AddStepToIncomingQueue(_step.GetStepFromConnector(NextStep));
+            else
+                _call.CallState.AddStepToOutgoingQueue(_step.GetStepFromConnector(NextStep));
             _call.FireStateChange(Trigger.NextCallFlowStep);
         }
 

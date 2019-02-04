@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Arke.SipEngine.Bridging;
@@ -25,7 +26,7 @@ namespace Arke.Steps.BridgeCallStep
             if (!string.IsNullOrEmpty(call.CallState.GetBridgeId()))
                 await call.StopHoldingBridge().ConfigureAwait(false);
             _callBridge = await call.CreateBridge(BridgeType.NoDTMF).ConfigureAwait(false);
-
+            call.CallState.CalledPartyAcceptTime = DateTimeOffset.Now;
             call.CallState.SetBridge(_callBridge);
 
             await call.AddLineToBridge(call.CallState.GetIncomingLineId(), _callBridge.Id).ConfigureAwait(false);

@@ -63,7 +63,10 @@ namespace Arke.Steps.OutboundCallStep
                 var noAnswerTimeout = new Stopwatch();
                 noAnswerTimeout.Start();
                 if (await WaitForCallToConnect(currentCallState, noAnswerTimeout, outgoingLineId))
+                {
+                    _call.CallState.CalledPartyAnswerTime = DateTimeOffset.Now;
                     return true;
+                }
             }
             catch (Exception ex)
             {
@@ -94,7 +97,8 @@ namespace Arke.Steps.OutboundCallStep
         {
             dialString = GenerateDialString(dialString);
             dialString = FixOurStupidVendorsDialStringPrefixRequirements(outboundEndpoint, dialString);
-            
+            _call.CallState.OutboundUri = outboundEndpoint.Replace("{exten}",dialString);
+            _call.CallState.TrunkOffHookTime = DateTimeOffset.Now;
             var outgoingCall = await _call.SipLineApi.CreateOutboundCall(dialString, outboundEndpoint)
                 .ConfigureAwait(false);
             await Task.Delay(500);

@@ -13,5 +13,6 @@ namespace Arke.SipEngine.CallObjects
         void StopPrompt();
         void AddPromptToQueue(IPrompt prompt);
         void DoStep(PlayerPromptSettings settings);
+        Task PlayRecordingToLine(string recordingName, string lineId);
     }
 }

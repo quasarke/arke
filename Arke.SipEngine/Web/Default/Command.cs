@@ -36,9 +36,10 @@ namespace Arke.SipEngine.Web.Default
             if (type == RequestParameterType.RequestBody)
             {
                 Request.JsonSerializer = new RestSharp.Serializers.JsonSerializer();
-                Request.AddParameter(name, JsonConvert.SerializeObject(value), 
-                    (ParameterType)Enum.Parse(typeof(ParameterType), 
-                    type.ToString()));
+                //Request.AddParameter(name, JsonConvert.SerializeObject(value), 
+                //    (ParameterType)Enum.Parse(typeof(ParameterType), 
+                //    type.ToString()));
+                Request.AddJsonBody(value);
             }
             else
             {
