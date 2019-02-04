@@ -17,5 +17,6 @@ namespace Arke.SipEngine.CallObjects
         public string TerminationDigit { get; set; }
         public int MaxRetryCount { get; set; }
         public int MaxAttemptsReachedStep { get; set; }
+        public string SetValueAs { get; set; }
     }
 }

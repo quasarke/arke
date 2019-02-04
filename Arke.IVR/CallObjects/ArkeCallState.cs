@@ -46,6 +46,13 @@ namespace Arke.IVR.CallObjects
         public bool CallCanBeAbandoned { get; set; }
         public int AttemptCount { get; set; }
         public Queue<string> OutboundEndpoint { get; set; }
+        public DateTimeOffset? TalkTimeStart { get; set; }
+        public DateTimeOffset? TalkTimeEnd { get; set; }
+        public DateTimeOffset? CalledPartyAnswerTime { get; set; }
+        public DateTimeOffset? TrunkOffHookTime { get; set; }
+        public DateTimeOffset? CalledPartyAcceptTime { get; set; }
+        public string OutboundUri { get; set; }
+        public DateTimeOffset? TimeDeviceConnected { get; set; }
 
         public void AddStepToIncomingQueue(int stepId)
         {

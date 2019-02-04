@@ -1,5 +1,6 @@
 using System.Timers;
 using System.Linq;
+using Arke.DSL.Step;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.Events;
@@ -91,10 +92,19 @@ namespace Arke.IVR.Input
             if (_call.CallState.InputRetryCount > _settings.MaxRetryCount && _settings.MaxRetryCount > 0)
             {
                 ResetInputRetryCount();
-                _call.AddStepToProcessQueue(_settings.MaxAttemptsReachedStep);
+                if (_settings.Direction != Direction.Outgoing)
+                    _call.CallState.AddStepToIncomingQueue(_settings.MaxAttemptsReachedStep);
+                else
+                    _call.CallState.AddStepToOutgoingQueue(_settings.MaxAttemptsReachedStep);
             }
             else
-                _call.CallState.AddStepToIncomingQueue(_settings.NoAction);
+            {
+                if (_settings.Direction != Direction.Outgoing)
+                    _call.CallState.AddStepToIncomingQueue(_settings.NoAction);
+                else
+                    _call.CallState.AddStepToOutgoingQueue(_settings.NoAction);
+            }
+
             _call.FireStateChange(Trigger.FailedInputCapture);
         }
 
@@ -143,7 +153,11 @@ namespace Arke.IVR.Input
                     if (_settings.SetValueAsDestination)
                         _call.CallState.Destination = DigitsReceived.Substring(0, DigitsReceived.Length - 1);
 
-                    _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
+                    if (_settings.Direction != Direction.Outgoing)
+                        _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
+                    else
+                        _call.CallState.AddStepToOutgoingQueue(_settings.NextStep);
+
                     _call.CallState.InputData = DigitsReceived.Substring(0, DigitsReceived.Length - 1);
                     ResetInputRetryCount();
                     _call.FireStateChange(Trigger.InputReceived);
@@ -153,7 +167,12 @@ namespace Arke.IVR.Input
             else if (_settings.SetValueAsDestination)
             {
                 _call.CallState.Destination = DigitsReceived.Substring(0, DigitsReceived.Length);
-                _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
+                
+                if (_settings.Direction != Direction.Outgoing)
+                    _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
+                else
+                    _call.CallState.AddStepToOutgoingQueue(_settings.NextStep);
+
                 _call.CallState.InputData = DigitsReceived.Substring(0, DigitsReceived.Length);
                 ResetInputRetryCount();
                 _call.FireStateChange(Trigger.InputReceived);
@@ -169,7 +188,12 @@ namespace Arke.IVR.Input
             foreach (var option in _settings.Options.Where(option => option.Input == DigitsReceived))
             {
                 ResetInputRetryCount();
-                _call.CallState.AddStepToIncomingQueue(option.NextStep);
+                
+                if (_settings.Direction != Direction.Outgoing)
+                    _call.CallState.AddStepToIncomingQueue(option.NextStep);
+                else
+                    _call.CallState.AddStepToOutgoingQueue(option.NextStep);
+
                 validStep = true;
             }
 
@@ -178,10 +202,19 @@ namespace Arke.IVR.Input
                 if (_call.CallState.InputRetryCount > _settings.MaxRetryCount && _settings.MaxRetryCount > 0)
                 {
                     ResetInputRetryCount();
-                    _call.AddStepToProcessQueue(_settings.MaxAttemptsReachedStep);
+
+                    if (_settings.Direction != Direction.Outgoing)
+                        _call.CallState.AddStepToIncomingQueue(_settings.MaxAttemptsReachedStep);
+                    else
+                        _call.CallState.AddStepToOutgoingQueue(_settings.MaxAttemptsReachedStep);
                 }
                 else
-                    _call.CallState.AddStepToIncomingQueue(_settings.Invalid);
+                {
+                    if (_settings.Direction != Direction.Outgoing)
+                        _call.CallState.AddStepToIncomingQueue(_settings.Invalid);
+                    else
+                        _call.CallState.AddStepToOutgoingQueue(_settings.Invalid);
+                }
             }
             _call.FireStateChange(Trigger.InputReceived);
         }

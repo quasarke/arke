@@ -28,8 +28,8 @@ namespace Arke.Steps.CallLoopStep
                 || e.LineId == _call.CallState.GetOutgoingLineId())
             {
                 _call.SipApiClient.OnLineHangupEvent -= SipApiClient_OnLineHangupEvent;
-                _call.AddStepToProcessQueue(_step.LinkedSteps.Single(s => s.FromPort == "NextIncomingStep").To);
-                _call.AddStepToProcessQueue(_step.LinkedSteps.Single(s => s.FromPort == "NextOutgoingStep").To);
+                _call.CallState.AddStepToIncomingQueue(_step.LinkedSteps.Single(s => s.FromPort == "NextIncomingStep").To);
+                _call.CallState.AddStepToOutgoingQueue(_step.LinkedSteps.Single(s => s.FromPort == "NextOutgoingStep").To);
             }
         }
 

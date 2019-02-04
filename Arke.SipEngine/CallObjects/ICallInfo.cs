@@ -23,6 +23,14 @@ namespace Arke.SipEngine.CallObjects
         bool CallCanBeAbandoned { get; set; }
         int AttemptCount { get; set; }
         Queue<string> OutboundEndpoint { get; set; }
+        DateTimeOffset? TalkTimeStart { get; set; }
+        DateTimeOffset? TalkTimeEnd { get; set; }
+        DateTimeOffset? CalledPartyAnswerTime { get; set; }
+        DateTimeOffset? TrunkOffHookTime { get; set; }
+        DateTimeOffset? CalledPartyAcceptTime { get; set; }
+        DateTimeOffset? TimeDeviceConnected { get; set; }
+        string OutboundUri { get; set; }
+
 
         void AddStepToIncomingQueue(int stepId);
         void AddStepToOutgoingQueue(int stepId);

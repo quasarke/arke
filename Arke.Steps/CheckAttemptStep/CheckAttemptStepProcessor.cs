@@ -18,12 +18,18 @@ namespace Arke.Steps.CheckAttemptStep
 
             if (call.CallState.AttemptCount >= stepSettings.MaxAttempts)
             {
-                call.AddStepToProcessQueue(step.GetStepFromConnector(MaxAttemptsStep));
+                if (stepSettings.Direction != Direction.Outgoing)
+                    call.CallState.AddStepToIncomingQueue(stepSettings.MaxAttempts);
+                else
+                    call.CallState.AddStepToOutgoingQueue(stepSettings.MaxAttempts);
             }
             else
             {
                 call.CallState.AttemptCount++;
-                call.AddStepToProcessQueue(step.GetStepFromConnector(NextStep));
+                if (stepSettings.Direction != Direction.Outgoing)
+                    call.AddStepToProcessQueue(step.GetStepFromConnector(NextStep));
+                else
+                    call.CallState.AddStepToOutgoingQueue(step.GetStepFromConnector(NextStep));
             }
             call.FireStateChange(Trigger.NextCallFlowStep);
             return Task.CompletedTask;
