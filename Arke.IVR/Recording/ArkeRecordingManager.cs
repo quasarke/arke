@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.CallObjects;
+using Arke.SipEngine.FSM;
 
 namespace Arke.IVR.Recording
 {
@@ -11,10 +12,12 @@ namespace Arke.IVR.Recording
         private readonly ISipRecordingApi _ariClient;
         private readonly Dictionary<string, string> _recordingsInProgress = new Dictionary<string, string>();
         private readonly string _creationDateTime;
+        private readonly ICall _call;
 
-        public ArkeRecordingManager(ISipRecordingApi ariClient)
+        public ArkeRecordingManager(ISipRecordingApi ariClient, ICall call)
         {
             _ariClient = ariClient;
+            _call = call;
             _creationDateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
         }
 
@@ -63,6 +66,11 @@ namespace Arke.IVR.Recording
                 await _ariClient.StopRecording(recordingItem.Value);
                 _recordingsInProgress.Remove(recordingItem.Key);
             }
+        }
+
+        public async Task AriClient_OnRecordingFinishedEvent(ISipApiClient sender, RecordingFinishedEventHandlerArgs args)
+        {
+            _call.FireStateChange(Trigger.NextCallFlowStep);
         }
     }
 }

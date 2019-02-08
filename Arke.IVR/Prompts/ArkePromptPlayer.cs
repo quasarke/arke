@@ -46,6 +46,20 @@ namespace Arke.IVR.Prompts
                 : Trigger.PlayPrompt);
         }
 
+        public async Task PlayRecordingToLine(string recordingName, string lineId)
+        {
+            try
+            {
+                _currentPlaybackId = await _sipPromptApi.PlayRecordingToLine(lineId, recordingName);
+            }
+            catch (Exception e)
+            {
+                _arkeCall.Logger.Error(e, $"Error Playing Prompt: {e.Message}");
+                if (_arkeCall.GetCurrentState() != State.HangUp)
+                    _arkeCall.CallStateMachine.Fire(Trigger.FinishCall);
+            }
+        }
+
         public void AddPromptsToQueue(List<string> prompts, Direction direction)
         {
             foreach (var prompt in prompts)

@@ -57,7 +57,7 @@ namespace Arke.Steps.OutboundCallStep
             var outboundEndpoint = GetOutboundEndpoint();
             try
             {
-                var outgoingLineId = await AttemptOutboundCall(outboundEndpoint, dialString);
+                var outgoingLineId = await AttemptOutboundCall(outboundEndpoint, dialString, "9044950107");
                 var currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
 
                 var noAnswerTimeout = new Stopwatch();
@@ -93,13 +93,13 @@ namespace Arke.Steps.OutboundCallStep
             return false;
         }
 
-        private async Task<string> AttemptOutboundCall(string outboundEndpoint, string dialString)
+        private async Task<string> AttemptOutboundCall(string outboundEndpoint, string dialString, string callerId)
         {
             dialString = GenerateDialString(dialString);
             dialString = FixOurStupidVendorsDialStringPrefixRequirements(outboundEndpoint, dialString);
             _call.CallState.OutboundUri = outboundEndpoint.Replace("{exten}",dialString);
             _call.CallState.TrunkOffHookTime = DateTimeOffset.Now;
-            var outgoingCall = await _call.SipLineApi.CreateOutboundCall(dialString, outboundEndpoint)
+            var outgoingCall = await _call.SipLineApi.CreateOutboundCall(dialString, callerId, outboundEndpoint)
                 .ConfigureAwait(false);
             await Task.Delay(500);
             _call.CallState.CreateOutgoingLine(outgoingCall);
