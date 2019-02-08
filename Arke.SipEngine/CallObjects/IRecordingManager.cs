@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Arke.SipEngine.Api;
 
 namespace Arke.SipEngine.CallObjects
 {
@@ -9,5 +10,6 @@ namespace Arke.SipEngine.CallObjects
         Task StartRecordingOnBridge(string bridgeId, ICallInfo callState);
         Task StopRecordingOnBridge(string bridgeId);
         Task StopAllRecordings();
+        Task AriClient_OnRecordingFinishedEvent(ISipApiClient sender, RecordingFinishedEventHandlerArgs args);
     }
 }

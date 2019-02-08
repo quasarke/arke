@@ -11,6 +11,7 @@ using Arke.SipEngine.CallObjects.RecordingFiles;
 using Arke.SipEngine.Events;
 using AsterNET.ARI;
 using NLog;
+using RecordingFinishedEventHandler = Arke.SipEngine.Api.RecordingFinishedEventHandler;
 
 namespace Arke.IVR
 {
@@ -32,6 +33,7 @@ namespace Arke.IVR
 
         public event DtmfReceivedEventHandler OnDtmfReceivedEvent;
         public event LineHangupEventHandler OnLineHangupEvent;
+        public event RecordingFinishedEventHandler OnRecordingFinishedEvent;
         public event PromptPlaybackFinishedEventHandler OnPromptPlaybackFinishedEvent;
 
         public static ArkeSipApiClient GetInstance(IAriClient ariClient)
@@ -149,6 +151,14 @@ namespace Arke.IVR
             return recording.Name;
         }
 
+        public async Task<string> StartShortRecordingForLine(string lineId, string fileName, int maxDurationSeconds, int maxSilenceSeconds,
+            bool beepOnStart)
+        {
+            return (await _ariClient.Channels
+                .RecordAsync(lineId, fileName, "wav", maxDurationSeconds, maxSilenceSeconds, "overwrite", beepOnStart)
+                .ConfigureAwait(false)).Name;
+        }
+
         public async Task StopRecordingOnBridge(string recordingId)
         {
             await _ariClient.Recordings.StopAsync(recordingId).ConfigureAwait(false);
@@ -170,6 +180,11 @@ namespace Arke.IVR
         public async Task<string> PlayPromptToBridge(string bridgeId, string promptFile, string languageCode)
         {
             return (await _ariClient.Bridges.PlayAsync(bridgeId, $"sound:{promptFile}", languageCode).ConfigureAwait(false)).Id;
+        }
+
+        public async Task<string> PlayRecordingToLine(string lineId, string recordingName)
+        {
+            return (await _ariClient.Channels.PlayAsync(lineId, $"recording:{recordingName}").ConfigureAwait(false)).Id;
         }
 
         public async Task StopPrompt(string playbackId)
@@ -284,6 +299,24 @@ namespace Arke.IVR
                 DurationInMilliseconds = e.Duration_ms,
                 LineId = e.Channel.Id
             });
+        }
+
+        public async Task<object> CreateOutboundCall(string numberToDial, string callerId, string outboundEndpoint)
+        {
+            try
+            {
+                return await _ariClient.Channels.OriginateAsync(
+                    outboundEndpoint,
+                    numberToDial,
+                    callerId: callerId,
+                    app: _appName, // need to test if this is needed
+                    appArgs: "dialed").ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "Error creating an outbound call");
+                throw;
+            }
         }
     }
 }
