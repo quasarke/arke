@@ -60,6 +60,14 @@ namespace Arke.IVR.Prompts
             }
         }
 
+        public async Task PlayNumberToLine(string number, string lineId)
+        {
+            _promptQueue.Clear();
+            _arkeCall.CallStateMachine.Fire(Trigger.PlayPrompt);
+            _currentPlaybackId =
+                await _sipPromptApi.PlayNumberToLine(lineId, number, _languageData.FolderName);
+        }
+
         public void AddPromptsToQueue(List<string> prompts, Direction direction)
         {
             foreach (var prompt in prompts)

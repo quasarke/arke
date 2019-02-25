@@ -11,6 +11,7 @@ namespace Arke.SipEngine.Api
         Task<string> GetEndpoint(string lineId);
         Task AnswerLine(string lineId);
         Task<string> GetLineVariable(string lineId, string variableName);
+        Task TransferLine(string lineId, string endpoint);
         Task PlayMusicOnHoldToLine(string channelId);
         Task StopMusicOnHoldToLine(string channelId);
     }

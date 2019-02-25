@@ -30,7 +30,9 @@ namespace Arke.Steps.BridgeCallStep
             call.CallState.SetBridge(_callBridge);
 
             await call.AddLineToBridge(call.CallState.GetIncomingLineId(), _callBridge.Id).ConfigureAwait(false);
+            await call.SipBridgingApi.MuteLine(call.CallState.GetIncomingLineId());
             await call.AddLineToBridge(call.CallState.GetOutgoingLineId(), _callBridge.Id).ConfigureAwait(false);
+            await call.SipBridgingApi.MuteLine(call.CallState.GetOutgoingLineId());
 
             call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
             call.FireStateChange(Trigger.NextCallFlowStep);

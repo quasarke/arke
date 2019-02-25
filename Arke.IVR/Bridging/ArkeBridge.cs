@@ -8,5 +8,6 @@ namespace Arke.IVR.Bridging
         public string Id { get; set; }
         public string Type { get; set; }
         public Bridge Bridge { get; set; }
+        public string Name { get; set; }
     }
 }

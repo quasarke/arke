@@ -46,6 +46,18 @@ namespace Arke.IVR
             await _ariClient.Channels.AnswerAsync(lineId).ConfigureAwait(false);
         }
 
+        public async Task TransferLine(string lineId, string endpoint)
+        {
+            try
+            {
+                await _ariClient.Channels.RedirectAsync(lineId, endpoint);
+            }
+            catch (Exception e)
+            {
+                _logger.Warn(e, "Error transfering line");
+            }
+        }
+
         public async Task PlayMusicOnHoldToLine(string channelId)
         {
             try
@@ -187,6 +199,19 @@ namespace Arke.IVR
             return (await _ariClient.Channels.PlayAsync(lineId, $"recording:{recordingName}").ConfigureAwait(false)).Id;
         }
 
+        public async Task<string> PlayNumberToLine(string lineId, string number, string languageCode)
+        {
+            try
+            {
+                return (await _ariClient.Channels.PlayAsync(lineId, $"number:{number}", languageCode).ConfigureAwait(false)).Id;
+            }
+            catch (HttpRequestException e)
+            {
+                _logger.Warn(e, "Channel probably dead");
+                return "";
+            }
+        }
+
         public async Task StopPrompt(string playbackId)
         {
             try
@@ -317,6 +342,16 @@ namespace Arke.IVR
                 _logger.Error(e, "Error creating an outbound call");
                 throw;
             }
+        }
+
+        public async Task MuteLine(string lineId)
+        {
+            await _ariClient.Channels.MuteAsync(lineId, "out");
+        }
+
+        public async Task UnmuteLine(string lineId)
+        {
+            await _ariClient.Channels.UnmuteAsync(lineId, "both");
         }
     }
 }

@@ -8,5 +8,6 @@ namespace Arke.SipEngine.Api
         Task StopPrompt(string playbackId);
         Task<string> PlayPromptToBridge(string bridgeId, string promptFile, string languageCode);
         Task<string> PlayRecordingToLine(string lineId, string recordingName);
+        Task<string> PlayNumberToLine(string lineId, string number, string languageCode);
     }
 }

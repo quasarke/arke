@@ -20,23 +20,22 @@ namespace Arke.Steps.HoldStep
         private HoldStepSettings _settings;
         public Dictionary<string, string> LogData = new Dictionary<string, string>();
         public string Name => "HoldStep";
+        private IBridge _holdingBridge;
         
-        public string HoldPrompt { get; private set; }
-
         public async Task DoStep(Step step, ICall call)
         {
             _call = call;
             _call.OnWorkflowStep += OnWorkflowStep;
             _call.Logger.Info("Hold processor start");
             _settings = (HoldStepSettings)step.NodeData.Properties;
-            var holdingBridge = await call.CreateBridge(BridgeType.Holding);
-            _call.CallState.SetBridge(holdingBridge);
+            _holdingBridge = await call.CreateBridge(BridgeType.Holding);
+            _call.CallState.SetBridge(_holdingBridge);
             await _call.SipBridgingApi.AddLineToBridge(_call.CallState.GetIncomingLineId(), _call.CallState.GetBridgeId());
             if (_settings.HoldMusic)
                 await _call.SipBridgingApi.PlayMusicOnHoldToBridge(_call.CallState.GetBridgeId());
             else
             {
-                HoldPrompt = _settings.WaitPrompt;
+                _call.CallState.HoldPrompt = _settings.WaitPrompt;
                 _call.SipApiClient.OnPromptPlaybackFinishedEvent += AriClient_OnPlaybackFinishedEvent;
                 _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridge(_call.CallState.GetBridgeId(), _settings.WaitPrompt, call.CallState.LanguageCode);
             }
@@ -61,23 +60,40 @@ namespace Arke.Steps.HoldStep
 
             if (_settings.PromptChanges.ContainsKey(onWorkflowStepEvent.StepId.ToString()))
             {
-                HoldPrompt = _settings.PromptChanges[onWorkflowStepEvent.StepId.ToString()];
+                _call.CallState.HoldPrompt = _settings.PromptChanges[onWorkflowStepEvent.StepId.ToString()];
+            }
+
+            if (call.CallState.Bridge.Id != _holdingBridge.Id)
+            {
+                // we're not on hold anymore, so we can just remove our events and continue
+                _call.SipApiClient.OnPromptPlaybackFinishedEvent -= AriClient_OnPlaybackFinishedEvent;
+                _call.OnWorkflowStep -= OnWorkflowStep;
             }
         }
 
         private async Task AriClient_OnPlaybackFinishedEvent(ISipApiClient sipApiClient, PromptPlaybackFinishedEvent e)
         {
-            LogData.Add("PlaybackId", e.PlaybackId);
+            _call.Logger.Info($"Playback finished {e.PlaybackId}");
+            AddPlaybackIdToLogData(e.PlaybackId);
+
             if (e.PlaybackId != _currentPlaybackId)
                 return;
-
+            if (_call.GetCurrentState() == State.InCall)
+            {
+                return;
+            }
             await Task.Delay(TimeSpan.FromSeconds(5));
+            if (_call.CallState.Bridge.Id != _holdingBridge.Id) return;
+            _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridge(_call.CallState.Bridge.Id, _call.CallState.HoldPrompt, _call.CallState.LanguageCode);
+            _call.Logger.Info($"Playback started {_currentPlaybackId}, of prompt {_call.CallState.HoldPrompt}, to bridge {_call.CallState.Bridge.Name}", LogData);
+        }
 
-            //if (_call.GetCurrentState() != State.OnHold)
-            //    return;
-
-            _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridge(_call.CallState.GetBridgeId(), HoldPrompt, "en");
-            _call.Logger.Info("Playback finished", LogData);
+        private void AddPlaybackIdToLogData(string id)
+        {
+            if (!LogData.ContainsKey("PlaybackId"))
+                LogData.Add("PlaybackId", id);
+            else
+                LogData["PlaybackId"] = id;
         }
     }
 }

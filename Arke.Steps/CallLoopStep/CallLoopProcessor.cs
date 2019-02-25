@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Arke.DSL.Step;
 using Arke.SipEngine.CallObjects;
+using Arke.SipEngine.FSM;
 using Arke.SipEngine.Processors;
 
 namespace Arke.Steps.CallLoopStep
@@ -12,7 +13,7 @@ namespace Arke.Steps.CallLoopStep
         public string Name => "CallLoop";
         private ICall _call;
         private Step _step;
-
+        
         public async Task DoStep(Step step, ICall call)
         {
             var callTimer = new Timer(1000d);
@@ -20,6 +21,7 @@ namespace Arke.Steps.CallLoopStep
             _call = call;
             _step = step;
             _call.SipApiClient.OnLineHangupEvent += SipApiClient_OnLineHangupEvent;
+            _call.FireStateChange(Trigger.StartTalking);
         }
 
         private void SipApiClient_OnLineHangupEvent(SipEngine.Api.ISipApiClient sender, SipEngine.Events.LineHangupEvent e)

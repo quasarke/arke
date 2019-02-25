@@ -30,7 +30,9 @@ namespace Arke.SipEngine.CallObjects
         DateTimeOffset? CalledPartyAcceptTime { get; set; }
         DateTimeOffset? TimeDeviceConnected { get; set; }
         string OutboundUri { get; set; }
-
+        string HoldPrompt { get; set; }
+        IBridge Bridge { get; }
+        string OutboundCallerId { get; set; }
 
         void AddStepToIncomingQueue(int stepId);
         void AddStepToOutgoingQueue(int stepId);
