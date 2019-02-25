@@ -35,6 +35,7 @@ namespace Arke.IVR.DSL
                 .Single(type => type.Name == stepName);
 
             var stepProcessor = ObjectContainer.GetInstance().GetObjectInstance(stepType);
+            _call.Logger.Debug($"{_call.CallId}: Processing Step: {stepType.FullName}");
             await ((IStepProcessor) stepProcessor).DoStep(step, _call);
         }
     }

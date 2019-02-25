@@ -23,7 +23,7 @@ namespace Arke.IVR.CallObjects
             ProcessOutgoingQueue = false;
         }
 
-        public ArkeBridge Bridge { get; set; }
+        public IBridge Bridge { get; set; }
         public Guid CallId { get; set; }
         public bool CallStarted { get; set; }
         public string Destination { get; set; }
@@ -52,7 +52,9 @@ namespace Arke.IVR.CallObjects
         public DateTimeOffset? TrunkOffHookTime { get; set; }
         public DateTimeOffset? CalledPartyAcceptTime { get; set; }
         public string OutboundUri { get; set; }
+        public string HoldPrompt { get; set; }
         public DateTimeOffset? TimeDeviceConnected { get; set; }
+        public string OutboundCallerId { get; set; }
 
         public void AddStepToIncomingQueue(int stepId)
         {
@@ -122,7 +124,7 @@ namespace Arke.IVR.CallObjects
 
         public virtual string GetBridgeId()
         {
-            return Bridge != null ? Bridge.Bridge.Id : string.Empty;
+            return Bridge != null ? ((ArkeBridge)Bridge).Bridge.Id : string.Empty;
         }
 
         public virtual string GetIncomingLineId()

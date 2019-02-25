@@ -49,6 +49,7 @@ namespace Arke.Steps.OutboundCallStep
             
             // give the person a moment to get the phone to their ear. We were missing quite a bit of the first prompt.
             await Task.Delay(1000);
+            _call.CallState.CalledPartyAnswerTime = DateTimeOffset.Now;
             GoToNextStep();
         }
 
@@ -64,7 +65,6 @@ namespace Arke.Steps.OutboundCallStep
                 noAnswerTimeout.Start();
                 if (await WaitForCallToConnect(currentCallState, noAnswerTimeout, outgoingLineId))
                 {
-                    _call.CallState.CalledPartyAnswerTime = DateTimeOffset.Now;
                     return true;
                 }
             }
@@ -98,6 +98,7 @@ namespace Arke.Steps.OutboundCallStep
             dialString = GenerateDialString(dialString);
             dialString = FixOurStupidVendorsDialStringPrefixRequirements(outboundEndpoint, dialString);
             _call.CallState.OutboundUri = outboundEndpoint.Replace("{exten}",dialString);
+            _call.CallState.OutboundCallerId = callerId;
             _call.CallState.TrunkOffHookTime = DateTimeOffset.Now;
             var outgoingCall = await _call.SipLineApi.CreateOutboundCall(dialString, callerId, outboundEndpoint)
                 .ConfigureAwait(false);
