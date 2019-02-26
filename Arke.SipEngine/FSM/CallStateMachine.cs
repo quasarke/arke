@@ -124,6 +124,7 @@ namespace Arke.SipEngine.FSM
                 .Permit(Trigger.FinishedPrompt, State.CallFlow)
                 .Permit(Trigger.PromptInterrupted, State.StoppingPlayback)
                 .Permit(Trigger.FinishCall, State.HangUp)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
                 .Permit(Trigger.InputReceived, State.CallFlow)
                 .Permit(Trigger.StartTalking, State.InCall)
                 .Ignore(Trigger.PlayInterruptiblePrompt)
@@ -148,6 +149,7 @@ namespace Arke.SipEngine.FSM
                 .Permit(Trigger.FinishedPrompt, State.CallFlow)
                 .Permit(Trigger.FinishCall, State.HangUp)
                 .Permit(Trigger.StartTalking, State.InCall)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
                 .Ignore(Trigger.PlayPrompt)
                 .OnEntry(_promptPlayer.PlayPromptsInQueue);
         }
