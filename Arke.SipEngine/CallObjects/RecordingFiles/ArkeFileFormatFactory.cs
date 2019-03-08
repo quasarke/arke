@@ -6,7 +6,7 @@
     {
         public override string GetFileFormat()
         {
-            return "wav";
+            return "ulaw";
         }
     }
 }
