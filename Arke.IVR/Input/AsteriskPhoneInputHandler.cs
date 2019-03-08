@@ -1,5 +1,6 @@
 using System.Timers;
 using System.Linq;
+using Arke.DSL.Extensions;
 using Arke.DSL.Step;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.CallObjects;
@@ -31,11 +32,13 @@ namespace Arke.IVR.Input
         public int MaxDigitTimeoutInSeconds { get; set; }
         public int NumberOfDigitsToWaitForNextStep { get; set; }
         public string TerminationDigit { get; set; }
+        public string SetValueAs { get; set; }
 
         public void ChangeInputSettings(PhoneInputHandlerSettings settings)
         {
             _settings = settings;
             MaxDigitTimeoutInSeconds = _settings.MaxDigitTimeoutInSeconds;
+            SetValueAs = _settings.SetValueAs;
             SetTimerInterval();
             NumberOfDigitsToWaitForNextStep = _settings.NumberOfDigitsToWaitForNextStep;
             TerminationDigit = _settings.TerminationDigit;
@@ -178,6 +181,15 @@ namespace Arke.IVR.Input
                 _call.FireStateChange(Trigger.InputReceived);
                 return;
             }
+            else if (DigitsReceived.Length == NumberOfDigitsToWaitForNextStep
+                     && !string.IsNullOrEmpty(SetValueAs))
+            {
+                DynamicState.SetProperty(_call.CallState, SetValueAs, DigitsReceived);
+                ResetInputRetryCount();
+                _call.FireStateChange(Trigger.InputReceived);
+                return;
+            }
+
             if (NumberOfDigitsToWaitForNextStep == 0)
             {
                 DigitTimeoutTimer.Start();
