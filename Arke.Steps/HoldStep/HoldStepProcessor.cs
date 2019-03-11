@@ -39,11 +39,30 @@ namespace Arke.Steps.HoldStep
                 _call.SipApiClient.OnPromptPlaybackFinishedEvent += AriClient_OnPlaybackFinishedEvent;
                 _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridge(_call.CallState.GetBridgeId(), _settings.WaitPrompt, call.CallState.LanguageCode);
             }
+            call.SipApiClient.OnLineHangupEvent += SipApiClientOnOnLineHangupEvent;
+
             _call.FireStateChange(Trigger.PlaceOnHold);
             _call.Logger.Info("Hold processor fired");
             _call.ProcessCallLogic();
         }
-        
+
+        private void SipApiClientOnOnLineHangupEvent(ISipApiClient sender, LineHangupEvent e)
+        {
+            if (e.LineId != _call.CallState.GetOutgoingLineId()) return;
+            if (!_call.CallState.TalkTimeStart.HasValue)
+            {
+                _call.CallState.CallCanBeAbandoned = true;
+                _call.FireStateChange(Trigger.FinishCall);
+            }
+            else
+            {
+                // we're not on hold anymore, so we can just remove our events and continue
+                _call.SipApiClient.OnPromptPlaybackFinishedEvent -= AriClient_OnPlaybackFinishedEvent;
+                _call.OnWorkflowStep -= OnWorkflowStep;
+                _call.SipApiClient.OnLineHangupEvent -= SipApiClientOnOnLineHangupEvent;
+            }
+        }
+
         private void OnWorkflowStep(ICall call, OnWorkflowStepEvent onWorkflowStepEvent)
         {
             if (onWorkflowStepEvent.LineId != _call.CallState.GetOutgoingLineId())
@@ -56,6 +75,8 @@ namespace Arke.Steps.HoldStep
             {
                 _call.CallState.AddStepToIncomingQueue(
                     int.Parse(_settings.Triggers[onWorkflowStepEvent.StepId.ToString()]));
+                _call.FireStateChange(Trigger.NextCallFlowStep);
+                _call.OnWorkflowStep -= OnWorkflowStep;
             }
 
             if (_settings.PromptChanges.ContainsKey(onWorkflowStepEvent.StepId.ToString()))
@@ -68,6 +89,7 @@ namespace Arke.Steps.HoldStep
                 // we're not on hold anymore, so we can just remove our events and continue
                 _call.SipApiClient.OnPromptPlaybackFinishedEvent -= AriClient_OnPlaybackFinishedEvent;
                 _call.OnWorkflowStep -= OnWorkflowStep;
+                _call.SipApiClient.OnLineHangupEvent -= SipApiClientOnOnLineHangupEvent;
             }
         }
 
