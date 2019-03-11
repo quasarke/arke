@@ -1,6 +1,6 @@
 ﻿using System;
-using Newtonsoft.Json;
 using RestSharp;
+using RestSharp.Serialization.Json;
 
 namespace Arke.SipEngine.Web.Default
 {
@@ -35,7 +35,7 @@ namespace Arke.SipEngine.Web.Default
         {
             if (type == RequestParameterType.RequestBody)
             {
-                Request.JsonSerializer = new RestSharp.Serializers.JsonSerializer();
+                Request.JsonSerializer = new JsonSerializer();
                 //Request.AddParameter(name, JsonConvert.SerializeObject(value), 
                 //    (ParameterType)Enum.Parse(typeof(ParameterType), 
                 //    type.ToString()));

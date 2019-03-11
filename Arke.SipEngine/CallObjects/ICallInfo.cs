@@ -46,5 +46,6 @@ namespace Arke.SipEngine.CallObjects
         int GetStepsOnIncomingQueue();
         int GetStepsOnOutgoingQueue();
         void SetBridge(IBridge bridge);
+        ISipChannel CreateTransferLine(object sipLine);
     }
 }

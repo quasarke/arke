@@ -170,5 +170,18 @@ namespace Arke.IVR.CallObjects
         {
             Bridge = bridge as ArkeBridge;
         }
+
+        public ISipChannel CreateTransferLine(object sipLine)
+        {
+            if (sipLine is Channel channel)
+            {
+                return new ArkeSipChannel
+                {
+                    Channel = channel,
+                    CurrentState = State.Initialization
+                };
+            }
+            return null;
+        }
     }
 }
