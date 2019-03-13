@@ -26,7 +26,7 @@ namespace Arke.Steps.HoldStep
         {
             _call = call;
             _call.OnWorkflowStep += OnWorkflowStep;
-            _call.Logger.Info("Hold processor start");
+            _call.Logger.Information("Hold processor start {@Call}", call.CallState);
             _settings = (HoldStepSettings)step.NodeData.Properties;
             _holdingBridge = await call.CreateBridge(BridgeType.Holding);
             _call.CallState.SetBridge(_holdingBridge);
@@ -42,7 +42,7 @@ namespace Arke.Steps.HoldStep
             call.SipApiClient.OnLineHangupEvent += SipApiClientOnOnLineHangupEvent;
 
             _call.FireStateChange(Trigger.PlaceOnHold);
-            _call.Logger.Info("Hold processor fired");
+            _call.Logger.Information("Hold processor fired {@Call}", call.CallState);
             _call.ProcessCallLogic();
         }
 
@@ -95,7 +95,7 @@ namespace Arke.Steps.HoldStep
 
         private async Task AriClient_OnPlaybackFinishedEvent(ISipApiClient sipApiClient, PromptPlaybackFinishedEvent e)
         {
-            _call.Logger.Info($"Playback finished {e.PlaybackId}");
+            _call.Logger.Information("Playback finished {PlaybackId} {@Call}", e.PlaybackId, _call.CallState);
             AddPlaybackIdToLogData(e.PlaybackId);
 
             if (e.PlaybackId != _currentPlaybackId)
@@ -107,7 +107,7 @@ namespace Arke.Steps.HoldStep
             await Task.Delay(TimeSpan.FromSeconds(5));
             if (_call.CallState.Bridge.Id != _holdingBridge.Id) return;
             _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridge(_call.CallState.Bridge.Id, _call.CallState.HoldPrompt, _call.CallState.LanguageCode);
-            _call.Logger.Info($"Playback started {_currentPlaybackId}, of prompt {_call.CallState.HoldPrompt}, to bridge {_call.CallState.Bridge.Name}", LogData);
+            _call.Logger.Information("Playback started {currentPlaybackId}, of prompt {HoldPrompt}, to bridge {BridgeName} {@Call}", _currentPlaybackId, _call.CallState.HoldPrompt, _call.CallState.Bridge.Name, _call.CallState);
         }
 
         private void AddPlaybackIdToLogData(string id)

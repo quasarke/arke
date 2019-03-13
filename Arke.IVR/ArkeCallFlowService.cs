@@ -11,7 +11,7 @@ using Arke.SipEngine.CallObjects;
 using AsterNET.ARI;
 using AsterNET.ARI.Models;
 using Microsoft.Extensions.Configuration;
-using NLog;
+using Serilog;
 
 #if !MONO
 #endif
@@ -22,15 +22,15 @@ namespace Arke.IVR
     {
         private readonly IAriClient _ariClient;
         public Dictionary<string, ICall> ConnectedLines { get; set; }
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger _logger;
         public static IConfiguration Configuration { get; set; }
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly ArkeSipApiClient _sipApi;
         
-        public ArkeCallFlowService()
-
+        public ArkeCallFlowService(ILogger logger)
         {
-            _logger.Info("ArkeCallFlowService Created");
+            _logger = logger;
+            _logger.Information("ArkeCallFlowService Created");
             ConnectedLines = new Dictionary<string, ICall>();
             _cancellationTokenSource = new CancellationTokenSource();
             _ariClient = ObjectContainer.GetInstance().GetObjectInstance<IAriClient>();
@@ -46,7 +46,7 @@ namespace Arke.IVR
         {
             try
             {
-                _logger.Info("ArkeCallFlowService Start() Initiated");
+                _logger.Information("ArkeCallFlowService Start() Initiated");
                 SetupAriEvents();
                 ConnectAri();
                 return true;
@@ -67,7 +67,7 @@ namespace Arke.IVR
         {
             _ariClient.OnStasisStartEvent += AriClientOnStasisStartEvent;
             _ariClient.OnStasisEndEvent += AriClientOnStasisEndEvent;
-            _logger.Info("Registering Events");
+            _logger.Information("Registering Events");
             _sipApi.SubscribeToDtmfReceivedEvents();
             _sipApi.SubscribeToLineHangupEvents();
             _sipApi.SubscribeToPlaybackFinishedEvents();
@@ -75,11 +75,11 @@ namespace Arke.IVR
         
         public bool Stop()
         {
-            _logger.Info("Unregistering events...");
+            _logger.Information("Unregistering events...");
             var disconnectionTask = DisconnectAri();
             disconnectionTask.Wait();
             _cancellationTokenSource.Cancel();
-            _logger.Info("Shutdown complete.");
+            _logger.Information("Shutdown complete.");
             return true;
         }
 
@@ -115,7 +115,7 @@ namespace Arke.IVR
             ICall line;
             if (e.Args.Contains("dialed") || e.Args.Contains("SnoopChannel"))
                 return;
-            _logger.Info("Line Offhook", new
+            _logger.Information("Line Offhook", new
             {
                 ChannelId = e.Channel.Id,
                 CallerIdName = e.Channel.Caller.Number,
@@ -123,19 +123,19 @@ namespace Arke.IVR
             });
             line = ArkeCallFactory.CreateArkeCall(e.Channel);
             ConnectedLines.Add(e.Channel.Id, line);
-            _logger.Info("Starting Call Script", new
+            _logger.Information("Starting Call Script", new
             {
                 ChannelId = e.Channel.Id
             });
         
             // call answered and started
             await line.RunCallScript();
-            _logger.Info("Call Script Complete", new { ChannelId = e.Channel.Id });
+            _logger.Information("Call Script Complete", new { ChannelId = e.Channel.Id });
         }
 
         private async void AriClientOnStasisEndEvent(IAriClient sender, StasisEndEvent stasisEndEvent)
         {
-            _logger.Info(stasisEndEvent.Channel.Id);
+            _logger.Information("Channel {channelId} hungup", new { channelId = stasisEndEvent.Channel.Id});
             if (!ConnectedLines.ContainsKey(stasisEndEvent.Channel.Id))
                 return;
             ConnectedLines[stasisEndEvent.Channel.Id].Hangup();

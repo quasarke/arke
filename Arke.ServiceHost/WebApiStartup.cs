@@ -18,7 +18,7 @@ namespace Arke.ServiceHost
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new Info { Title = "Arke Management API", Version = "v1" }));
+            services.AddSwaggerGen();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

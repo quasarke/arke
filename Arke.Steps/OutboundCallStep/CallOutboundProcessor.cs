@@ -28,7 +28,7 @@ namespace Arke.Steps.OutboundCallStep
         public void GoToNextStep()
         {
             var next = _step.GetStepFromConnector(NextStep);
-            _call.Logger.Info("Outbound connected, go to next step " + next);
+            _call.Logger.Information("Outbound connected, go to next step {stepId} {@Call}", next, _call.CallState);
             _call.CallState.AddStepToOutgoingQueue(next);
             _call.FireStateChange(Trigger.NextCallFlowStep);
         }
@@ -41,7 +41,7 @@ namespace Arke.Steps.OutboundCallStep
 
         public async Task CallOutbound(string dialString)
         {
-            _call.Logger.Info("Outbound start " + dialString);
+            _call.Logger.Information("Outbound start " + dialString);
             while (_call.CallState.OutboundEndpoint.Count > 0)
             {
                 if (await PlaceOutboundCall(dialString)) return;

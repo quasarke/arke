@@ -45,7 +45,7 @@ namespace Arke.Steps.LanguageStep
             _promptPlayer = call.LanguageSelectionPromptPlayer;
             _promptPlayer.SetStepProcessor(this);
             _call = call;
-            _call.Logger.Info("Get Language Step Start");
+            _call.Logger.Information("Get Language Step Start {@Call}", call.CallState);
             _step = step;
             _settings = (LanguageStepSettings)step.NodeData.Properties;
             call.SipApiClient.OnDtmfReceivedEvent += DTMF_ReceivedEvent;
@@ -53,7 +53,7 @@ namespace Arke.Steps.LanguageStep
             _promptPlayer.AddPromptsToQueue(_settings.Prompts);
             await _promptPlayer.PlayNextPromptInQueue();
             _inputTimeout.Interval = _settings.MaxDigitTimeoutInSeconds * 1000;
-            _call.Logger.Info("Get Language Step End");
+            _call.Logger.Information("Get Language Step End {@Call}", call.CallState);
         }
 
         private void InputTimeout(object sender, ElapsedEventArgs elapsedEventArgs)
@@ -86,12 +86,12 @@ namespace Arke.Steps.LanguageStep
                     _call.FireStateChange(Trigger.GetLanguageInput);
                 GetLanguageChoiceForDigit(e.Digit);
                 _inputTimeout.Stop();
-                _call.Logger.Info("DTMF Event", LogData);
+                _call.Logger.Information("DTMF Event {@Call}", _call.CallState);
                 GoToNextStep();
             }
             catch (Exception ex)
             {
-                _call.Logger.Error(ex, "DTMF Received event ", LogData);
+                _call.Logger.Error(ex, "DTMF Received event {@Call}", _call.CallState);
             }
         }
 

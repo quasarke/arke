@@ -96,7 +96,7 @@ namespace Arke.IVR.Prompts
             catch (Exception e)
             {
                 if (e.Message.Contains("playback cannot be found"))
-                    _asteriskCall.Logger.Warn("Playback ID Missing. Probably don't need to call this.");
+                    _asteriskCall.Logger.Warning("Playback ID Missing. Probably don't need to call this.");
                 else
                     _asteriskCall.Logger.Error(e, "Problem stopping playback.");
             }

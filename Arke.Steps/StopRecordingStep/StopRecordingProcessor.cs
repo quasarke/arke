@@ -14,7 +14,7 @@ namespace Arke.Steps.StopRecordingStep
 
         public async Task DoStep(Step settings, ICall call)
         {
-            call.Logger.Info($"Stop recording {call.CallState.GetIncomingLineId()}");
+            call.Logger.Information("Stop recording {LineId} {@Call}", call.CallState, call.CallState.GetIncomingLineId());
             await call.RecordingManager.StopRecordingOnLine(call.CallState.GetIncomingLineId());
             GoToNextStep(call, settings);
         }
