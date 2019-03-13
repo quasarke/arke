@@ -9,7 +9,7 @@ using Arke.SipEngine.Events;
 using Arke.SipEngine.FSM;
 using Arke.SipEngine.Processors;
 using Arke.SipEngine.Prompts;
-using NLog;
+using Serilog;
 
 namespace Arke.SipEngine.CallObjects
 {
@@ -18,7 +18,7 @@ namespace Arke.SipEngine.CallObjects
         Guid CallId { get; set; }
         ICallInfo CallState { get; set; }
         Dictionary<string,string> LogData { get; }
-        Logger Logger { get; }
+        ILogger Logger { get; }
         NodeProperties StepSettings { get; set; }
         IPromptPlayer PromptPlayer { get; }
         IPhoneInputHandler InputProcessor { get; }

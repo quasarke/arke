@@ -13,6 +13,7 @@ namespace Arke.Steps.DeviceConnectedStep
 
         public virtual Task DoStep(Step step, ICall call)
         {
+            call.Logger.Information("Call flow begin for call {@Call}", call.CallState);
             call.Logger.Debug("Next step " + step.GetStepFromConnector(NextStep));
             call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
             call.CallState.TimeDeviceConnected = DateTimeOffset.Now;

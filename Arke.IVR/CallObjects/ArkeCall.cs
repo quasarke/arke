@@ -17,7 +17,8 @@ using Arke.SipEngine.Processors;
 using Arke.SipEngine.Prompts;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json;
-using NLog;
+using Serilog;
+using Serilog.Core;
 
 namespace Arke.IVR.CallObjects
 {
@@ -36,8 +37,9 @@ namespace Arke.IVR.CallObjects
         private readonly CallStateMachine _callStateMachine;
         
         public ArkeCall(ISipApiClient sipApiClient, ISipLineApi sipLineApi, ISipBridgingApi sipBridgeApi,
-            ISipPromptApi sipPromptApi, IRecordingManager recordingmanager)
+            ISipPromptApi sipPromptApi, IRecordingManager recordingmanager, ILogger logger)
         {
+            Logger = logger;
             _sipApiClient = sipApiClient;
             _sipLineApi = sipLineApi;
             _sipBridgeApi = sipBridgeApi;
@@ -69,7 +71,7 @@ namespace Arke.IVR.CallObjects
         public IPhoneInputHandler InputProcessor => _asteriskPhoneInputHandler;
         public ILanguageSelectionPromptPlayer LanguageSelectionPromptPlayer { get; private set; }
         public Dictionary<string, string> LogData => _logFields;
-        public virtual Logger Logger { get; set; } = LogManager.GetCurrentClassLogger();
+        public ILogger Logger { get; }
         public IPromptPlayer PromptPlayer => _promptPlayer;
         public IRecordingManager RecordingManager => _asteriskRecordingManager;
         public NodeProperties StepSettings { get; set; }
@@ -170,7 +172,7 @@ namespace Arke.IVR.CallObjects
 
         public void Hangup()
         {
-            Logger.Info("Hangup");
+            Logger.Information("Hangup");
 
             DisposeOfCallServices();
         }

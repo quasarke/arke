@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.PlatformAbstractions;
-using NLog;
+using Serilog;
 
 namespace Arke.SipEngine.BridgeName
 {
@@ -59,7 +59,6 @@ namespace Arke.SipEngine.BridgeName
 
     public static class GetAllWords
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public static string[] GetWordsFromTextFile(this string fileName)
         {
@@ -72,7 +71,6 @@ namespace Arke.SipEngine.BridgeName
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "read file error");
             }
 
             return item.Split(',');

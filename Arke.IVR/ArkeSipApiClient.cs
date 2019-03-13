@@ -10,7 +10,7 @@ using Arke.SipEngine.Bridging;
 using Arke.SipEngine.CallObjects.RecordingFiles;
 using Arke.SipEngine.Events;
 using AsterNET.ARI;
-using NLog;
+using Serilog;
 using RecordingFinishedEventHandler = Arke.SipEngine.Api.RecordingFinishedEventHandler;
 
 namespace Arke.IVR
@@ -20,13 +20,14 @@ namespace Arke.IVR
     {
         private readonly IAriClient _ariClient;
         private string _appName;
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger _logger;
         
         [SuppressMessage("NDepend", "ND1901:AvoidNonReadOnlyStaticFields", Justification="Singleton Pattern")]
         private static ArkeSipApiClient _instance;
 
-        public ArkeSipApiClient(IAriClient ariClient)
+        public ArkeSipApiClient(IAriClient ariClient, ILogger logger)
         {
+            _logger = logger;
             _ariClient = ariClient;
             _appName = ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskAppName").Value;
         }
@@ -36,9 +37,9 @@ namespace Arke.IVR
         public event RecordingFinishedEventHandler OnRecordingFinishedEvent;
         public event PromptPlaybackFinishedEventHandler OnPromptPlaybackFinishedEvent;
 
-        public static ArkeSipApiClient GetInstance(IAriClient ariClient)
+        public static ArkeSipApiClient GetInstance(IAriClient ariClient, ILogger logger)
         {
-            return _instance ?? (_instance = new ArkeSipApiClient(ariClient));
+            return _instance ?? (_instance = new ArkeSipApiClient(ariClient, logger));
         }
 
         public async Task AnswerLine(string lineId)
@@ -54,7 +55,7 @@ namespace Arke.IVR
             }
             catch (Exception e)
             {
-                _logger.Warn(e, "Error transfering line");
+                _logger.Warning(e, "Error transfering line");
             }
         }
 
@@ -66,7 +67,7 @@ namespace Arke.IVR
             }
             catch (HttpRequestException e)
             {
-                _logger.Warn(e, "Channel probably dead");
+                _logger.Warning(e, "Channel probably dead");
             }
         }
 
@@ -78,7 +79,7 @@ namespace Arke.IVR
             }
             catch (HttpRequestException e)
             {
-                _logger.Warn(e, "Channel probably dead");
+                _logger.Warning(e, "Channel probably dead");
             }
         }
 
@@ -129,7 +130,7 @@ namespace Arke.IVR
             }
             catch (HttpRequestException e)
             {
-                _logger.Warn(e, "Channel probably dead");
+                _logger.Warning(e, "Channel probably dead");
             }
         }
 
@@ -184,7 +185,7 @@ namespace Arke.IVR
             }
             catch (HttpRequestException e)
             {
-                _logger.Warn(e, "Channel probably dead");
+                _logger.Warning(e, "Channel probably dead");
                 return "";
             }
         }
@@ -207,7 +208,7 @@ namespace Arke.IVR
             }
             catch (HttpRequestException e)
             {
-                _logger.Warn(e, "Channel probably dead");
+                _logger.Warning(e, "Channel probably dead");
                 return "";
             }
         }
@@ -220,7 +221,7 @@ namespace Arke.IVR
             }
             catch (HttpRequestException e)
             {
-                _logger.Warn(e, "Channel probably dead");
+                _logger.Warning(e, "Channel probably dead");
             }
         }
 

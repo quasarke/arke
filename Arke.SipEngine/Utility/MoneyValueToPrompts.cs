@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using NLog;
+using Serilog;
 
 namespace Arke.SipEngine.Utility
 {
     public class MoneyValueToPrompts
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger _logger;
+
+        public MoneyValueToPrompts(ILogger logger)
+        {
+            _logger = logger;
+        }
+
         public List<string> GetPromptsForValue(decimal value)
         {
             if (value < -9999 || value > 9999)

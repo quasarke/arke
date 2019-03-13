@@ -45,7 +45,7 @@ namespace Arke.Steps.ArkeInitStep
         public async Task SetEndpointFromChannelVariable()
         {
             await GetEndpointFromAri();
-            _call.Logger.Debug($"Phone connected at Endpoint {_call.CallState.Endpoint} PortID: {_call.CallState.PortId}");
+            _call.Logger.Debug("Phone connected at Endpoint {Endpoint} PortID: {PortId} {@Call}", _call.CallState.Endpoint, _call.CallState.PortId, _call.CallState);
         }
 
         private async Task GetEndpointFromAri()
@@ -60,7 +60,7 @@ namespace Arke.Steps.ArkeInitStep
             }
             catch (Exception ex)
             {
-                _call.Logger.Error(ex, "Exception getting the Endpoint from ARI");
+                _call.Logger.Error(ex, "Exception getting the Endpoint from ARI {@Call}", _call.CallState);
                 throw new EndpointNotFoundException("Exception getting the Endpoint from ARI", ex);
             }
         }

@@ -59,7 +59,7 @@ namespace Arke.Steps.PlayValueStep
 
         private static Task PlayMoneyValue(Step step, ICall call, PlayValueStepSettings stepSettings)
         {
-            var numbersToPromptsConverter = new MoneyValueToPrompts();
+            var numbersToPromptsConverter = new MoneyValueToPrompts(call.Logger);
             var valueToPlay = (decimal?) DynamicState.GetProperty(call.CallState, stepSettings.Value);
 
             if (valueToPlay == null)
