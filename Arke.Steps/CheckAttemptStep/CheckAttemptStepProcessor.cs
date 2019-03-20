@@ -19,9 +19,9 @@ namespace Arke.Steps.CheckAttemptStep
             if (call.CallState.AttemptCount >= stepSettings.MaxAttempts)
             {
                 if (stepSettings.Direction != Direction.Outgoing)
-                    call.CallState.AddStepToIncomingQueue(stepSettings.MaxAttempts);
+                    call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(MaxAttemptsStep));
                 else
-                    call.CallState.AddStepToOutgoingQueue(stepSettings.MaxAttempts);
+                    call.CallState.AddStepToOutgoingQueue(step.GetStepFromConnector(MaxAttemptsStep));
             }
             else
             {

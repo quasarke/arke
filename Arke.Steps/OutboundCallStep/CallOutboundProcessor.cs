@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Arke.DSL.Step;
 using Arke.SipEngine.CallObjects;
@@ -41,10 +42,29 @@ namespace Arke.Steps.OutboundCallStep
 
         public async Task CallOutbound(string dialString)
         {
-            _call.Logger.Information("Outbound start " + dialString);
+            _call.Logger.Information("Outbound start {DialedNumber} {@Call}", dialString, _call.CallState);
             while (_call.CallState.OutboundEndpoint.Count > 0)
             {
-                if (await PlaceOutboundCall(dialString)) return;
+                try
+                {
+                    _call.Logger.Information("Placing Outbound call. {@Call}", _call.CallState);
+                    if (await PlaceOutboundCall(dialString).ConfigureAwait(false))
+                    {
+                        _call.Logger.Information("Call Connected. Going to next step. {@Call}", _call.CallState);
+                        break;
+                    }
+                    else
+                    {
+                        _call.Logger.Information("No Answer or busy. {@Call}", _call.CallState);
+                        _call.CallState.AddStepToOutgoingQueue(_step.GetStepFromConnector(NoAnswer));
+                        _call.FireStateChange(Trigger.NextCallFlowStep);
+                        return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    _call.Logger.Error(e, "Dial through carrier failed. Trying next carrier. {@Call}", _call.CallState);
+                }
             }
             
             // give the person a moment to get the phone to their ear. We were missing quite a bit of the first prompt.
@@ -58,7 +78,7 @@ namespace Arke.Steps.OutboundCallStep
             var outboundEndpoint = GetOutboundEndpoint();
             try
             {
-                var outgoingLineId = await AttemptOutboundCall(outboundEndpoint, dialString, "9044950107");
+                var outgoingLineId = await AttemptOutboundCall(outboundEndpoint, dialString, "9044950107").ConfigureAwait(false);
                 var currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
 
                 var noAnswerTimeout = new Stopwatch();
@@ -70,27 +90,39 @@ namespace Arke.Steps.OutboundCallStep
             }
             catch (Exception ex)
             {
-                _call.Logger.Error(ex, $"Dial through carrier {outboundEndpoint} failed. Trying next carrier.");
+                _call.Logger.Error(ex, "Dial through carrier {outboundEndpoint} failed. Trying next carrier. {@Call}", outboundEndpoint, _call.CallState);
+                throw ex;
             }
             return false;
         }
 
         private async Task<bool> WaitForCallToConnect(string currentCallState, Stopwatch noAnswerTimeout, string outgoingLineId)
         {
-            while (currentCallState != "Up")
+            do
             {
-                if (noAnswerTimeout.Elapsed.TotalSeconds > 90)
+                try
                 {
-                    _call.CallState.AddStepToOutgoingQueue(_step.GetStepFromConnector(NoAnswer));
-                    _call.FireStateChange(Trigger.NextCallFlowStep);
-                    return true;
+                    if (noAnswerTimeout.Elapsed.TotalSeconds > 90)
+                    {
+                        return false;
+                    }
+
+                    await Task.Delay(500).ConfigureAwait(false);
+                    currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
                 }
+                catch (HttpRequestException ex)
+                {
+                    _call.Logger.Information(ex, "404 From Asterisk while waiting for an answer. Probably rejected the call. {@Call}", _call.CallState);
+                    return false;
+                }
+                catch (Exception e)
+                {
+                    _call.Logger.Information(e, "Carrier failed to place call, go to next. {@Call}", _call.CallState);
+                    throw e;
+                }
+            } while (currentCallState != "Up");
 
-                await Task.Delay(100).ConfigureAwait(false);
-                currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
-            }
-
-            return false;
+            return true;
         }
 
         private async Task<string> AttemptOutboundCall(string outboundEndpoint, string dialString, string callerId)
