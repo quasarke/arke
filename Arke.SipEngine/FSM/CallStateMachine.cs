@@ -69,7 +69,9 @@ namespace Arke.SipEngine.FSM
             StateMachine.Configure(State.InCall)
                 .Permit(Trigger.NextCallFlowStep, State.CallFlow)
                 .Permit(Trigger.PlayPrompt, State.PlayingPromptOnCall)
+                .Ignore(Trigger.InputReceived)
                 .Ignore(Trigger.FinishedPrompt)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
                 .Permit(Trigger.FinishCall, State.HangUp);
 
             StateMachine.Configure(State.StartingRecording)

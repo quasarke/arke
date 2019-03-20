@@ -30,7 +30,7 @@ namespace Arke.Steps.PlayPromptStep
             {
                 case Direction.Both:
                     call.CallState.AddStepToIncomingQueue(step);
-                    call.CallState.AddStepToOutgoingQueue(step);
+                    //call.CallState.AddStepToOutgoingQueue(step); // might not be needed, could be causing our double queue issue.
                     break;
                 case Direction.Incoming:
                     call.CallState.AddStepToIncomingQueue(step);
