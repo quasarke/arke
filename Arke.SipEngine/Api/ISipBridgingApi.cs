@@ -5,13 +5,13 @@ namespace Arke.SipEngine.Api
 {
     public interface ISipBridgingApi
     {
-        Task<IBridge> CreateBridge(string bridgeType, string bridgeName);
-        Task AddLineToBridge(string lineId, string bridgeId);
-        Task PlayMusicOnHoldToBridge(string bridgeId);
-        Task RemoveLineFromBridge(string lineId, string bridgeId);
-        Task DestroyBridge(string bridgeId);
-        Task MuteLine(string lineId);
-        Task UnmuteLine(string lineId);
-        Task<string> PlayPromptToBridge(string bridgeId, string promptFile, string languageCode);
+        Task<IBridge> CreateBridgeAsync(string bridgeType, string bridgeName);
+        Task AddLineToBridgeAsync(string lineId, string bridgeId);
+        Task PlayMusicOnHoldToBridgeAsync(string bridgeId);
+        Task RemoveLineFromBridgeAsync(string lineId, string bridgeId);
+        Task DestroyBridgeAsync(string bridgeId);
+        Task MuteLineAsync(string lineId);
+        Task UnmuteLineAsync(string lineId);
+        Task<string> PlayPromptToBridgeAsync(string bridgeId, string promptFile, string languageCode);
     }
 }

@@ -19,7 +19,7 @@ namespace Arke.Steps.OutboundCallStep
         private Step _step;
         public string Name => "CallOutbound";
 
-        public async Task DoStep(Step step, ICall call)
+        public async Task DoStepAsync(Step step, ICall call)
         {
             _step = step;
             _call = call;
@@ -57,7 +57,7 @@ namespace Arke.Steps.OutboundCallStep
                     {
                         _call.Logger.Information("No Answer or busy. {@Call}", _call.CallState);
                         _call.CallState.AddStepToOutgoingQueue(_step.GetStepFromConnector(NoAnswer));
-                        _call.FireStateChange(Trigger.NextCallFlowStep);
+                        await _call.FireStateChange(Trigger.NextCallFlowStep);
                         return;
                     }
                 }
@@ -79,7 +79,7 @@ namespace Arke.Steps.OutboundCallStep
             try
             {
                 var outgoingLineId = await AttemptOutboundCall(outboundEndpoint, dialString, "9044950107").ConfigureAwait(false);
-                var currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
+                var currentCallState = await _call.SipLineApi.GetLineStateAsync(outgoingLineId).ConfigureAwait(false);
 
                 var noAnswerTimeout = new Stopwatch();
                 noAnswerTimeout.Start();
@@ -108,7 +108,7 @@ namespace Arke.Steps.OutboundCallStep
                     }
 
                     await Task.Delay(500).ConfigureAwait(false);
-                    currentCallState = await _call.SipLineApi.GetLineState(outgoingLineId).ConfigureAwait(false);
+                    currentCallState = await _call.SipLineApi.GetLineStateAsync(outgoingLineId).ConfigureAwait(false);
                 }
                 catch (HttpRequestException ex)
                 {
@@ -132,7 +132,7 @@ namespace Arke.Steps.OutboundCallStep
             _call.CallState.OutboundUri = outboundEndpoint.Replace("{exten}",dialString);
             _call.CallState.OutboundCallerId = callerId;
             _call.CallState.TrunkOffHookTime = DateTimeOffset.Now;
-            var outgoingCall = await _call.SipLineApi.CreateOutboundCall(dialString, callerId, outboundEndpoint)
+            var outgoingCall = await _call.SipLineApi.CreateOutboundCallAsync(dialString, callerId, outboundEndpoint)
                 .ConfigureAwait(false);
             await Task.Delay(500);
             _call.CallState.CreateOutgoingLine(outgoingCall);

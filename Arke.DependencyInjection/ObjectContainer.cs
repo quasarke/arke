@@ -57,7 +57,7 @@ namespace Arke.DependencyInjection
 
         public virtual void RegisterSingleton<T>(T objectCreator) where T : class
         {
-            _container.RegisterSingleton(objectCreator);
+            _container.RegisterInstance<T>(objectCreator);
         }
         
         public virtual void Register<TInterface, TImplementation>() where TInterface : class where TImplementation : class, TInterface

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Stateless;
 
 namespace Arke.SipEngine.FSM
@@ -5,7 +6,7 @@ namespace Arke.SipEngine.FSM
     public interface IStateMachine
     {
         StateMachine<State, Trigger> StateMachine { get; set; }
-        void Fire(Trigger trigger);
+        Task FireAsync(Trigger trigger);
         void SetupFiniteStateMachine();
     }
 }

@@ -8,6 +8,6 @@ namespace Arke.SipEngine.Processors
     public interface IStepProcessor
     {
         string Name { get; }
-        Task DoStep(Step step, ICall call);
+        Task DoStepAsync(Step step, ICall call);
     }
 }

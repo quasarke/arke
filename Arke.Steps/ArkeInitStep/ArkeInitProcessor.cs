@@ -23,7 +23,7 @@ namespace Arke.Steps.ArkeInitStep
             _sipLineApi = sipLineApi;
         }
 
-        public async Task DoStep(Step step, ICall call)
+        public async Task DoStepAsync(Step step, ICall call)
         {
             _settings = (ArkeInitSettings) step.NodeData.Properties;
             _call = call;
@@ -38,7 +38,7 @@ namespace Arke.Steps.ArkeInitStep
             }
             
             _call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
-            _call.FireStateChange(SipEngine.FSM.Trigger.NextCallFlowStep);
+            await _call.FireStateChange(SipEngine.FSM.Trigger.NextCallFlowStep);
         }
 
         
@@ -53,9 +53,9 @@ namespace Arke.Steps.ArkeInitStep
             try
             {
                 _call.CallState.Endpoint =
-                    await _sipLineApi.GetEndpoint(_call.CallState.GetIncomingLineId());
+                    await _sipLineApi.GetEndpointAsync(_call.CallState.GetIncomingLineId());
                 _call.CallState.PortId =
-                    await _sipLineApi.GetLineVariable(_call.CallState.GetIncomingLineId(),
+                    await _sipLineApi.GetLineVariableAsync(_call.CallState.GetIncomingLineId(),
                     "CALLERID(num)");
             }
             catch (Exception ex)

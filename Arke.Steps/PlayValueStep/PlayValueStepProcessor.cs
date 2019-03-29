@@ -12,7 +12,7 @@ namespace Arke.Steps.PlayValueStep
     {
         private const string NextStep = "NextStep";
         public string Name => "PlayValueStep";
-        public async Task DoStep(Step step, ICall call)
+        public async Task DoStepAsync(Step step, ICall call)
         {
             if (!(step.NodeData.Properties is PlayValueStepSettings stepSettings))
                 throw new ArgumentException("PlayValueStepProcessor called with invalid Step settings");
@@ -39,14 +39,14 @@ namespace Arke.Steps.PlayValueStep
                 Direction = stepSettings.Direction
             };
 
-            call.PromptPlayer.DoStep(promptSettings);
+            await call.PromptPlayer.DoStepAsync(promptSettings);
 
             var valueToPlay = DynamicState.GetProperty(call.CallState, stepSettings.Value);
 
             if (valueToPlay == null)
                 throw new ArgumentException("Value specified does not exist on CallState: " + stepSettings.Value);
 
-            await call.PromptPlayer.PlayNumberToLine(valueToPlay.ToString(),
+            await call.PromptPlayer.PlayNumberToLineAsync(valueToPlay.ToString(),
                 stepSettings.Direction == Direction.Incoming
                     ? call.CallState.GetIncomingLineId()
                     : call.CallState.GetOutgoingLineId());
@@ -75,7 +75,7 @@ namespace Arke.Steps.PlayValueStep
                 Direction = stepSettings.Direction
             };
 
-            call.PromptPlayer.DoStep(promptSettings);
+            call.PromptPlayer.DoStepAsync(promptSettings);
             if (stepSettings.Direction != Direction.Outgoing)
                 call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
             else
