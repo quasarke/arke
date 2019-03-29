@@ -12,7 +12,7 @@ namespace Arke.Steps.CheckAttemptStep
         private const string MaxAttemptsStep = "MaxAttemptsStep";
         private const string NextStep = "NextStep";
         public string Name => "CheckAttemptStep";
-        public Task DoStep(Step step, ICall call)
+        public Task DoStepAsync(Step step, ICall call)
         {
             var stepSettings = step.NodeData.Properties as CheckAttemptStepSettings;
 

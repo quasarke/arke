@@ -89,7 +89,7 @@ namespace Arke.IVR
             _sipApi.UnsubscribeToPlaybackFinishedEvents();
             if (!((AriClient) _ariClient).Connected)
                 return;
-            await EndAllCalls();
+            await EndAllCallsAsync();
             ((AriClient) _ariClient).Disconnect();
             _sipApi.UnsubscribeToDtmfReceivedEvents();
             _sipApi.UnsubscribeToPlaybackFinishedEvents();
@@ -129,7 +129,7 @@ namespace Arke.IVR
             });
         
             // call answered and started
-            await line.RunCallScript();
+            await line.RunCallScriptAsync(_cancellationTokenSource.Token);
             _logger.Information("Call Script Complete", new { ChannelId = e.Channel.Id });
         }
 
@@ -138,7 +138,7 @@ namespace Arke.IVR
             _logger.Information("Channel {channelId} hungup", new { channelId = stasisEndEvent.Channel.Id});
             if (!ConnectedLines.ContainsKey(stasisEndEvent.Channel.Id))
                 return;
-            ConnectedLines[stasisEndEvent.Channel.Id].Hangup();
+            await ConnectedLines[stasisEndEvent.Channel.Id].HangupAsync();
             
             while (!ConnectedLines[stasisEndEvent.Channel.Id].CallState.CallCanBeAbandoned)
             {
@@ -147,17 +147,18 @@ namespace Arke.IVR
             ConnectedLines.Remove(stasisEndEvent.Channel.Id);
         }
 
-        private async Task EndAllCalls()
+        private async Task EndAllCallsAsync()
         {
+            _cancellationTokenSource.Cancel();
             foreach (var line in ConnectedLines.Where(c => c.Value.CallState.CallCanBeAbandoned))
             {
-                line.Value.Hangup();
+                await line.Value.HangupAsync();
             }
             foreach (var line in ConnectedLines.Where(c => !c.Value.CallState.CallCanBeAbandoned))
             {
                 while (!line.Value.CallState.CallCanBeAbandoned)
                     await Task.Delay(1000);
-                line.Value.Hangup();
+                await line.Value.HangupAsync();
             }
         }
     }

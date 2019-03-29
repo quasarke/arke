@@ -23,7 +23,7 @@ namespace Arke.IVR.Recording
 
         public async Task StartRecordingOnLine(string lineId, string direction, ICallInfo callState)
         {
-            var recordingId = await _ariClient.StartRecordingOnLine(
+            var recordingId = await _ariClient.StartRecordingOnLineAsync(
                 lineId, GetFileName(lineId, direction, callState));
 
             _recordingsInProgress.Add(lineId, recordingId);
@@ -33,14 +33,14 @@ namespace Arke.IVR.Recording
         {
             if (_recordingsInProgress.ContainsKey(lineId))
             {
-                await _ariClient.StopRecording(_recordingsInProgress[lineId]);
+                await _ariClient.StopRecordingAsync(_recordingsInProgress[lineId]);
                 _recordingsInProgress.Remove(lineId);
             }
         }
 
         public async Task StartRecordingOnBridge(string bridgeId, ICallInfo callState)
         {
-            var recordingId = await _ariClient.StartRecordingOnBridge(
+            var recordingId = await _ariClient.StartRecordingOnBridgeAsync(
                 bridgeId, GetFileName(bridgeId, "B", callState));
             _recordingsInProgress.Add(bridgeId, recordingId);
         }
@@ -49,7 +49,7 @@ namespace Arke.IVR.Recording
         {
             if (_recordingsInProgress.ContainsKey(bridgeId))
             {
-                await _ariClient.StopRecording(_recordingsInProgress[bridgeId]);
+                await _ariClient.StopRecordingAsync(_recordingsInProgress[bridgeId]);
                 _recordingsInProgress.Remove(bridgeId);
             }
         }
@@ -63,14 +63,14 @@ namespace Arke.IVR.Recording
         {
             foreach (var recordingItem in _recordingsInProgress)
             {
-                await _ariClient.StopRecording(recordingItem.Value);
+                await _ariClient.StopRecordingAsync(recordingItem.Value);
                 _recordingsInProgress.Remove(recordingItem.Key);
             }
         }
 
         public async Task AriClient_OnRecordingFinishedEvent(ISipApiClient sender, RecordingFinishedEventHandlerArgs args)
         {
-            _call.FireStateChange(Trigger.NextCallFlowStep);
+            await _call.FireStateChange(Trigger.NextCallFlowStep);
         }
     }
 }

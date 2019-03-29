@@ -32,7 +32,7 @@ namespace Arke.IVR.Prompts
             _promptQueue.Enqueue(prompt);
         }
 
-        public void DoStep(PlayerPromptSettings settings)
+        public async Task DoStepAsync(PlayerPromptSettings settings)
         {
             if (settings.IsInterruptible)
             {
@@ -41,31 +41,31 @@ namespace Arke.IVR.Prompts
 
             AddPromptsToQueue(settings.Prompts, settings.Direction);
 
-            _arkeCall.CallStateMachine.Fire(settings.IsInterruptible
+            await _arkeCall.CallStateMachine.FireAsync(settings.IsInterruptible
                 ? Trigger.PlayInterruptiblePrompt
                 : Trigger.PlayPrompt);
         }
 
-        public async Task PlayRecordingToLine(string recordingName, string lineId)
+        public async Task PlayRecordingToLineAsync(string recordingName, string lineId)
         {
             try
             {
-                _currentPlaybackId = await _sipPromptApi.PlayRecordingToLine(lineId, recordingName);
+                _currentPlaybackId = await _sipPromptApi.PlayRecordingToLineAsync(lineId, recordingName);
             }
             catch (Exception e)
             {
                 _arkeCall.Logger.Error(e, $"Error Playing Prompt: {e.Message}");
                 if (_arkeCall.GetCurrentState() != State.HangUp)
-                    _arkeCall.CallStateMachine.Fire(Trigger.FinishCall);
+                    await _arkeCall.CallStateMachine.FireAsync(Trigger.FinishCall);
             }
         }
 
-        public async Task PlayNumberToLine(string number, string lineId)
+        public async Task PlayNumberToLineAsync(string number, string lineId)
         {
             _promptQueue.Clear();
-            _arkeCall.CallStateMachine.Fire(Trigger.PlayPrompt);
+            await _arkeCall.CallStateMachine.FireAsync(Trigger.PlayPrompt);
             _currentPlaybackId =
-                await _sipPromptApi.PlayNumberToLine(lineId, number, _languageData.FolderName);
+                await _sipPromptApi.PlayNumberToLineAsync(lineId, number, _languageData.FolderName);
         }
 
         public void AddPromptsToQueue(List<string> prompts, Direction direction)
@@ -86,7 +86,7 @@ namespace Arke.IVR.Prompts
             throw new NotImplementedException("Asterisk Engine currently does not support TTS");
         }
 
-        public async void PlayPromptsInQueue()
+        public async Task PlayPromptsInQueueAsync()
         {
             if (_arkeCall.GetCurrentState() == State.StoppingPlayback || _promptQueue.Count == 0)
                 return;
@@ -101,7 +101,7 @@ namespace Arke.IVR.Prompts
                     switch (prompt.Direction)
                     {
                         case Direction.Incoming:
-                            await PlayPromptToIncomingLine(prompt.PromptFile).ConfigureAwait(false);
+                            await PlayPromptToIncomingLineAsync(prompt.PromptFile).ConfigureAwait(false);
                             break;
                         case Direction.Outgoing:
                             await PlayPromptToOutgoingLine(prompt.PromptFile).ConfigureAwait(false);
@@ -114,26 +114,26 @@ namespace Arke.IVR.Prompts
             }
             catch (Exception)
             {
-                _arkeCall.CallStateMachine.Fire(Trigger.FinishedPrompt);
+                await _arkeCall.CallStateMachine.FireAsync(Trigger.FinishedPrompt);
             }
         }
 
-        public void StopPrompt()
+        public async Task StopPromptAsync()
         {
             if (_arkeCall.GetCurrentState() == State.PlayingPrompt)
                 throw new InvalidOperationException("Cannot stop playback of this prompt.");
-            _arkeCall.CallStateMachine.Fire(Trigger.PromptInterrupted);
+            await _arkeCall.CallStateMachine.FireAsync(Trigger.PromptInterrupted);
             _arkeCall.Logger.Debug($"Stopping Prompt {_currentPlaybackId}", _arkeCall.LogData);
-            _sipPromptApi.StopPrompt(_currentPlaybackId);
+            await _sipPromptApi.StopPromptAsync(_currentPlaybackId).ConfigureAwait(false);
             _promptQueue.Clear();
-            _arkeCall.CallStateMachine.Fire(Trigger.FinishedPrompt);
+            await _arkeCall.CallStateMachine.FireAsync(Trigger.FinishedPrompt);
         }
 
         public async Task PlayPromptToBridge(string promptFile)
         {
             try
             {
-                _currentPlaybackId = (await _sipPromptApi.PlayPromptToBridge(
+                _currentPlaybackId = (await _sipPromptApi.PlayPromptToBridgeAsync(
                     _arkeCall.CallState.GetBridgeId(),
                     promptFile, _languageData.FolderName).ConfigureAwait(false));
                 _arkeCall.Logger.Debug($"Prompt file is: {promptFile}");
@@ -143,7 +143,7 @@ namespace Arke.IVR.Prompts
             {
                 _arkeCall.Logger.Error(ex, $"Error Playing Prompt: {ex.Message}");
                 if (_arkeCall.GetCurrentState() != State.HangUp)
-                    _arkeCall.CallStateMachine.Fire(Trigger.FinishCall);
+                    await _arkeCall.CallStateMachine.FireAsync(Trigger.FinishCall);
             }
         }
 
@@ -151,7 +151,7 @@ namespace Arke.IVR.Prompts
         {
             try
             {
-                _currentPlaybackId = (await _sipPromptApi.PlayPromptToLine(
+                _currentPlaybackId = (await _sipPromptApi.PlayPromptToLineAsync(
                     _arkeCall.CallState.GetOutgoingLineId(),
                     promptFile, _languageData.FolderName).ConfigureAwait(false));
                 _arkeCall.Logger.Debug($"Prompt file is: {promptFile}");
@@ -161,15 +161,15 @@ namespace Arke.IVR.Prompts
             {
                 _arkeCall.Logger.Error(ex, $"Error Playing Prompt: {ex.Message}");
                 if (_arkeCall.GetCurrentState() != State.HangUp)
-                    _arkeCall.CallStateMachine.Fire(Trigger.FinishCall);
+                    await _arkeCall.CallStateMachine.FireAsync(Trigger.FinishCall);
             }
         }
 
-        public async Task PlayPromptToIncomingLine(string promptFile)
+        public async Task PlayPromptToIncomingLineAsync(string promptFile)
         {
             try
             {
-                _currentPlaybackId = (await _sipPromptApi.PlayPromptToLine(
+                _currentPlaybackId = (await _sipPromptApi.PlayPromptToLineAsync(
                     _arkeCall.CallState.GetIncomingLineId(),
                     promptFile, _languageData.FolderName).ConfigureAwait(false));
                 _arkeCall.Logger.Debug($"Prompt file is: {promptFile}");
@@ -179,20 +179,19 @@ namespace Arke.IVR.Prompts
             {
                 _arkeCall.Logger.Error(ex, $"Error Playing Prompt: {ex.Message}");
                 if (_arkeCall.GetCurrentState() != State.HangUp)
-                    _arkeCall.CallStateMachine.Fire(Trigger.FinishCall);
+                    await _arkeCall.CallStateMachine.FireAsync(Trigger.FinishCall);
             }
         }
 
-        public Task AriClient_OnPlaybackFinishedEvent(ISipApiClient sipApiClient, PromptPlaybackFinishedEvent e)
+        public async Task AriClient_OnPlaybackFinishedEvent(ISipApiClient sipApiClient, PromptPlaybackFinishedEvent e)
         {
             if (e.PlaybackId != _currentPlaybackId)
-                return Task.CompletedTask;
+                return;
             if (_arkeCall.GetCurrentState() == State.StoppingPlayback)
-                return Task.CompletedTask;
+                return;
 
-            _arkeCall.CallStateMachine.Fire(
+            await _arkeCall.CallStateMachine.FireAsync(
                 _promptQueue.Count == 0 ? Trigger.FinishedPrompt : Trigger.PlayNextPrompt);
-            return Task.CompletedTask;
         }
 
         public void SetLanguageCode(LanguageData language)

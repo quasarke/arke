@@ -21,21 +21,22 @@ namespace Arke.Steps.BridgeCallStep
             return _callBridge?.Id;
         }
 
-        public async Task DoStep(Step step, ICall call)
+        public async Task DoStepAsync(Step step, ICall call)
         {
             if (!string.IsNullOrEmpty(call.CallState.GetBridgeId()))
-                await call.StopHoldingBridge().ConfigureAwait(false);
-            _callBridge = await call.CreateBridge(BridgeType.NoDTMF).ConfigureAwait(false);
+                await call.StopHoldingBridgeAsync().ConfigureAwait(false);
+            _callBridge = await call.CreateBridgeAsync(BridgeType.NoDTMF).ConfigureAwait(false);
             call.CallState.CalledPartyAcceptTime = DateTimeOffset.Now;
             call.CallState.SetBridge(_callBridge);
+            call.InputProcessor.ChangeInputSettings(null);
 
-            await call.AddLineToBridge(call.CallState.GetIncomingLineId(), _callBridge.Id).ConfigureAwait(false);
-            //await call.SipBridgingApi.MuteLine(call.CallState.GetIncomingLineId());
-            await call.AddLineToBridge(call.CallState.GetOutgoingLineId(), _callBridge.Id).ConfigureAwait(false);
-            //await call.SipBridgingApi.MuteLine(call.CallState.GetOutgoingLineId());
+            await call.AddLineToBridgeAsync(call.CallState.GetIncomingLineId(), _callBridge.Id).ConfigureAwait(false);
+            //await call.SipBridgingApi.MuteLineAsync(call.CallState.GetIncomingLineId());
+            await call.AddLineToBridgeAsync(call.CallState.GetOutgoingLineId(), _callBridge.Id).ConfigureAwait(false);
+            //await call.SipBridgingApi.MuteLineAsync(call.CallState.GetOutgoingLineId());
 
             call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
-            call.FireStateChange(Trigger.NextCallFlowStep);
+            await call.FireStateChange(Trigger.NextCallFlowStep);
         }
     }
 }

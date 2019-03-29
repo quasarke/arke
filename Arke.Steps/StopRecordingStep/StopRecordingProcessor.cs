@@ -12,7 +12,7 @@ namespace Arke.Steps.StopRecordingStep
         public string Name => "StopRecording";
         private const string NextStep = "NextStep";
 
-        public async Task DoStep(Step settings, ICall call)
+        public async Task DoStepAsync(Step settings, ICall call)
         {
             call.Logger.Information("Stop recording {LineId} {@Call}", call.CallState, call.CallState.GetIncomingLineId());
             await call.RecordingManager.StopRecordingOnLine(call.CallState.GetIncomingLineId());

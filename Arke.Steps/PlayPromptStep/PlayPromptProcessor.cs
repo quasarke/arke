@@ -12,14 +12,14 @@ namespace Arke.Steps.PlayPromptStep
         public string Name => "PlayPrompt";
         private Direction _direction;
 
-        public Task DoStep(Step step, ICall call)
+        public Task DoStepAsync(Step step, ICall call)
         {
             var stepSettings = (PlayPromptSettings) step.NodeData.Properties;
             call.StepSettings = stepSettings;
             _direction = stepSettings.Direction;
             var nextStep = step.GetStepFromConnector(NextStep);
             call.Logger.Debug("Next step {stepId} {@Call}",nextStep, call.CallState);
-            call.PromptPlayer.DoStep(stepSettings.GetPromptPlayerSettings(step, stepSettings.Direction));
+            call.PromptPlayer.DoStepAsync(stepSettings.GetPromptPlayerSettings(step, stepSettings.Direction));
             AddStepToProperQueue(nextStep, call);
             return Task.CompletedTask;
         }

@@ -14,22 +14,22 @@ namespace Arke.Steps.CallLoopStep
         private ICall _call;
         private Step _step;
         
-        public async Task DoStep(Step step, ICall call)
+        public async Task DoStepAsync(Step step, ICall call)
         {
             var callTimer = new Timer(1000d);
             callTimer.Elapsed += CallTimer_Elapsed;
             _call = call;
             _step = step;
-            _call.SipApiClient.OnLineHangupEvent += SipApiClient_OnLineHangupEvent;
-            _call.FireStateChange(Trigger.StartTalking);
+            _call.SipApiClient.OnLineHangupAsyncEvent += SipApiClient_OnLineHangupEvent;
+            await _call.FireStateChange(Trigger.StartTalking);
         }
 
-        private void SipApiClient_OnLineHangupEvent(SipEngine.Api.ISipApiClient sender, SipEngine.Events.LineHangupEvent e)
+        private async Task SipApiClient_OnLineHangupEvent(SipEngine.Api.ISipApiClient sender, SipEngine.Events.LineHangupEvent e)
         {
             if (e.LineId == _call.CallState.GetIncomingLineId()
                 || e.LineId == _call.CallState.GetOutgoingLineId())
             {
-                _call.SipApiClient.OnLineHangupEvent -= SipApiClient_OnLineHangupEvent;
+                _call.SipApiClient.OnLineHangupAsyncEvent -= SipApiClient_OnLineHangupEvent;
                 _call.CallState.AddStepToIncomingQueue(_step.GetStepFromConnector("NextIncomingStep"));
                 _call.CallState.AddStepToOutgoingQueue(_step.GetStepFromConnector("NextOutgoingStep"));
             }

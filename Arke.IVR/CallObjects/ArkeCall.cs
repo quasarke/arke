@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Arke.DSL.Step;
 using Arke.IVR.Bridging;
@@ -34,6 +35,7 @@ namespace Arke.IVR.CallObjects
         private readonly ISipBridgingApi _sipBridgeApi;
         private readonly ISipLineApi _sipLineApi;
         private ArkeCallState _callState;
+        private CancellationToken _cancellationToken;
         private readonly CallStateMachine _callStateMachine;
         
         public ArkeCall(ISipApiClient sipApiClient, ISipLineApi sipLineApi, ISipBridgingApi sipBridgeApi,
@@ -79,7 +81,7 @@ namespace Arke.IVR.CallObjects
         public ISipBridgingApi SipBridgingApi => _sipBridgeApi;
         public ISipLineApi SipLineApi => _sipLineApi;
 
-        public async Task AddLineToBridge(string lineId, string bridgeId)
+        public async Task AddLineToBridgeAsync(string lineId, string bridgeId)
         {
             await _arkeBridgeFactory.AddLineToBridge(lineId, bridgeId);
         }
@@ -101,68 +103,68 @@ namespace Arke.IVR.CallObjects
         {
             _logFields.Add("ChannelID", _callState.IncomingSipChannel.Channel.Id);
             Logger.Debug("Answering Channel");
-            var answerCall = _sipLineApi.AnswerLine(_callState.IncomingSipChannel.Channel.Id);
+            var answerCall = _sipLineApi.AnswerLineAsync(_callState.IncomingSipChannel.Channel.Id);
             await answerCall;
             Logger.Debug("Channel Answered");
             _callState.TimeOffHook = DateTimeOffset.Now;
             _logFields.Add("TimeDeviceOffHook", _callState.TimeOffHook.ToString("s"));
-            CallStateMachine.Fire(Trigger.Answered);
+            await CallStateMachine.FireAsync(Trigger.Answered);
             Logger.Debug("New Call Answered");
         }
 
-        private void AriClient_OnStasisEndEvent(ISipApiClient sipApiClient, LineHangupEvent e)
+        private async Task AriClient_OnStasisEndEvent(ISipApiClient sipApiClient, LineHangupEvent e)
         {
             if (_callState.IncomingSipChannel?.Channel == null)
                 return;
             if (e.LineId != _callState.IncomingSipChannel.Channel.Id)
                 return;
             Logger.Debug("OnStasisEndEvent");
-            CallStateMachine.Fire(Trigger.FinishCall);
+            await CallStateMachine.FireAsync(Trigger.FinishCall);
             _sipApiClient.OnDtmfReceivedEvent -= _asteriskPhoneInputHandler.AriClient_OnChannelDtmfReceivedEvent;
-            _sipApiClient.OnPromptPlaybackFinishedEvent -= _promptPlayer.AriClient_OnPlaybackFinishedEvent;
+            _sipApiClient.OnPromptPlaybackFinishedAsyncEvent -= _promptPlayer.AriClient_OnPlaybackFinishedEvent;
             
         }
 
-        public async Task<IBridge> CreateBridge(BridgeType bridgeType)
+        public async Task<IBridge> CreateBridgeAsync(BridgeType bridgeType)
         {
             return await _arkeBridgeFactory.CreateBridge(bridgeType);
         }
 
-        private void DisposeOfBridgeApi()
+        private async Task DisposeOfBridgeApi()
         {
             if (CallState.GetBridgeId() != null)
             {
-                _sipBridgeApi.DestroyBridge(CallState.GetBridgeId());
+                await _sipBridgeApi.DestroyBridgeAsync(CallState.GetBridgeId());
             }
         }
 
-        private void DisposeOfCallServices()
+        private async Task DisposeOfCallServices()
         {
-            DisposeOfBridgeApi();
-            DisposeOfOutgoingSipLineChannel();
-            DisposeOfIncomingSipLineChannel();
+            await DisposeOfBridgeApi();
+            await DisposeOfOutgoingSipLineChannel();
+            await DisposeOfIncomingSipLineChannel();
         }
 
-        private void DisposeOfIncomingSipLineChannel()
+        private async Task DisposeOfIncomingSipLineChannel()
         {
             if (_callState.IncomingSipChannel?.Channel == null)
             {
                 return;
             }
-            _sipLineApi.HangupLine(_callState.IncomingSipChannel.Channel.Id);
+            await _sipLineApi.HangupLineAsync(_callState.IncomingSipChannel.Channel.Id);
         }
         
-        private void DisposeOfOutgoingSipLineChannel()
+        private async Task DisposeOfOutgoingSipLineChannel()
         {
             if (_callState.OutgoingSipChannel?.Channel != null)
             {
-                _sipLineApi.HangupLine(_callState.OutgoingSipChannel.Channel.Id);
+                await _sipLineApi.HangupLineAsync(_callState.OutgoingSipChannel.Channel.Id);
             }
         }
 
-        public void FireStateChange(Trigger trigger)
+        public async Task FireStateChange(Trigger trigger)
         {
-            CallStateMachine.Fire(trigger);
+            await CallStateMachine.FireAsync(trigger);
         }
 
         public State GetCurrentState()
@@ -170,16 +172,16 @@ namespace Arke.IVR.CallObjects
             return CallStateMachine.StateMachine.State;
         }
 
-        public void Hangup()
+        public async Task HangupAsync()
         {
-            Logger.Information("Hangup");
+            Logger.Information("HangupAsync");
 
-            DisposeOfCallServices();
+            await DisposeOfCallServices();
         }
 
         public event Action<ICall, OnWorkflowStepEvent> OnWorkflowStep;
 
-        public virtual async void ProcessCallLogic()
+        public virtual async Task ProcessCallLogicAsync()
         {
             if (_callState.GetStepsOnIncomingQueue() > 0)
             {
@@ -187,7 +189,7 @@ namespace Arke.IVR.CallObjects
                 var step = _callState.GetNextIncomingStep();
                 AddOrUpdateStepIdToLogFields(step);
                 Logger.Debug($"Processing Step ID {step}");
-                await DslProcessor.ProcessStep(step);
+                await DslProcessor.ProcessStepAsync(step);
                 OnWorkflowStep?.Invoke(this, new OnWorkflowStepEvent()
                 {
                     LineId = _callState.IncomingSipChannel.Channel.Id,
@@ -200,7 +202,7 @@ namespace Arke.IVR.CallObjects
                 Logger.Debug("Processing next step on outgoing line.");
                 var step = _callState.GetNextOutgoingStep();
                 AddOrUpdateStepIdToLogFields(step);
-                await DslProcessor.ProcessStep(step);
+                await DslProcessor.ProcessStepAsync(step);
                 OnWorkflowStep?.Invoke(this, new OnWorkflowStepEvent()
                 {
                     LineId = _callState.OutgoingSipChannel.Channel.Id,
@@ -209,14 +211,16 @@ namespace Arke.IVR.CallObjects
             }
         }
 
-        public async Task RunCallScript()
+        public async Task RunCallScriptAsync(CancellationToken cancellationToken)
         {
+            _cancellationToken = cancellationToken;
+            _cancellationToken.Register(async () => await HangupAsync());
             await Answer();
             SetupSuccessfulCallStartEvents();
             await StartCallFlowDslProcessor();
             SetFileNameForCall();
             await StartConnectionStep();
-            StartTheCallFlow();
+            await StartTheCallFlow();
         }
 
         public void SetCallLanguage(LanguageData languageData)
@@ -226,7 +230,7 @@ namespace Arke.IVR.CallObjects
 
         private async Task StartConnectionStep()
         {
-            await DslProcessor.ProcessStep(0);
+            await DslProcessor.ProcessStepAsync(0);
         }
 
         private void SetFileNameForCall()
@@ -240,8 +244,8 @@ namespace Arke.IVR.CallObjects
             CallState.TerminationCode = TerminationCode.NormalCallCompletion;
             _callState.StepAttempts = 0;
             _sipApiClient.OnDtmfReceivedEvent += _asteriskPhoneInputHandler.AriClient_OnChannelDtmfReceivedEvent;
-            _sipApiClient.OnPromptPlaybackFinishedEvent += _promptPlayer.AriClient_OnPlaybackFinishedEvent;
-            _sipApiClient.OnLineHangupEvent += AriClient_OnStasisEndEvent;
+            _sipApiClient.OnPromptPlaybackFinishedAsyncEvent += _promptPlayer.AriClient_OnPlaybackFinishedEvent;
+            _sipApiClient.OnLineHangupAsyncEvent += AriClient_OnStasisEndEvent;
         }
 
         private async Task StartCallFlowDslProcessor()
@@ -267,7 +271,12 @@ namespace Arke.IVR.CallObjects
             DslProcessor.Dsl = deviceWorkflow.Value as Dictionary<int, Step>;
         }
 
-        public async Task StartCallRecording()
+        public async Task ForceCallEndAsync()
+        {
+            await HangupAsync();
+        }
+
+        public async Task StartCallRecordingAsync()
         {
             if (_callState.IncomingSipChannel != null)
                 await _asteriskRecordingManager.StartRecordingOnLine(_callState.IncomingSipChannel.Channel.Id, "I",
@@ -277,22 +286,22 @@ namespace Arke.IVR.CallObjects
                     CallState);
         }
 
-        public async Task StartRecordingOnBridge(string bridgeId)
+        public async Task StartRecordingOnBridgeAsync(string bridgeId)
         {
             await RecordingManager.StartRecordingOnBridge(bridgeId, CallState);
         }
 
-        public async Task StartRecordingOnLine(string lineId, string direction)
+        public async Task StartRecordingOnLineAsync(string lineId, string direction)
         {
             await RecordingManager.StartRecordingOnLine(lineId, direction, CallState);
         }
 
-        private void StartTheCallFlow()
+        private async Task StartTheCallFlow()
         {
-            CallStateMachine.Fire(Trigger.StartCallFlow);
+            await CallStateMachine.FireAsync(Trigger.StartCallFlow);
         }
 
-        public async Task StopCallRecording()
+        public async Task StopCallRecordingAsync()
         {
             if (_callState.IncomingSipChannel != null)
                 await _asteriskRecordingManager.StopRecordingOnLine(_callState.IncomingSipChannel.Channel.Id);
@@ -300,7 +309,7 @@ namespace Arke.IVR.CallObjects
                 await _asteriskRecordingManager.StopRecordingOnLine(_callState.OutgoingSipChannel.Channel.Id);
         }
 
-        public async Task StopHoldingBridge()
+        public async Task StopHoldingBridgeAsync()
         {
             await _arkeBridgeFactory.StopHoldingBridge(CallState);
         }

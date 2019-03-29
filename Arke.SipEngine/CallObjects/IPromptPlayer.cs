@@ -8,12 +8,12 @@ namespace Arke.SipEngine.CallObjects
     {
         void AddPromptsToQueue(List<string> prompts, Direction direction);
         void PlayPromptTextToSpeech(string promptText);
-        void PlayPromptsInQueue();
-        Task PlayPromptToIncomingLine(string promptFile);
-        void StopPrompt();
+        Task PlayPromptsInQueueAsync();
+        Task PlayPromptToIncomingLineAsync(string promptFile);
+        Task StopPromptAsync();
         void AddPromptToQueue(IPrompt prompt);
-        void DoStep(PlayerPromptSettings settings);
-        Task PlayRecordingToLine(string recordingName, string lineId);
-        Task PlayNumberToLine(string number, string lineId);
+        Task DoStepAsync(PlayerPromptSettings settings);
+        Task PlayRecordingToLineAsync(string recordingName, string lineId);
+        Task PlayNumberToLineAsync(string number, string lineId);
     }
 }

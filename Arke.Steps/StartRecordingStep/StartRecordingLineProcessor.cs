@@ -16,7 +16,7 @@ namespace Arke.Steps.StartRecordingStep
 
         public string Name => "StartRecordingLine";
         
-        public async Task DoStep(Step step, ICall call)
+        public async Task DoStepAsync(Step step, ICall call)
         {
             _call = call;
             _step = step;
@@ -75,7 +75,7 @@ namespace Arke.Steps.StartRecordingStep
             if (_call.CallState.GetIncomingLineId() != null)
             {
                 _call.Logger.Information("Start recording on inbound line {@Call} {LineId}", _call.CallState, _call.CallState.GetIncomingLineId());
-                await _call.StartRecordingOnLine(_call.CallState.GetIncomingLineId(), "I");
+                await _call.StartRecordingOnLineAsync(_call.CallState.GetIncomingLineId(), "I");
             }
         }
 
@@ -84,7 +84,7 @@ namespace Arke.Steps.StartRecordingStep
             if (_call.CallState.GetOutgoingLineId() != null)
             {
                 _call.Logger.Information("Start recording on outbound line {@Call} {LineId}", _call.CallState, _call.CallState.GetOutgoingLineId());
-                await _call.StartRecordingOnLine(_call.CallState.GetOutgoingLineId(), "O");
+                await _call.StartRecordingOnLineAsync(_call.CallState.GetOutgoingLineId(), "O");
             }            
         }
 
@@ -93,7 +93,7 @@ namespace Arke.Steps.StartRecordingStep
             if (_call.CallState.GetBridgeId() != null)
             {
                 _call.Logger.Information("Start recording on bridge: {@Call} {BridgeId}", _call.CallState, _call.CallState.GetBridgeId());
-                await _call.StartRecordingOnBridge(_call.CallState.GetBridgeId());
+                await _call.StartRecordingOnBridgeAsync(_call.CallState.GetBridgeId());
             }
         }
     }

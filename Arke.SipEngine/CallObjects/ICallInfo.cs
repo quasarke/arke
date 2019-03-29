@@ -33,6 +33,7 @@ namespace Arke.SipEngine.CallObjects
         string HoldPrompt { get; set; }
         IBridge Bridge { get; }
         string OutboundCallerId { get; set; }
+        bool CallCleanupRun { get; set; }
 
         void AddStepToIncomingQueue(int stepId);
         void AddStepToOutgoingQueue(int stepId);

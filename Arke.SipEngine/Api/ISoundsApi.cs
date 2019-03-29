@@ -6,6 +6,6 @@ namespace Arke.SipEngine.Api
 {
     public interface ISoundsApi
     {
-        Task<ICollection<Sound>> GetSoundsOnEngine();
+        Task<ICollection<Sound>> GetSoundsOnEngineAsync();
     }
 }

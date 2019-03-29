@@ -23,8 +23,13 @@ namespace Arke.Steps.HoldStep
         public string Name => "HoldStep";
         private IBridge _holdingBridge;
         private int _timeoutStep = 0;
-        
-        public async Task DoStep(Step step, ICall call)
+
+        public HoldStepSettings GetSettings()
+        {
+            return _settings;
+        }
+
+        public async Task DoStepAsync(Step step, ICall call)
         {
             _call = call;
             _call.OnWorkflowStep += OnWorkflowStep;
@@ -32,35 +37,54 @@ namespace Arke.Steps.HoldStep
             _settings = (HoldStepSettings)step.NodeData.Properties;
             _timeoutStep = step.GetStepFromConnector("TimeoutStep");
             
-            _holdingBridge = await call.CreateBridge(BridgeType.Holding);
+            _holdingBridge = await call.CreateBridgeAsync(BridgeType.Holding);
             _call.CallState.SetBridge(_holdingBridge);
-            await _call.SipBridgingApi.AddLineToBridge(_call.CallState.GetIncomingLineId(), _call.CallState.GetBridgeId());
+            try
+            {
+                await _call.SipBridgingApi.AddLineToBridgeAsync(_call.CallState.GetIncomingLineId(), _call.CallState.GetBridgeId());
+            }
+            catch (Exception e)
+            {
+                _call.Logger.Error(e, "Failed to place line on hold. Probably hungup. {@Call}", call.CallState);
+                await _call.FireStateChange(Trigger.FailedCallFlow);
+                await _call.ProcessCallLogicAsync();
+                return;
+            }
+            
             if (_settings.HoldMusic)
-                await _call.SipBridgingApi.PlayMusicOnHoldToBridge(_call.CallState.GetBridgeId());
+                await _call.SipBridgingApi.PlayMusicOnHoldToBridgeAsync(_call.CallState.GetBridgeId());
             else
             {
                 _call.CallState.HoldPrompt = _settings.WaitPrompt;
-                _call.SipApiClient.OnPromptPlaybackFinishedEvent += AriClient_OnPlaybackFinishedEvent;
-                _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridge(_call.CallState.GetBridgeId(), _settings.WaitPrompt, call.CallState.LanguageCode);
+                _call.SipApiClient.OnPromptPlaybackFinishedAsyncEvent += AriClient_OnPlaybackFinishedAsyncEvent;
+                _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridgeAsync(_call.CallState.GetBridgeId(), _settings.WaitPrompt, call.CallState.LanguageCode);
             }
-            call.SipApiClient.OnLineHangupEvent += SipApiClientOnOnLineHangupEvent;
+            call.SipApiClient.OnLineHangupAsyncEvent += SipApiClientOnOnLineHangupEvent;
 
-            _call.FireStateChange(Trigger.PlaceOnHold);
+            await _call.FireStateChange(Trigger.PlaceOnHold);
             _call.Logger.Information("Hold processor fired {@Call}", call.CallState);
-            _call.ProcessCallLogic();
+            
+#pragma warning disable 4014 // we want to keep going without waiting.
+            _call.ProcessCallLogicAsync();
+#pragma warning restore 4014
 
-            var holdTimeout = Task.Delay(_settings.HoldTimeoutInSeconds * 1000).ContinueWith((status) =>
+            await Task.Delay(_settings.HoldTimeoutInSeconds * 1000).ContinueWith(HoldTimeoutAction());
+        }
+
+        private Action<Task> HoldTimeoutAction()
+        {
+            return (status) =>
             {
                 if (_call.CallState.Bridge.Id == _holdingBridge.Id)
                     HoldTimeoutCallBack();
                 else
                 {
                     // we're not on hold anymore, so we can just remove our events and continue
-                    _call.SipApiClient.OnPromptPlaybackFinishedEvent -= AriClient_OnPlaybackFinishedEvent;
+                    _call.SipApiClient.OnPromptPlaybackFinishedAsyncEvent -= AriClient_OnPlaybackFinishedAsyncEvent;
                     _call.OnWorkflowStep -= OnWorkflowStep;
-                    _call.SipApiClient.OnLineHangupEvent -= SipApiClientOnOnLineHangupEvent;
+                    _call.SipApiClient.OnLineHangupAsyncEvent -= SipApiClientOnOnLineHangupEvent;
                 }
-            });
+            };
         }
 
         private void HoldTimeoutCallBack()
@@ -68,27 +92,27 @@ namespace Arke.Steps.HoldStep
             // we somehow got stuck in the holding bridge. Lets move on.
             // we're not on hold anymore, so we can just remove our events and continue
             _call.Logger.Warning("On Hold Timeout for call {@Call}", _call.CallState);
-            _call.SipApiClient.OnPromptPlaybackFinishedEvent -= AriClient_OnPlaybackFinishedEvent;
+            _call.SipApiClient.OnPromptPlaybackFinishedAsyncEvent -= AriClient_OnPlaybackFinishedAsyncEvent;
             _call.OnWorkflowStep -= OnWorkflowStep;
-            _call.SipApiClient.OnLineHangupEvent -= SipApiClientOnOnLineHangupEvent;
+            _call.SipApiClient.OnLineHangupAsyncEvent -= SipApiClientOnOnLineHangupEvent;
             _call.AddStepToProcessQueue(_timeoutStep);
             _call.FireStateChange(Trigger.NextCallFlowStep);
         }
 
-        private void SipApiClientOnOnLineHangupEvent(ISipApiClient sender, LineHangupEvent e)
+        private async Task SipApiClientOnOnLineHangupEvent(ISipApiClient sender, LineHangupEvent e)
         {
             if (e.LineId != _call.CallState.GetOutgoingLineId()) return;
             if (!_call.CallState.TalkTimeStart.HasValue)
             {
                 _call.CallState.CallCanBeAbandoned = true;
-                _call.FireStateChange(Trigger.FinishCall);
+                await _call.FireStateChange(Trigger.FinishCall);
             }
             else
             {
                 // we're not on hold anymore, so we can just remove our events and continue
-                _call.SipApiClient.OnPromptPlaybackFinishedEvent -= AriClient_OnPlaybackFinishedEvent;
+                _call.SipApiClient.OnPromptPlaybackFinishedAsyncEvent -= AriClient_OnPlaybackFinishedAsyncEvent;
                 _call.OnWorkflowStep -= OnWorkflowStep;
-                _call.SipApiClient.OnLineHangupEvent -= SipApiClientOnOnLineHangupEvent;
+                _call.SipApiClient.OnLineHangupAsyncEvent -= SipApiClientOnOnLineHangupEvent;
             }
         }
 
@@ -102,10 +126,7 @@ namespace Arke.Steps.HoldStep
 
             if (_settings.Triggers.ContainsKey(onWorkflowStepEvent.StepId.ToString()))
             {
-                _call.CallState.AddStepToIncomingQueue(
-                    int.Parse(_settings.Triggers[onWorkflowStepEvent.StepId.ToString()]));
-                _call.FireStateChange(Trigger.NextCallFlowStep);
-                _call.OnWorkflowStep -= OnWorkflowStep;
+                TriggerWorkflowStepEvent(onWorkflowStepEvent);
             }
 
             if (_settings.PromptChanges.ContainsKey(onWorkflowStepEvent.StepId.ToString()))
@@ -115,14 +136,27 @@ namespace Arke.Steps.HoldStep
 
             if (call.CallState.Bridge.Id != _holdingBridge.Id)
             {
-                // we're not on hold anymore, so we can just remove our events and continue
-                _call.SipApiClient.OnPromptPlaybackFinishedEvent -= AriClient_OnPlaybackFinishedEvent;
-                _call.OnWorkflowStep -= OnWorkflowStep;
-                _call.SipApiClient.OnLineHangupEvent -= SipApiClientOnOnLineHangupEvent;
+                RemoveEventSubscriptions();
             }
         }
 
-        private async Task AriClient_OnPlaybackFinishedEvent(ISipApiClient sipApiClient, PromptPlaybackFinishedEvent e)
+        private void RemoveEventSubscriptions()
+        {
+// we're not on hold anymore, so we can just remove our events and continue
+            _call.SipApiClient.OnPromptPlaybackFinishedAsyncEvent -= AriClient_OnPlaybackFinishedAsyncEvent;
+            _call.OnWorkflowStep -= OnWorkflowStep;
+            _call.SipApiClient.OnLineHangupAsyncEvent -= SipApiClientOnOnLineHangupEvent;
+        }
+
+        private void TriggerWorkflowStepEvent(OnWorkflowStepEvent onWorkflowStepEvent)
+        {
+            _call.CallState.AddStepToIncomingQueue(
+                int.Parse(_settings.Triggers[onWorkflowStepEvent.StepId.ToString()]));
+            _call.FireStateChange(Trigger.NextCallFlowStep);
+            _call.OnWorkflowStep -= OnWorkflowStep;
+        }
+
+        private async Task AriClient_OnPlaybackFinishedAsyncEvent(ISipApiClient sipApiClient, PromptPlaybackFinishedEvent e)
         {
             _call.Logger.Information("Playback finished {PlaybackId} {@Call}", e.PlaybackId, _call.CallState);
             AddPlaybackIdToLogData(e.PlaybackId);
@@ -135,7 +169,7 @@ namespace Arke.Steps.HoldStep
             }
             await Task.Delay(TimeSpan.FromSeconds(5));
             if (_call.CallState.Bridge.Id != _holdingBridge.Id) return;
-            _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridge(_call.CallState.Bridge.Id, _call.CallState.HoldPrompt, _call.CallState.LanguageCode);
+            _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridgeAsync(_call.CallState.Bridge.Id, _call.CallState.HoldPrompt, _call.CallState.LanguageCode);
             _call.Logger.Information("Playback started {currentPlaybackId}, of prompt {HoldPrompt}, to bridge {BridgeName} {@Call}", _currentPlaybackId, _call.CallState.HoldPrompt, _call.CallState.Bridge.Name, _call.CallState);
         }
 

@@ -40,7 +40,7 @@ namespace Arke.Steps.LanguageStep
             _currentRetryCount = 0;
         }
 
-        public async Task DoStep(Step step, ICall call)
+        public async Task DoStepAsync(Step step, ICall call)
         {
             _promptPlayer = call.LanguageSelectionPromptPlayer;
             _promptPlayer.SetStepProcessor(this);
@@ -49,7 +49,7 @@ namespace Arke.Steps.LanguageStep
             _step = step;
             _settings = (LanguageStepSettings)step.NodeData.Properties;
             call.SipApiClient.OnDtmfReceivedEvent += DTMF_ReceivedEvent;
-            call.FireStateChange(Trigger.PlayLanguagePrompts);
+            await call.FireStateChange(Trigger.PlayLanguagePrompts);
             _promptPlayer.AddPromptsToQueue(_settings.Prompts);
             await _promptPlayer.PlayNextPromptInQueue();
             _inputTimeout.Interval = _settings.MaxDigitTimeoutInSeconds * 1000;
@@ -62,7 +62,7 @@ namespace Arke.Steps.LanguageStep
                 ? Trigger.FailedCallFlow
                 : Trigger.PlayLanguagePrompts);
             _currentRetryCount++;
-            DoStep(_step, _call).Start();
+            DoStepAsync(_step, _call).Start();
         }
 
         public void StartTimeoutTimer()

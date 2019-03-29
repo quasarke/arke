@@ -12,7 +12,7 @@ namespace Arke.Steps.ParallelStep
         private const string IncomingNextStep = "IncomingNextStep";
         private const string OutgoingNextStep = "OutgoingNextStep";
 
-        public Task DoStep(Step step, ICall call)
+        public Task DoStepAsync(Step step, ICall call)
         {
             call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(IncomingNextStep));
             call.CallState.AddStepToOutgoingQueue(step.GetStepFromConnector(OutgoingNextStep));

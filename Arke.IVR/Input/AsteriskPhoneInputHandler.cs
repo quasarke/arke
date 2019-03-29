@@ -1,5 +1,6 @@
 using System.Timers;
 using System.Linq;
+using System.Threading.Tasks;
 using Arke.DSL.Extensions;
 using Arke.DSL.Step;
 using Arke.SipEngine.Api;
@@ -77,7 +78,7 @@ namespace Arke.IVR.Input
             CaptureDigitIfInValidState(dtmfReceivedEvent);
 
             if (_call.GetCurrentState() == State.PlayingInterruptiblePrompt)
-                _promptPlayer.StopPrompt();
+                _promptPlayer.StopPromptAsync();
 
             ProcessDigitsReceived();
         }
@@ -133,7 +134,7 @@ namespace Arke.IVR.Input
             _call.Logger.Debug("DTMF Received", _call.LogData);
         }
 
-        public void ProcessDigitsReceived()
+        public async Task ProcessDigitsReceived()
         {
             if (_call.GetCurrentState() != State.CapturingInput ||
                 DigitsReceived.Length < NumberOfDigitsToWaitForNextStep)
@@ -163,7 +164,7 @@ namespace Arke.IVR.Input
 
                     _call.CallState.InputData = DigitsReceived.Substring(0, DigitsReceived.Length - 1);
                     ResetInputRetryCount();
-                    _call.FireStateChange(Trigger.InputReceived);
+                    await _call.FireStateChange(Trigger.InputReceived);
                     return;
                 }
             }
@@ -178,7 +179,7 @@ namespace Arke.IVR.Input
 
                 _call.CallState.InputData = DigitsReceived.Substring(0, DigitsReceived.Length);
                 ResetInputRetryCount();
-                _call.FireStateChange(Trigger.InputReceived);
+                await _call.FireStateChange(Trigger.InputReceived);
                 return;
             }
             else if (DigitsReceived.Length == NumberOfDigitsToWaitForNextStep
@@ -186,7 +187,7 @@ namespace Arke.IVR.Input
             {
                 DynamicState.SetProperty(_call.CallState, SetValueAs, DigitsReceived);
                 ResetInputRetryCount();
-                _call.FireStateChange(Trigger.InputReceived);
+                await _call.FireStateChange(Trigger.InputReceived);
                 return;
             }
 
@@ -197,7 +198,7 @@ namespace Arke.IVR.Input
             }
 
             var validStep = false;
-            foreach (var option in _settings.Options.Where(option => option.Input == DigitsReceived))
+            foreach (var option in _settings.Options.Where(option => option.Input == DigitsReceived.Substring(0, NumberOfDigitsToWaitForNextStep)))
             {
                 ResetInputRetryCount();
                 
@@ -228,7 +229,7 @@ namespace Arke.IVR.Input
                         _call.CallState.AddStepToOutgoingQueue(_settings.Invalid);
                 }
             }
-            _call.FireStateChange(Trigger.InputReceived);
+            await _call.FireStateChange(Trigger.InputReceived);
         }
     }
 }
