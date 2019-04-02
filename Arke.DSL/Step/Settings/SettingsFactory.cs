@@ -17,7 +17,8 @@ namespace Arke.DSL.Step.Settings
         {
             var propertiesName = category + "Settings";
             var propertiesType = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(assembly => !assembly.FullName.Contains("xunit"))
+                .Where(assembly => !assembly.FullName.Contains("xunit")
+                                   && !assembly.FullName.Contains("MsgPack.Serialization"))
                 .SelectMany(assembly => assembly.GetTypes())
                 .Where(type => typeof(NodeProperties).IsAssignableFrom(type))
                 .SingleOrDefault(type => type.Name == propertiesName);
