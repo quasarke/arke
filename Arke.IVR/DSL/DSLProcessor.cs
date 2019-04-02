@@ -29,7 +29,9 @@ namespace Arke.IVR.DSL
             var stepName = step.NodeData.Category + "Processor";
             var stepType = AppDomain.CurrentDomain.GetAssemblies()
                 // Xunit assemblies cause issues during unit tests, so omit from assembly search.
-                .Where(assembly => !assembly.FullName.Contains("xunit"))
+                // and apparently datadog serialization is causing issues on load too so leave those out.
+                .Where(assembly => !assembly.FullName.Contains("xunit")
+                && !assembly.FullName.Contains("MsgPack.Serialization"))
                 .SelectMany(assembly => assembly.GetTypes())
                 .Where(type => typeof(IStepProcessor).IsAssignableFrom(type))
                 .Single(type => type.Name == stepName);

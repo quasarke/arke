@@ -169,7 +169,17 @@ namespace Arke.Steps.HoldStep
             }
             await Task.Delay(TimeSpan.FromSeconds(5));
             if (_call.CallState.Bridge.Id != _holdingBridge.Id) return;
-            _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridgeAsync(_call.CallState.Bridge.Id, _call.CallState.HoldPrompt, _call.CallState.LanguageCode);
+            
+            try
+            {
+                _currentPlaybackId = await _call.SipBridgingApi.PlayPromptToBridgeAsync(_call.CallState.Bridge.Id, _call.CallState.HoldPrompt, _call.CallState.LanguageCode);
+            }
+            catch (Exception exception)
+            {
+                _call.Logger.Warning(exception, "Think the call has probably hungup");
+                RemoveEventSubscriptions();
+            }
+            
             _call.Logger.Information("Playback started {currentPlaybackId}, of prompt {HoldPrompt}, to bridge {BridgeName} {@Call}", _currentPlaybackId, _call.CallState.HoldPrompt, _call.CallState.Bridge.Name, _call.CallState);
         }
 
