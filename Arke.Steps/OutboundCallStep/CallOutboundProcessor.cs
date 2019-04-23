@@ -78,7 +78,7 @@ namespace Arke.Steps.OutboundCallStep
             var outboundEndpoint = GetOutboundEndpoint();
             try
             {
-                var outgoingLineId = await AttemptOutboundCall(outboundEndpoint, dialString, "9044950107").ConfigureAwait(false);
+                var outgoingLineId = await AttemptOutboundCall(outboundEndpoint, dialString, _call.CallState.OutboundCallerId).ConfigureAwait(false);
                 var currentCallState = await _call.SipLineApi.GetLineStateAsync(outgoingLineId).ConfigureAwait(false);
 
                 var noAnswerTimeout = new Stopwatch();
