@@ -35,6 +35,8 @@ namespace Arke.Steps.ArkeInitStep
             {
                 _call.CallState.TerminationCode = TerminationCode.InvalidDeviceConfig;
                 _call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(FailStep));
+                await _call.FireStateChange(SipEngine.FSM.Trigger.FailedCallFlow);
+                return;
             }
             
             _call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
