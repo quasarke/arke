@@ -184,26 +184,5 @@ namespace Arke.Steps.OutboundCallStep
         private const string ThinqTrunkName = "PJSIP/{exten}@thinq-trunk";
         private const string CciTrunkName = "PJSIP/{exten}@cci-trunk";
 
-        private int GetProviderId(string dialString)
-        {
-            switch (dialString)
-            {
-                case "PJSIP/{exten}@airespring-trunk":
-                    return 2;
-                case "PJSIP/{exten}@bandwidth-us-trunk":
-                    return 3;
-                case "PJSIP/{exten}@cci-trunk":
-                    return 6;
-                case "PJSIP/{exten}@sonus-trunk":
-                    return 7;
-                case "PJSIP/{exten}@thinq-trunk":
-                    return 8;
-                case "PJSIP/{exten}@bandwidth-in-trunk":
-                    return 2;
-                default:
-                    return 0;
-            }
-        }
-
     }
 }
