@@ -78,7 +78,7 @@ namespace Arke.Steps.OutboundCallStep
             var outboundEndpoint = GetOutboundEndpoint();
             try
             {
-                var outgoingLineId = await AttemptOutboundCall(outboundEndpoint, dialString, _call.CallState.OutboundCallerId).ConfigureAwait(false);
+                var outgoingLineId = await AttemptOutboundCall(outboundEndpoint, dialString, "9044950107").ConfigureAwait(false);
                 var currentCallState = await _call.SipLineApi.GetLineStateAsync(outgoingLineId).ConfigureAwait(false);
 
                 var noAnswerTimeout = new Stopwatch();
@@ -205,39 +205,5 @@ namespace Arke.Steps.OutboundCallStep
             }
         }
 
-        //private string GetAirespringTrunkNameForCallState()
-        //{
-        //    return "PJSIP/{exten}@airespring-trunk";
-        //}
-
-        //private string GetBandwidthTrunkNameForCallState()
-        //{
-        //    switch (_routingData.TrafficType)
-        //    {
-        //        case "LI":
-        //        case "AI":
-        //        case "EO":
-        //        case "EI":
-        //            return "PJSIP/{exten}@bandwidth-us-trunk";
-        //        case "IN":
-        //        default:
-        //            return "PJSIP/{exten}@bandwidth-in-trunk";
-        //    }
-        //}
-
-        //private string GetSonusTrunkNameForCallState()
-        //{
-        //    return "PJSIP/{exten}@sonus-trunk";
-        //}
-
-        //private string GetThinqTrunkNameForCallState()
-        //{
-        //    return "PJSIP/{exten}@thinq-trunk";
-        //}
-
-        //private string GetCciTrunkNameForCallState()
-        //{
-        //    return "PJSIP/{exten}@cci-trunk";
-        //}
     }
 }
