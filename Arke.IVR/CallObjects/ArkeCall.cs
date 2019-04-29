@@ -80,6 +80,7 @@ namespace Arke.IVR.CallObjects
         public ISipApiClient SipApiClient => _sipApiClient;
         public ISipBridgingApi SipBridgingApi => _sipBridgeApi;
         public ISipLineApi SipLineApi => _sipLineApi;
+        public string SipProviderId { get; set; }
 
         public async Task AddLineToBridgeAsync(string lineId, string bridgeId)
         {
