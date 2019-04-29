@@ -132,12 +132,14 @@ namespace Arke.Steps.OutboundCallStep
             _call.CallState.OutboundUri = outboundEndpoint.Replace("{exten}",dialString);
             _call.CallState.OutboundCallerId = callerId;
             _call.CallState.TrunkOffHookTime = DateTimeOffset.Now;
+            _call.SipProviderId = outboundEndpoint;
             var outgoingCall = await _call.SipLineApi.CreateOutboundCallAsync(dialString, callerId, outboundEndpoint)
                 .ConfigureAwait(false);
             await Task.Delay(500);
             _call.CallState.CreateOutgoingLine(outgoingCall);
             await Task.Delay(500);
             var outgoingLineId = _call.CallState.GetOutgoingLineId();
+
             return outgoingLineId;
         }
 
@@ -181,5 +183,6 @@ namespace Arke.Steps.OutboundCallStep
         private const string SonusTrunkName = "PJSIP/{exten}@sonus-trunk";
         private const string ThinqTrunkName = "PJSIP/{exten}@thinq-trunk";
         private const string CciTrunkName = "PJSIP/{exten}@cci-trunk";
+
     }
 }

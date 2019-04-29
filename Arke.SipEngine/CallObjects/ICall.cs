@@ -28,7 +28,7 @@ namespace Arke.SipEngine.CallObjects
         ISipApiClient SipApiClient { get; }
         ISipBridgingApi SipBridgingApi { get; }
         ISipLineApi SipLineApi { get; }
-
+        string SipProviderId { get; set; }
 
         Task RunCallScriptAsync(CancellationToken cancellationToken);
         Task HangupAsync();
