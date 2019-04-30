@@ -23,6 +23,7 @@ namespace Arke.Steps.OutboundCallStep
         {
             _step = step;
             _call = call;
+            
             await CallOutbound(_call.CallState.Destination).ConfigureAwait(false);
         }
 
