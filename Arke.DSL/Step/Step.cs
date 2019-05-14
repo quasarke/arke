@@ -19,7 +19,7 @@ namespace Arke.DSL.Step
             }
             catch (Exception)
             {
-                throw new StepNotFoundException($"Connector {connectorName} not found on {NodeData.Key}");
+                throw new StepNotFoundException($"Step at id: {NodeData.Key} is missing the Connector named: {connectorName}");
             }
         }
     }
