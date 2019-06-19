@@ -56,6 +56,10 @@ namespace Arke.IVR.CallObjects
         public DateTimeOffset? TimeDeviceConnected { get; set; }
         public string OutboundCallerId { get; set; }
         public bool CallCleanupRun { get; set; }
+        public DateTimeOffset OutgoingRecordingStartTime { get; set; }
+        public DateTimeOffset IncomingRecordingStartTime { get; set; }
+        public DateTimeOffset OutgoingRecordingEndTime { get; set; }
+        public DateTimeOffset IncomingRecordingEndTime { get; set; }
 
         public void AddStepToIncomingQueue(int stepId)
         {

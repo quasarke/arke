@@ -34,6 +34,10 @@ namespace Arke.SipEngine.CallObjects
         IBridge Bridge { get; }
         string OutboundCallerId { get; set; }
         bool CallCleanupRun { get; set; }
+        DateTimeOffset OutgoingRecordingStartTime { get; set; }
+        DateTimeOffset IncomingRecordingStartTime { get; set; }
+        DateTimeOffset OutgoingRecordingEndTime { get; set; }
+        DateTimeOffset IncomingRecordingEndTime { get; set; }
 
         void AddStepToIncomingQueue(int stepId);
         void AddStepToOutgoingQueue(int stepId);
