@@ -10,5 +10,7 @@ namespace Arke.SipEngine.Api
 
         Task<string> StartShortRecordingForLineAsync(string lineId, string fileName, int maxDurationSeconds,
             int maxSilenceSeconds, bool beepOnStart);
+
+        event RecordingFinishedEventHandler OnRecordingFinishedAsyncEvent;
     }
 }
