@@ -60,6 +60,12 @@ namespace Arke.IVR.CallObjects
         public DateTimeOffset IncomingRecordingStartTime { get; set; }
         public DateTimeOffset OutgoingRecordingEndTime { get; set; }
         public DateTimeOffset IncomingRecordingEndTime { get; set; }
+        public long ChannelIncomingRecordingStartTimeTicks { get; set; }
+        public long ChannelIncomingRecordingEndTimeTicks { get; set; }
+        public long ChannelOutgoingRecordingStartTimeTicks { get; set; }
+        public long ChannelOutgoingRecordingEndTimeTicks { get; set; }
+        public long ChannelBridgeRecordingStartTimeTicks { get; set; }
+        public long ChannelBridgeRecordingEndTimeTicks { get; set; }
 
         public void AddStepToIncomingQueue(int stepId)
         {
