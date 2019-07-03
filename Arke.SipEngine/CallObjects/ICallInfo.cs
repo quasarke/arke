@@ -38,6 +38,12 @@ namespace Arke.SipEngine.CallObjects
         DateTimeOffset IncomingRecordingStartTime { get; set; }
         DateTimeOffset OutgoingRecordingEndTime { get; set; }
         DateTimeOffset IncomingRecordingEndTime { get; set; }
+        long ChannelIncomingRecordingStartTimeTicks { get; set; }
+        long ChannelIncomingRecordingEndTimeTicks { get; set; }
+        long ChannelOutgoingRecordingStartTimeTicks { get; set; }
+        long ChannelOutgoingRecordingEndTimeTicks { get; set; }
+        long ChannelBridgeRecordingStartTimeTicks { get; set; }
+        long ChannelBridgeRecordingEndTimeTicks { get; set; }
 
         void AddStepToIncomingQueue(int stepId);
         void AddStepToOutgoingQueue(int stepId);
