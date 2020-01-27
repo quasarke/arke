@@ -9,7 +9,7 @@
     <PackageReference Include="NLog" Version="4.5.4" />
     <PackageReference Include="SimpleInjector.Packaging" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
-    <PackageReference Include="System.ServiceModel.Http" Version="4.4.2" />
+    <PackageReference Include="System.ServiceModel.Http" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup>
