@@ -72,7 +72,7 @@ namespace Arke.ServiceHost
             _pluginDirectory = ArkeCallFlowService.GetConfigValue("appSettings:PluginDirectory");
             var assemblies =
                 from file in new DirectoryInfo(_pluginDirectory).GetFiles()
-                where file.Extension.ToLowerInvariant() == ".dll"
+                where string.Equals(file.Extension, ".dll", StringComparison.InvariantCultureIgnoreCase)
                 select Assembly.Load(AssemblyLoadContext.GetAssemblyName(file.FullName));
 
             ObjectContainer.GetInstance().GetSimpleInjectorContainer().RegisterPackages(assemblies);
