@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.PlatformAbstractions;
-using NLog;
+using Serilog;
 
 namespace Arke.SipEngine.BridgeName
 {
@@ -59,7 +59,6 @@ namespace Arke.SipEngine.BridgeName
 
     public static class GetAllWords
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public static string[] GetWordsFromTextFile(this string fileName)
         {
@@ -72,7 +71,6 @@ namespace Arke.SipEngine.BridgeName
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "read file error");
             }
 
             return item.Split(',');
@@ -80,15 +78,20 @@ namespace Arke.SipEngine.BridgeName
 
         public static string GetDevFilePathForWordFiles()
         {
-            return "c:\\ArtemisConfig\\";
+            //return "c:\\ArtemisConfig\\";
+            var path = PlatformServices.Default.Application.ApplicationBasePath;
+            const string textFilesFolder = "TextFilesForBridgeName";
+            var workingFolder = path + textFilesFolder;
+            var file = Path.Combine(path, textFilesFolder);
+            return file;
         }
 
         private static string GetFilePathForWordFiles()
         {
             var path = PlatformServices.Default.Application.ApplicationBasePath;
             const string textFilesFolder = "TextFilesForBridgeName";
-            var workingFolder = path + "\\" + textFilesFolder;
-            var file = Path.Combine(path, workingFolder);
+            var workingFolder = path + textFilesFolder;
+            var file = Path.Combine(path, textFilesFolder);
             return file;
         }
     }

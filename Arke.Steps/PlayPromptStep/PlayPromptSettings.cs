@@ -26,13 +26,14 @@ namespace Arke.Steps.PlayPromptStep
             return this;
         }
 
-        public PlayerPromptSettings GetPromptPlayerSettings(Step step)
+        public PlayerPromptSettings GetPromptPlayerSettings(Step step, Direction direction)
         {
             return new PlayerPromptSettings()
             {
                 IsInterruptible = IsInterruptible,
                 Prompts = Prompts,
-                NextStep = step.GetStepFromConnector(NextStep)
+                NextStep = step.GetStepFromConnector(NextStep),
+                Direction = direction
             };
         }
     }

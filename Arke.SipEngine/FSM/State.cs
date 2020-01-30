@@ -15,6 +15,7 @@
         CapturingInput,
         StoppingPlayback,
         StartingRecording,
-        StoppingRecording
+        StoppingRecording,
+        PlayingPromptOnCall
     }
 }

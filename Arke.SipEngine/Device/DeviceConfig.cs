@@ -4,9 +4,9 @@ using Newtonsoft.Json;
 
 namespace Arke.SipEngine.Device
 {
-    public abstract class DeviceConfig
+    public class DeviceConfig
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string IpAddress { get; set; }
         public string Port { get; set; }
         public string Name { get; set; }
@@ -14,7 +14,7 @@ namespace Arke.SipEngine.Device
         public DeviceType DeviceType { get; set; }
         public List<Feature> Features { get; set; }
         public List<Setting> Settings { get; set; }
-        public List<Workflow> Workflows { get; set; }
+        //public List<Workflow> Workflows { get; set; }
     }
 
     public class Workflow

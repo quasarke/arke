@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Arke.DSL.Step;
 using Arke.SipEngine.Api;
@@ -9,7 +10,7 @@ using Arke.SipEngine.Events;
 using Arke.SipEngine.FSM;
 using Arke.SipEngine.Processors;
 using Arke.SipEngine.Prompts;
-using NLog;
+using Serilog;
 
 namespace Arke.SipEngine.CallObjects
 {
@@ -18,7 +19,7 @@ namespace Arke.SipEngine.CallObjects
         Guid CallId { get; set; }
         ICallInfo CallState { get; set; }
         Dictionary<string,string> LogData { get; }
-        Logger Logger { get; }
+        ILogger Logger { get; }
         NodeProperties StepSettings { get; set; }
         IPromptPlayer PromptPlayer { get; }
         IPhoneInputHandler InputProcessor { get; }
@@ -27,23 +28,24 @@ namespace Arke.SipEngine.CallObjects
         ISipApiClient SipApiClient { get; }
         ISipBridgingApi SipBridgingApi { get; }
         ISipLineApi SipLineApi { get; }
+        string SipProviderId { get; set; }
 
-
-        Task RunCallScript();
-        void Hangup();
-        void ProcessCallLogic();
-        Task StartCallRecording();
-        Task StopCallRecording();
-        void FireStateChange(Trigger trigger);
+        Task RunCallScriptAsync(CancellationToken cancellationToken);
+        Task HangupAsync();
+        Task ProcessCallLogicAsync();
+        Task StartCallRecordingAsync();
+        Task StopCallRecordingAsync();
+        Task FireStateChange(Trigger trigger);
         void AddStepToProcessQueue(int stepNumber);
         State GetCurrentState();
         event Action<ICall, OnWorkflowStepEvent> OnWorkflowStep;
         void SetCallLanguage(LanguageData languageData);
-        Task<IBridge> CreateBridge(BridgeType bridgeType);
-        Task StopHoldingBridge();
-        Task AddLineToBridge(string lineId, string bridgeId);
-        Task StartRecordingOnLine(string lineId, string direction);
-        Task StartRecordingOnBridge(string bridgeId);
+        Task<IBridge> CreateBridgeAsync(BridgeType bridgeType);
+        Task StopHoldingBridgeAsync();
+        Task AddLineToBridgeAsync(string lineId, string bridgeId);
+        Task StartRecordingOnLineAsync(string lineId, string direction);
+        Task StartRecordingOnBridgeAsync(string bridgeId);
         void SetWorkflow(Workflow deviceWorkflow);
+        Task ForceCallEndAsync();
     }
 }

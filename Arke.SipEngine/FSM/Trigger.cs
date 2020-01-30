@@ -24,6 +24,7 @@
         FailedInputCapture,
         NextCallFlowStep,
         PlaceOnHold,
-        StartRecording
+        StartRecording,
+        StartTalking
     }
 }

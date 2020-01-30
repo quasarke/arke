@@ -4,13 +4,15 @@ namespace Arke.SipEngine.Api
 {
     public interface ISipLineApi
     {
-        Task HangupLine(string lineId);
-        Task<object> CreateOutboundCall(string numberToDial, string outboundEndpoint);
-        Task<string> GetLineState(string lineId);
-        Task<string> GetEndpoint(string lineId);
-        Task AnswerLine(string lineId);
-        Task<string> GetLineVariable(string lineId, string variableName);
-        Task PlayMusicOnHoldToLine(string channelId);
-        Task StopMusicOnHoldToLine(string channelId);
+        Task HangupLineAsync(string lineId);
+        Task<object> CreateOutboundCallAsync(string numberToDial, string callerId, string outboundEndpoint);
+        Task<object> CreateOutboundCallAsync(string numberToDial, string outboundEndpoint);
+        Task<string> GetLineStateAsync(string lineId);
+        Task<string> GetEndpointAsync(string lineId);
+        Task AnswerLineAsync(string lineId);
+        Task<string> GetLineVariableAsync(string lineId, string variableName);
+        Task TransferLineAsync(string lineId, string endpoint);
+        Task PlayMusicOnHoldToLineAsync(string channelId);
+        Task StopMusicOnHoldToLineAsync(string channelId);
     }
 }

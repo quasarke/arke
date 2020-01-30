@@ -1,5 +1,8 @@
 using System.Timers;
 using System.Linq;
+using System.Threading.Tasks;
+using Arke.DSL.Extensions;
+using Arke.DSL.Step;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.Events;
@@ -30,11 +33,13 @@ namespace Arke.IVR.Input
         public int MaxDigitTimeoutInSeconds { get; set; }
         public int NumberOfDigitsToWaitForNextStep { get; set; }
         public string TerminationDigit { get; set; }
+        public string SetValueAs { get; set; }
 
         public void ChangeInputSettings(PhoneInputHandlerSettings settings)
         {
             _settings = settings;
             MaxDigitTimeoutInSeconds = _settings.MaxDigitTimeoutInSeconds;
+            SetValueAs = _settings.SetValueAs;
             SetTimerInterval();
             NumberOfDigitsToWaitForNextStep = _settings.NumberOfDigitsToWaitForNextStep;
             TerminationDigit = _settings.TerminationDigit;
@@ -54,7 +59,6 @@ namespace Arke.IVR.Input
             {
                 DigitsReceived = "";
             }
-            _call.CallState.InputRetryCount++;
             SetTimerInterval();
             if (MaxDigitTimeoutInSeconds > 0)
                 DigitTimeoutTimer.Start();
@@ -74,7 +78,7 @@ namespace Arke.IVR.Input
             CaptureDigitIfInValidState(dtmfReceivedEvent);
 
             if (_call.GetCurrentState() == State.PlayingInterruptiblePrompt)
-                _promptPlayer.StopPrompt();
+                _promptPlayer.StopPromptAsync();
 
             ProcessDigitsReceived();
         }
@@ -92,10 +96,19 @@ namespace Arke.IVR.Input
             if (_call.CallState.InputRetryCount > _settings.MaxRetryCount && _settings.MaxRetryCount > 0)
             {
                 ResetInputRetryCount();
-                _call.AddStepToProcessQueue(_settings.MaxAttemptsReachedStep);
+                if (_settings.Direction != Direction.Outgoing)
+                    _call.CallState.AddStepToIncomingQueue(_settings.MaxAttemptsReachedStep);
+                else
+                    _call.CallState.AddStepToOutgoingQueue(_settings.MaxAttemptsReachedStep);
             }
             else
-                _call.CallState.AddStepToIncomingQueue(_settings.NoAction);
+            {
+                if (_settings.Direction != Direction.Outgoing)
+                    _call.CallState.AddStepToIncomingQueue(_settings.NoAction);
+                else
+                    _call.CallState.AddStepToOutgoingQueue(_settings.NoAction);
+            }
+
             _call.FireStateChange(Trigger.FailedInputCapture);
         }
 
@@ -121,7 +134,7 @@ namespace Arke.IVR.Input
             _call.Logger.Debug("DTMF Received", _call.LogData);
         }
 
-        public void ProcessDigitsReceived()
+        public async Task ProcessDigitsReceived()
         {
             if (_call.GetCurrentState() != State.CapturingInput ||
                 DigitsReceived.Length < NumberOfDigitsToWaitForNextStep)
@@ -144,22 +157,40 @@ namespace Arke.IVR.Input
                     if (_settings.SetValueAsDestination)
                         _call.CallState.Destination = DigitsReceived.Substring(0, DigitsReceived.Length - 1);
 
-                    _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
+                    if (_settings.Direction != Direction.Outgoing)
+                        _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
+                    else
+                        _call.CallState.AddStepToOutgoingQueue(_settings.NextStep);
+
                     _call.CallState.InputData = DigitsReceived.Substring(0, DigitsReceived.Length - 1);
                     ResetInputRetryCount();
-                    _call.FireStateChange(Trigger.InputReceived);
+                    await _call.FireStateChange(Trigger.InputReceived);
                     return;
                 }
             }
             else if (_settings.SetValueAsDestination)
             {
                 _call.CallState.Destination = DigitsReceived.Substring(0, DigitsReceived.Length);
-                _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
+                
+                if (_settings.Direction != Direction.Outgoing)
+                    _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
+                else
+                    _call.CallState.AddStepToOutgoingQueue(_settings.NextStep);
+
                 _call.CallState.InputData = DigitsReceived.Substring(0, DigitsReceived.Length);
                 ResetInputRetryCount();
-                _call.FireStateChange(Trigger.InputReceived);
+                await _call.FireStateChange(Trigger.InputReceived);
                 return;
             }
+            else if (DigitsReceived.Length == NumberOfDigitsToWaitForNextStep
+                     && !string.IsNullOrEmpty(SetValueAs))
+            {
+                DynamicState.SetProperty(_call.CallState, SetValueAs, DigitsReceived);
+                ResetInputRetryCount();
+                await _call.FireStateChange(Trigger.InputReceived);
+                return;
+            }
+
             if (NumberOfDigitsToWaitForNextStep == 0)
             {
                 DigitTimeoutTimer.Start();
@@ -167,10 +198,15 @@ namespace Arke.IVR.Input
             }
 
             var validStep = false;
-            foreach (var option in _settings.Options.Where(option => option.Input == DigitsReceived))
+            foreach (var option in _settings.Options.Where(option => option.Input == DigitsReceived.Substring(0, NumberOfDigitsToWaitForNextStep)))
             {
                 ResetInputRetryCount();
-                _call.CallState.AddStepToIncomingQueue(option.NextStep);
+                
+                if (_settings.Direction != Direction.Outgoing)
+                    _call.CallState.AddStepToIncomingQueue(option.NextStep);
+                else
+                    _call.CallState.AddStepToOutgoingQueue(option.NextStep);
+
                 validStep = true;
             }
 
@@ -179,12 +215,21 @@ namespace Arke.IVR.Input
                 if (_call.CallState.InputRetryCount > _settings.MaxRetryCount && _settings.MaxRetryCount > 0)
                 {
                     ResetInputRetryCount();
-                    _call.AddStepToProcessQueue(_settings.MaxAttemptsReachedStep);
+
+                    if (_settings.Direction != Direction.Outgoing)
+                        _call.CallState.AddStepToIncomingQueue(_settings.MaxAttemptsReachedStep);
+                    else
+                        _call.CallState.AddStepToOutgoingQueue(_settings.MaxAttemptsReachedStep);
                 }
                 else
-                    _call.CallState.AddStepToIncomingQueue(_settings.Invalid);
+                {
+                    if (_settings.Direction != Direction.Outgoing)
+                        _call.CallState.AddStepToIncomingQueue(_settings.Invalid);
+                    else
+                        _call.CallState.AddStepToOutgoingQueue(_settings.Invalid);
+                }
             }
-            _call.FireStateChange(Trigger.InputReceived);
+            await _call.FireStateChange(Trigger.InputReceived);
         }
     }
 }

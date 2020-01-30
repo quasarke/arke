@@ -27,7 +27,7 @@ namespace Arke.IVR.Prompts
             _promptQueue = new Queue<IPrompt>();
             _sipPromptApi = sipPromptApi;
             _sipApiClient = sipApiClient;
-            _sipApiClient.OnPromptPlaybackFinishedEvent += HandlePromptFinishedEvent;
+            _sipApiClient.OnPromptPlaybackFinishedAsyncEvent += HandlePromptFinishedEvent;
         }
 
         public void AddPromptsToQueue(List<string> prompts)
@@ -60,7 +60,7 @@ namespace Arke.IVR.Prompts
             catch (Exception e)
             {
                 _asteriskCall.Logger.Error(e, "Error playing prompt in queue.");
-                _asteriskCall.FireStateChange(Trigger.FinishCall);
+                await _asteriskCall.FireStateChange(Trigger.FinishCall);
             }
         }
 
@@ -68,7 +68,7 @@ namespace Arke.IVR.Prompts
         {
             try
             {
-                _currentPlaybackId = await _sipPromptApi.PlayPromptToLine(
+                _currentPlaybackId = await _sipPromptApi.PlayPromptToLineAsync(
                     _asteriskCall.CallState.GetIncomingLineId(), promptFile, LanguageCode)
                     .ConfigureAwait(false);
                 _asteriskCall.Logger.Debug($"Prompt ID: {_currentPlaybackId}", _asteriskCall.LogData);
@@ -78,7 +78,7 @@ namespace Arke.IVR.Prompts
                 _asteriskCall.Logger.Error(ex, $"Error Playing Prompt: {ex.Message}");
                 CleanupEventHooks();
                 if (_asteriskCall.GetCurrentState() != State.HangUp)
-                    _asteriskCall.FireStateChange(Trigger.FinishCall);
+                    await _asteriskCall.FireStateChange(Trigger.FinishCall);
             }
         }
 
@@ -87,7 +87,7 @@ namespace Arke.IVR.Prompts
             if (_asteriskCall.GetCurrentState() == State.PlayingPrompt)
                 throw new InvalidOperationException("Cannot stop playback of this prompt.");
             _asteriskCall.Logger.Debug($"Stopping Prompt {_currentPlaybackId}", _asteriskCall.LogData);
-            var stopPlaybackTask = _sipPromptApi.StopPrompt(_currentPlaybackId).ConfigureAwait(false);
+            var stopPlaybackTask = _sipPromptApi.StopPromptAsync(_currentPlaybackId).ConfigureAwait(false);
             _promptQueue.Clear();
             try
             {
@@ -96,7 +96,7 @@ namespace Arke.IVR.Prompts
             catch (Exception e)
             {
                 if (e.Message.Contains("playback cannot be found"))
-                    _asteriskCall.Logger.Warn("Playback ID Missing. Probably don't need to call this.");
+                    _asteriskCall.Logger.Warning("Playback ID Missing. Probably don't need to call this.");
                 else
                     _asteriskCall.Logger.Error(e, "Problem stopping playback.");
             }
@@ -110,7 +110,7 @@ namespace Arke.IVR.Prompts
 
         public void CleanupEventHooks()
         {
-            _sipApiClient.OnPromptPlaybackFinishedEvent -= HandlePromptFinishedEvent;
+            _sipApiClient.OnPromptPlaybackFinishedAsyncEvent -= HandlePromptFinishedEvent;
         }
 
         public void SetStepProcessor(ILanguageStepProcessor languageStepProcessor)
@@ -127,7 +127,7 @@ namespace Arke.IVR.Prompts
             if (_promptQueue.Count == 0)
             {
                 if (_asteriskCall.GetCurrentState() != State.LanguageInput)
-                    _asteriskCall.FireStateChange(Trigger.GetLanguageInput);
+                    await _asteriskCall.FireStateChange(Trigger.GetLanguageInput);
                 _stepProcessor.StartTimeoutTimer();
             }
             else

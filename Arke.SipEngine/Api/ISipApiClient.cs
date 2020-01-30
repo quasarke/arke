@@ -3,7 +3,8 @@
     public interface ISipApiClient
     {
         event DtmfReceivedEventHandler OnDtmfReceivedEvent;
-        event PromptPlaybackFinishedEventHandler OnPromptPlaybackFinishedEvent;
-        event LineHangupEventHandler OnLineHangupEvent;
+        event PromptPlaybackFinishedEventHandler OnPromptPlaybackFinishedAsyncEvent;
+        event LineHangupEventHandler OnLineHangupAsyncEvent;
+        event Arke.SipEngine.Api.RecordingFinishedEventHandler OnRecordingFinishedAsyncEvent;
     }
 }

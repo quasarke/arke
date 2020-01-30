@@ -21,7 +21,7 @@ namespace Arke.ManagementApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetSoundsForEngine()
         {
-            return new OkObjectResult(await soundsApi.GetSoundsOnEngine().ConfigureAwait(false));
+            return new OkObjectResult(await soundsApi.GetSoundsOnEngineAsync().ConfigureAwait(false));
         }
     }
 }

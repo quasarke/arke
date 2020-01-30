@@ -16,13 +16,13 @@ namespace Arke.IVR.Bridging
 
         public async Task AddLineToBridge(string lineId, string bridgeId)
         {
-            await _ariClient.AddLineToBridge(lineId, bridgeId);
+            await _ariClient.AddLineToBridgeAsync(lineId, bridgeId);
         }
 
         public async Task StopHoldingBridge(ICallInfo callInfo)
         {
-            await _ariClient.RemoveLineFromBridge(callInfo.GetIncomingLineId(), callInfo.GetBridgeId());
-            await _ariClient.DestroyBridge(callInfo.GetBridgeId());
+            await _ariClient.RemoveLineFromBridgeAsync(callInfo.GetIncomingLineId(), callInfo.GetBridgeId());
+            await _ariClient.DestroyBridgeAsync(callInfo.GetBridgeId());
         }
 
         public async Task<IBridge> CreateBridge(BridgeType bridgeType)
@@ -30,15 +30,15 @@ namespace Arke.IVR.Bridging
             switch (bridgeType)
             {
                 case BridgeType.NoMedia:
-                    return await _ariClient.CreateBridge((new MixingBridgeType()).Type, new BridgeNameGenerator().GetRandomBridgeName());
+                    return await _ariClient.CreateBridgeAsync((new MixingBridgeType()).Type, new BridgeNameGenerator().GetRandomBridgeName());
                 case BridgeType.Holding:
-                    return await _ariClient.CreateBridge((new HoldingBridgeType()).Type, new BridgeNameGenerator().GetRandomBridgeName());
+                    return await _ariClient.CreateBridgeAsync((new HoldingBridgeType()).Type, new BridgeNameGenerator().GetRandomBridgeName());
                 case BridgeType.NoDTMF:
-                    return await _ariClient.CreateBridge((new ProxyMediaBridgeType()).Type, new BridgeNameGenerator().GetRandomBridgeName());
+                    return await _ariClient.CreateBridgeAsync((new ProxyMediaBridgeType()).Type, new BridgeNameGenerator().GetRandomBridgeName());
                 case BridgeType.WithDTMF:
-                    return await _ariClient.CreateBridge($"{(new DtmfBridgeType()).Type},{(new MixingBridgeType()).Type}", new BridgeNameGenerator().GetRandomBridgeName());
+                    return await _ariClient.CreateBridgeAsync($"{(new DtmfBridgeType()).Type},{(new MixingBridgeType()).Type}", new BridgeNameGenerator().GetRandomBridgeName());
                 default:
-                    return await _ariClient.CreateBridge((new DtmfBridgeType()).Type, new BridgeNameGenerator().GetRandomBridgeName());
+                    return await _ariClient.CreateBridgeAsync((new DtmfBridgeType()).Type, new BridgeNameGenerator().GetRandomBridgeName());
             }
         }
     }
