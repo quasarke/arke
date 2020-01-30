@@ -23,7 +23,7 @@ namespace Arke.Steps.ArkeInitStep
             _sipLineApi = sipLineApi;
         }
 
-        public async Task DoStep(Step step, ICall call)
+        public async Task DoStepAsync(Step step, ICall call)
         {
             _settings = (ArkeInitSettings) step.NodeData.Properties;
             _call = call;
@@ -35,17 +35,19 @@ namespace Arke.Steps.ArkeInitStep
             {
                 _call.CallState.TerminationCode = TerminationCode.InvalidDeviceConfig;
                 _call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(FailStep));
+                await _call.FireStateChange(SipEngine.FSM.Trigger.FailedCallFlow);
+                return;
             }
             
             _call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
-            _call.FireStateChange(SipEngine.FSM.Trigger.NextCallFlowStep);
+            await _call.FireStateChange(SipEngine.FSM.Trigger.NextCallFlowStep);
         }
 
         
         public async Task SetEndpointFromChannelVariable()
         {
             await GetEndpointFromAri();
-            _call.Logger.Debug($"Phone connected at Endpoint {_call.CallState.Endpoint} PortID: {_call.CallState.PortId}");
+            _call.Logger.Debug("Phone connected at Endpoint {Endpoint} PortID: {PortId} {@Call}", _call.CallState.Endpoint, _call.CallState.PortId, _call.CallState);
         }
 
         private async Task GetEndpointFromAri()
@@ -53,14 +55,14 @@ namespace Arke.Steps.ArkeInitStep
             try
             {
                 _call.CallState.Endpoint =
-                    await _sipLineApi.GetEndpoint(_call.CallState.GetIncomingLineId());
+                    await _sipLineApi.GetEndpointAsync(_call.CallState.GetIncomingLineId());
                 _call.CallState.PortId =
-                    await _sipLineApi.GetLineVariable(_call.CallState.GetIncomingLineId(),
+                    await _sipLineApi.GetLineVariableAsync(_call.CallState.GetIncomingLineId(),
                     "CALLERID(num)");
             }
             catch (Exception ex)
             {
-                _call.Logger.Error(ex, "Exception getting the Endpoint from ARI");
+                _call.Logger.Error(ex, "Exception getting the Endpoint from ARI {@Call}", _call.CallState);
                 throw new EndpointNotFoundException("Exception getting the Endpoint from ARI", ex);
             }
         }

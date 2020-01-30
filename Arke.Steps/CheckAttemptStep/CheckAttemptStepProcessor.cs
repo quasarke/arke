@@ -12,18 +12,24 @@ namespace Arke.Steps.CheckAttemptStep
         private const string MaxAttemptsStep = "MaxAttemptsStep";
         private const string NextStep = "NextStep";
         public string Name => "CheckAttemptStep";
-        public Task DoStep(Step step, ICall call)
+        public Task DoStepAsync(Step step, ICall call)
         {
             var stepSettings = step.NodeData.Properties as CheckAttemptStepSettings;
 
             if (call.CallState.AttemptCount >= stepSettings.MaxAttempts)
             {
-                call.AddStepToProcessQueue(step.GetStepFromConnector(MaxAttemptsStep));
+                if (stepSettings.Direction != Direction.Outgoing)
+                    call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(MaxAttemptsStep));
+                else
+                    call.CallState.AddStepToOutgoingQueue(step.GetStepFromConnector(MaxAttemptsStep));
             }
             else
             {
                 call.CallState.AttemptCount++;
-                call.AddStepToProcessQueue(step.GetStepFromConnector(NextStep));
+                if (stepSettings.Direction != Direction.Outgoing)
+                    call.AddStepToProcessQueue(step.GetStepFromConnector(NextStep));
+                else
+                    call.CallState.AddStepToOutgoingQueue(step.GetStepFromConnector(NextStep));
             }
             call.FireStateChange(Trigger.NextCallFlowStep);
             return Task.CompletedTask;

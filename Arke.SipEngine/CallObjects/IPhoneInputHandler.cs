@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace Arke.SipEngine.CallObjects
@@ -10,5 +11,6 @@ namespace Arke.SipEngine.CallObjects
         int NumberOfDigitsToWaitForNextStep { get; set; }
         void StartUserInput(bool reset);
         void ChangeInputSettings(PhoneInputHandlerSettings settings);
+        Task ProcessDigitsReceived();
     }
 }

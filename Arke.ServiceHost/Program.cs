@@ -18,8 +18,7 @@ using AsterNET.ARI;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using NLog;
-using NLog.Web;
+using Serilog;
 using SimpleInjector;
 
 namespace Arke.ServiceHost
@@ -27,31 +26,34 @@ namespace Arke.ServiceHost
     [SuppressMessage("ReSharper", "FormatStringProblem", Justification = "NLog will use args in the output format instead of string format.")]
     internal static class Program
     {
-        private static Logger _logger;
+        private static ILogger _logger;
         private static AriClient _ariClient;
         private static ArkeSipApiClient _sipApi;
-        private static string _pluginDirectory = "c:\\Arke\\Plugins";
+        private static string _pluginDirectory = "/app";
+        private static IConfiguration _configuration;
 
         public static void Main(string[] args)
         {
-            _logger = LogManager.GetCurrentClassLogger();
-            RegisterDependencies();
             InitializeConfigurationFileDependencies();
+            _logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(_configuration)
+                .CreateLogger();
+            RegisterDependencies();
             LoadPlugins();
             
             _logger.Debug("Configuration Loaded.");
             SetupAriEndpoint();
-            _logger.Info("Verifying DI Container", new { DIContainer = "SimpleInjector"});
+            _logger.Information("Verifying DI Container", new { DIContainer = "SimpleInjector"});
             ObjectContainer.GetInstance().Verify();
             
-            var service = new ArkeCallFlowService();
+            var service = new ArkeCallFlowService(_logger);
             service.Start();
             
-            _logger.Info("Service running, press CTRL-C to terminate.");
+            _logger.Information("Service running, press CTRL-C to terminate.");
 
             try
             {
-                _logger.Info("Starting Web Host services.");
+                _logger.Information("Starting Web Host services.");
                 BuildWebHost(args).Run();
             }
             catch (Exception e)
@@ -63,7 +65,6 @@ namespace Arke.ServiceHost
         private static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<WebApiStartup>()
-                .UseNLog()
                 .Build();
 
         private static void LoadPlugins()
@@ -84,7 +85,7 @@ namespace Arke.ServiceHost
         
         public static void SetupAriEndpoint()
         {
-            _logger.Info("Creating Endpoint");
+            _logger.Information("Creating Endpoint");
             var appName = ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskAppName").Value;
 
             var endpoint = new StasisEndpoint(
@@ -93,17 +94,17 @@ namespace Arke.ServiceHost
                 ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskUser").Value,
                 ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskPassword").Value
                 );
-            _logger.Info("Registering endpoint with AriClient");
+            _logger.Information("Registering endpoint with AriClient");
             _ariClient = new AriClient(endpoint,
                 appName);
 
-            _logger.Info("Adding AriClient to CallFlowService");
+            _logger.Information("Adding AriClient to CallFlowService");
 
             var container = ObjectContainer.GetInstance();
             container.RegisterSingleton<IAriClient>(() => _ariClient);
-            _sipApi = new ArkeSipApiClient(_ariClient);
+            _sipApi = new ArkeSipApiClient(_ariClient, _logger);
             container.RegisterSingleton(_sipApi);
-            _logger.Info("Registering API Layer");
+            _logger.Information("Registering API Layer");
             container.RegisterSingleton<ISipApiClient>(_sipApi);
             container.RegisterSingleton<ISipBridgingApi>(_sipApi);
             container.RegisterSingleton<ISipLineApi>(_sipApi);
@@ -114,24 +115,24 @@ namespace Arke.ServiceHost
 
         private static void RegisterDependencies()
         {
-            _logger.Info("Creating Container.");
+            _logger.Information("Creating Container.");
             var container = ObjectContainer.GetInstance();
-            _logger.Info("Registering Dependencies");
+            _logger.Information("Registering Dependencies");
             container.Register<IServiceClientBuilder, ServiceClientBuilder>();
             container.Register<IRecordingManager, ArkeRecordingManager>();
             container.Register<ICallFlowService, ArkeCallFlowService>();
             container.Register<ICall, ArkeCall>(ObjectLifecycle.Transient);
-            _logger.Info("Dependencies registered.");
+            _logger.Information("Dependencies registered.");
         }
         
         public static IConfiguration GetAppSettingsByHostName()
         {
-            _logger.Info("Loading Configuration");
+            _logger.Information("Loading Configuration");
             var hostName = Dns.GetHostName();
-            _logger.Info($"Server Hostname is {hostName}");
+            _logger.Information($"Server Hostname is {hostName}");
             var configBuilder = new ConfigurationBuilder();
             configBuilder.AddJsonFile("appsettings.json"); 
-            _logger.Info("Building config.");
+            _logger.Information("Building config.");
             return configBuilder.Build();
         }
     }

@@ -1,6 +1,7 @@
-﻿using Arke.SipEngine.Events;
+﻿using System.Threading.Tasks;
+using Arke.SipEngine.Events;
 
 namespace Arke.SipEngine.Api
 {
-    public delegate void LineHangupEventHandler(ISipApiClient sender, LineHangupEvent e);
+    public delegate Task LineHangupEventHandler(ISipApiClient sender, LineHangupEvent e);
 }

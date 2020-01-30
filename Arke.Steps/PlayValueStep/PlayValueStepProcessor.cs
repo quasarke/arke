@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Arke.DSL.Extensions;
 using Arke.DSL.Step;
-using Arke.DSL.Step.Settings;
 using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.Processors;
 using Arke.SipEngine.Utility;
@@ -12,13 +12,55 @@ namespace Arke.Steps.PlayValueStep
     {
         private const string NextStep = "NextStep";
         public string Name => "PlayValueStep";
-        public Task DoStep(Step step, ICall call)
+        public async Task DoStepAsync(Step step, ICall call)
         {
-            var stepSettings = step.NodeData.Properties as PlayValueStepSettings;
-            if (stepSettings == null)
+            if (!(step.NodeData.Properties is PlayValueStepSettings stepSettings))
                 throw new ArgumentException("PlayValueStepProcessor called with invalid Step settings");
-            var numbersToPromptsConverter = new MoneyValueToPrompts();
-            var valueToPlay = (decimal?)call.CallState.GetType().GetProperty(stepSettings.Value)?.GetValue(call.CallState);
+            if (stepSettings.ValueType == "money")
+            {
+                await PlayMoneyValue(step, call, stepSettings);
+            }
+            else if (stepSettings.ValueType == "number")
+            {
+                await PlayNumberValue(step, call, stepSettings);
+            }
+            else if (stepSettings.ValueType == "digits")
+            {
+                throw new NotImplementedException("Digits not supported yet. Please request if needed.");
+            }
+        }
+
+        private static async Task PlayNumberValue(Step step, ICall call, PlayValueStepSettings stepSettings)
+        {
+            var promptSettings = new PlayerPromptSettings()
+            {
+                IsInterruptible = stepSettings.IsInterruptible,
+                NextStep = step.GetStepFromConnector(NextStep),
+                Direction = stepSettings.Direction
+            };
+
+            await call.PromptPlayer.DoStepAsync(promptSettings);
+
+            var valueToPlay = DynamicState.GetProperty(call.CallState, stepSettings.Value);
+
+            if (valueToPlay == null)
+                throw new ArgumentException("Value specified does not exist on CallState: " + stepSettings.Value);
+
+            await call.PromptPlayer.PlayNumberToLineAsync(valueToPlay.ToString(),
+                stepSettings.Direction == Direction.Incoming
+                    ? call.CallState.GetIncomingLineId()
+                    : call.CallState.GetOutgoingLineId());
+
+            if (stepSettings.Direction != Direction.Outgoing)
+                call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
+            else
+                call.CallState.AddStepToOutgoingQueue(step.GetStepFromConnector(NextStep));
+        }
+
+        private static Task PlayMoneyValue(Step step, ICall call, PlayValueStepSettings stepSettings)
+        {
+            var numbersToPromptsConverter = new MoneyValueToPrompts(call.Logger);
+            var valueToPlay = (decimal?) DynamicState.GetProperty(call.CallState, stepSettings.Value);
 
             if (valueToPlay == null)
                 throw new ArgumentException("Value specified does not exist on CallState: " + stepSettings.Value);
@@ -29,11 +71,15 @@ namespace Arke.Steps.PlayValueStep
             {
                 IsInterruptible = stepSettings.IsInterruptible,
                 NextStep = step.GetStepFromConnector(NextStep),
-                Prompts = prompts
+                Prompts = prompts,
+                Direction = stepSettings.Direction
             };
 
-            call.PromptPlayer.DoStep(promptSettings);
-            call.AddStepToProcessQueue(step.GetStepFromConnector(NextStep));
+            call.PromptPlayer.DoStepAsync(promptSettings);
+            if (stepSettings.Direction != Direction.Outgoing)
+                call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
+            else
+                call.CallState.AddStepToOutgoingQueue(step.GetStepFromConnector(NextStep));
             return Task.CompletedTask;
         }
     }

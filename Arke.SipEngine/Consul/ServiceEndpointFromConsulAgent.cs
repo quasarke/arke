@@ -4,16 +4,21 @@ using System.Threading.Tasks;
 using Arke.SipEngine.Exceptions;
 using Arke.SipEngine.Web;
 using Arke.SipEngine.Web.Default;
-using NLog;
+using Serilog;
 
 namespace Arke.SipEngine.Consul
 {
     public class ServiceEndpointFromConsulAgent
     {
-        private const string ConsulNetworkUrl = "http://172.28.128.3:8500";
+        private readonly Uri _consulNetworkUrl = new Uri("http://172.28.128.3:8500");
         private const string ServiceQueryParameter = "/v1/catalog/service/{appName}";
         private const string NodeQueryParameter = "/v1/catalog/nodes";
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger _logger;
+
+        public ServiceEndpointFromConsulAgent(ILogger logger)
+        {
+            _logger = logger;
+        }
         
         public async Task<string> GetServiceEndpointFromConsulAgent(string appName)
         {
@@ -39,11 +44,11 @@ namespace Arke.SipEngine.Consul
 
         private async Task<IRestCommandResult<List<CatalogService>>> GetServiceEndpointsFromConsul(string appName)
         {
-            var action = new RestActionConsumer(ConsulNetworkUrl);
+            var action = new RestActionConsumer(_consulNetworkUrl.AbsoluteUri);
             var command = action.GetRestCommand(HttpMethod.GET, ServiceQueryParameter);
             command.AddUrlSegment("appName", appName);
             var results = await action.ProcessRestCommand<List<CatalogService>>(command);
-            _logger.Info("StatusCode " + results.StatusCode);
+            _logger.Information("StatusCode " + results.StatusCode);
             return results;
         }
 
@@ -59,7 +64,7 @@ namespace Arke.SipEngine.Consul
         {
             var results = await GetCatalogNodeFromConsul(appName);
             if (results == null)
-                throw new NullReferenceException();
+                throw new ServiceNotRunningException();
             if (results.Count == 0)
                 throw new ServiceNotRunningException();
             return results;
@@ -67,7 +72,7 @@ namespace Arke.SipEngine.Consul
 
         private async Task<List<CatalogNode>> GetCatalogNodeFromConsul(string appName)
         {
-            var action = new RestActionConsumer(ConsulNetworkUrl);
+            var action = new RestActionConsumer(_consulNetworkUrl.AbsoluteUri);
             var command = action.GetRestCommand(HttpMethod.GET, NodeQueryParameter);
             command.AddUrlSegment("appName", appName);
             var results = await action.ProcessRestCommand<List<CatalogNode>>(command);

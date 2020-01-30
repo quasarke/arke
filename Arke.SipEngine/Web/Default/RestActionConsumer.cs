@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Arke.SipEngine.Web.Default
 {
@@ -29,7 +30,7 @@ namespace Arke.SipEngine.Web.Default
             var rtn = new CommandResult<T>
             {
                 StatusCode = result.StatusCode,
-                Data = result.Data
+                Data = JsonConvert.DeserializeObject<T>(result.Content)
             };
             return rtn;
         }

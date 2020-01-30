@@ -23,7 +23,7 @@ namespace Arke.IVR.CallObjects
             ProcessOutgoingQueue = false;
         }
 
-        public ArkeBridge Bridge { get; set; }
+        public IBridge Bridge { get; set; }
         public Guid CallId { get; set; }
         public bool CallStarted { get; set; }
         public string Destination { get; set; }
@@ -45,6 +45,27 @@ namespace Arke.IVR.CallObjects
 
         public bool CallCanBeAbandoned { get; set; }
         public int AttemptCount { get; set; }
+        public Queue<string> OutboundEndpoint { get; set; }
+        public DateTimeOffset? TalkTimeStart { get; set; }
+        public DateTimeOffset? TalkTimeEnd { get; set; }
+        public DateTimeOffset? CalledPartyAnswerTime { get; set; }
+        public DateTimeOffset? TrunkOffHookTime { get; set; }
+        public DateTimeOffset? CalledPartyAcceptTime { get; set; }
+        public string OutboundUri { get; set; }
+        public string HoldPrompt { get; set; }
+        public DateTimeOffset? TimeDeviceConnected { get; set; }
+        public string OutboundCallerId { get; set; }
+        public bool CallCleanupRun { get; set; }
+        public DateTimeOffset OutgoingRecordingStartTime { get; set; }
+        public DateTimeOffset IncomingRecordingStartTime { get; set; }
+        public DateTimeOffset OutgoingRecordingEndTime { get; set; }
+        public DateTimeOffset IncomingRecordingEndTime { get; set; }
+        public long ChannelIncomingRecordingStartTimeTicks { get; set; }
+        public long ChannelIncomingRecordingEndTimeTicks { get; set; }
+        public long ChannelOutgoingRecordingStartTimeTicks { get; set; }
+        public long ChannelOutgoingRecordingEndTimeTicks { get; set; }
+        public long ChannelBridgeRecordingStartTimeTicks { get; set; }
+        public long ChannelBridgeRecordingEndTimeTicks { get; set; }
 
         public void AddStepToIncomingQueue(int stepId)
         {
@@ -114,7 +135,7 @@ namespace Arke.IVR.CallObjects
 
         public virtual string GetBridgeId()
         {
-            return Bridge != null ? Bridge.Bridge.Id : string.Empty;
+            return Bridge != null ? ((ArkeBridge)Bridge).Bridge.Id : string.Empty;
         }
 
         public virtual string GetIncomingLineId()
@@ -159,6 +180,19 @@ namespace Arke.IVR.CallObjects
         public void SetBridge(IBridge bridge)
         {
             Bridge = bridge as ArkeBridge;
+        }
+
+        public ISipChannel CreateTransferLine(object sipLine)
+        {
+            if (sipLine is Channel channel)
+            {
+                return new ArkeSipChannel
+                {
+                    Channel = channel,
+                    CurrentState = State.Initialization
+                };
+            }
+            return null;
         }
     }
 }

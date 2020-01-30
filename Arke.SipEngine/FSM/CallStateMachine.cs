@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Arke.SipEngine.CallObjects;
 using Stateless;
 
@@ -15,9 +16,9 @@ namespace Arke.SipEngine.FSM
             _promptPlayer = promptPlayer;
         }
 
-        public void Fire(Trigger trigger)
+        public async Task FireAsync(Trigger trigger)
         {
-            StateMachine.Fire(trigger);
+            await StateMachine.FireAsync(trigger);
         }
 
         public void SetupFiniteStateMachine()
@@ -31,17 +32,21 @@ namespace Arke.SipEngine.FSM
                 .Permit(Trigger.PlaceOnHold, State.OnHold)
                 .Permit(Trigger.PlayLanguagePrompts, State.LanguagePrompts)
                 .PermitReentry(Trigger.NextCallFlowStep)
+                .PermitReentry(Trigger.InputReceived)
                 .PermitReentry(Trigger.FailedInputCapture)
                 .Ignore(Trigger.FinishedPrompt)
                 .Ignore(Trigger.PlayNextPrompt)
                 .Permit(Trigger.FailedCallFlow, State.HangUp)
                 .Permit(Trigger.FinishCall, State.HangUp)
                 .Permit(Trigger.StartRecording, State.StartingRecording)
-                .OnEntry(_call.ProcessCallLogic);
+                .Permit(Trigger.StartTalking, State.InCall)
+                .OnEntryAsync(_call.ProcessCallLogicAsync);
 
             StateMachine.Configure(State.OnHold)
                 .Permit(Trigger.FinishCall, State.HangUp)
                 .Permit(Trigger.NextCallFlowStep, State.CallFlow)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
+                .Permit(Trigger.StartTalking, State.InCall)
                 .Ignore(Trigger.FinishedPrompt);
 
             SetupPromptStates();
@@ -60,12 +65,19 @@ namespace Arke.SipEngine.FSM
                 .PermitIf(Trigger.NextCallFlowStep, State.CallFlow, () => !_call.CallState.CallCanBeAbandoned, "Cannot abandon call yet.")
                 .IgnoreIf(Trigger.NextCallFlowStep, () => _call.CallState.CallCanBeAbandoned, "Abandoning Call")
                 .Ignore(Trigger.CaptureInput)
-                .OnEntry(_call.Hangup);
+                .OnEntryAsync(_call.HangupAsync);
 
-            StateMachine.Configure(State.InCall);
+            StateMachine.Configure(State.InCall)
+                .Permit(Trigger.NextCallFlowStep, State.CallFlow)
+                .Permit(Trigger.PlayPrompt, State.PlayingPromptOnCall)
+                .Ignore(Trigger.InputReceived)
+                .Ignore(Trigger.FinishedPrompt)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
+                .Permit(Trigger.FinishCall, State.HangUp);
 
             StateMachine.Configure(State.StartingRecording)
                 .Permit(Trigger.NextCallFlowStep, State.CallFlow)
+                .Permit(Trigger.StartTalking, State.InCall)
                 .Permit(Trigger.FinishCall, State.HangUp);
         }
 
@@ -75,7 +87,9 @@ namespace Arke.SipEngine.FSM
                 .Permit(Trigger.InputReceived, State.CallFlow)
                 .Permit(Trigger.NextCallFlowStep, State.CallFlow)
                 .Permit(Trigger.FailedInputCapture, State.CallFlow)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
                 .Permit(Trigger.FinishCall, State.HangUp)
+                .Permit(Trigger.StartTalking, State.InCall)
                 .Ignore(Trigger.FinishedPrompt)
                 .Ignore(Trigger.PlayNextPrompt)
                 .Ignore(Trigger.PromptInterrupted);
@@ -97,7 +111,7 @@ namespace Arke.SipEngine.FSM
                 .Permit(Trigger.NextCallFlowStep, State.CallFlow)
                 .Permit(Trigger.FailedCallFlow, State.HangUp)
                 .Permit(Trigger.FinishCall, State.HangUp)
-                .OnEntry(_call.ProcessCallLogic);
+                .OnEntryAsync(_call.ProcessCallLogicAsync);
 
             StateMachine.Configure(State.LanguageInput)
                 .Permit(Trigger.PlayLanguagePrompts, State.LanguagePrompts)
@@ -113,19 +127,34 @@ namespace Arke.SipEngine.FSM
                 .Permit(Trigger.FinishedPrompt, State.CallFlow)
                 .Permit(Trigger.PromptInterrupted, State.StoppingPlayback)
                 .Permit(Trigger.FinishCall, State.HangUp)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
                 .Permit(Trigger.InputReceived, State.CallFlow)
+                .Permit(Trigger.StartTalking, State.InCall)
                 .Ignore(Trigger.PlayInterruptiblePrompt)
-                .OnEntry(_promptPlayer.PlayPromptsInQueue);
+                .OnEntryAsync(_promptPlayer.PlayPromptsInQueueAsync);
 
             StateMachine.Configure(State.StoppingPlayback)
                 .Permit(Trigger.FinishedPrompt, State.CallFlow);
 
+            StateMachine.Configure(State.PlayingPromptOnCall)
+                .Permit(Trigger.FinishedPrompt, State.InCall)
+                .Permit(Trigger.FinishCall, State.HangUp)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
+                .Ignore(Trigger.InputReceived)
+                .Ignore(Trigger.PlayInterruptiblePrompt)
+                .Ignore(Trigger.PlayPrompt)
+                .OnEntryAsync(_promptPlayer.PlayPromptsInQueueAsync);
+
             StateMachine.Configure(State.PlayingPrompt)
                 .PermitReentry(Trigger.PlayNextPrompt)
                 .Ignore(Trigger.NextCallFlowStep)
+                .Permit(Trigger.InputReceived, State.CallFlow)
                 .Permit(Trigger.FinishedPrompt, State.CallFlow)
                 .Permit(Trigger.FinishCall, State.HangUp)
-                .OnEntry(_promptPlayer.PlayPromptsInQueue);
+                .Permit(Trigger.StartTalking, State.InCall)
+                .Permit(Trigger.FailedCallFlow, State.HangUp)
+                .Ignore(Trigger.PlayPrompt)
+                .OnEntryAsync(_promptPlayer.PlayPromptsInQueueAsync);
         }
     }
 }

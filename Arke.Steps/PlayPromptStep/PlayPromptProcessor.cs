@@ -10,16 +10,38 @@ namespace Arke.Steps.PlayPromptStep
     {
         private const string NextStep = "NextStep";
         public string Name => "PlayPrompt";
+        private Direction _direction;
 
-        public Task DoStep(Step step, ICall call)
+        public Task DoStepAsync(Step step, ICall call)
         {
             var stepSettings = (PlayPromptSettings) step.NodeData.Properties;
             call.StepSettings = stepSettings;
+            _direction = stepSettings.Direction;
             var nextStep = step.GetStepFromConnector(NextStep);
-            call.Logger.Debug("Next step " + nextStep);
-            call.PromptPlayer.DoStep(stepSettings.GetPromptPlayerSettings(step));
-            call.CallState.AddStepToIncomingQueue(nextStep);
+            call.Logger.Debug("Next step {stepId} {@Call}",nextStep, call.CallState);
+            call.PromptPlayer.DoStepAsync(stepSettings.GetPromptPlayerSettings(step, stepSettings.Direction));
+            AddStepToProperQueue(nextStep, call);
             return Task.CompletedTask;
+        }
+
+        public void AddStepToProperQueue(int step, ICall call)
+        {
+            switch (_direction)
+            {
+                case Direction.Both:
+                    call.CallState.AddStepToIncomingQueue(step);
+                    //call.CallState.AddStepToOutgoingQueue(step); // might not be needed, could be causing our double queue issue.
+                    break;
+                case Direction.Incoming:
+                    call.CallState.AddStepToIncomingQueue(step);
+                    break;
+                case Direction.Outgoing:
+                    call.CallState.AddStepToOutgoingQueue(step);
+                    break;
+                default:
+                    call.CallState.AddStepToIncomingQueue(step);
+                    break;
+            }
         }
     }
 }

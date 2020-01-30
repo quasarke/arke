@@ -10,15 +10,19 @@ namespace Arke.Steps.InputStep
     public class GetInputProcessor : IStepProcessor
     {
         public string Name => "GetInput";
-        public Task DoStep(Step step, ICall call)
+        public async Task DoStepAsync(Step step, ICall call)
         {
+            call.Logger.Information("GetInputStep {@Call}", call.CallState);
             call.CallState.InputRetryCount++;
+            call.Logger.Information("Attempt count {InputRetryCount} {@Call}", call.CallState.InputRetryCount, call.CallState);
             var inputHandlerSettings = (GetInputSettings) step.NodeData.Properties;
-            
-            call.FireStateChange(Trigger.CaptureInput);
+            await call.FireStateChange(Trigger.CaptureInput);
             call.InputProcessor.ChangeInputSettings(inputHandlerSettings.GetPhoneInputHandlerSettings(step));
             call.InputProcessor.StartUserInput(false);
-            return Task.CompletedTask;
+            if (!string.IsNullOrEmpty(call.InputProcessor.DigitsReceived))
+                await call.InputProcessor.ProcessDigitsReceived();
+            
+            call.Logger.Information("Input Processor begin! {@Call}", call.CallState);
         }
     }
 }
