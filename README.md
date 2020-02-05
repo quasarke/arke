@@ -16,9 +16,9 @@ Arke is an IVR written using .NET Core 2.0 for Asterisk using the ARI interface 
 
 ## Dependencies
 * AsterNET.ARI 1.2+
-* .NET Core 2.0
+* .NET Core 2.2
 * SimpleInjector 4
-* NLog 5
+* Serilog 3
 
 ## Extending and creating plugins for Arke
 * Create a .NET Core Library with the namespace Arke.*
