@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Arke.DSL.Step;
@@ -8,6 +9,7 @@ using Arke.IVR.Bridging;
 using Arke.IVR.DSL;
 using Arke.IVR.Input;
 using Arke.IVR.Prompts;
+using Arke.IVR.Recording;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.Bridging;
 using Arke.SipEngine.CallObjects;
@@ -27,32 +29,26 @@ namespace Arke.IVR.CallObjects
     {
         private readonly ArkeBridgeFactory _arkeBridgeFactory;
         private readonly AsteriskPhoneInputHandler _asteriskPhoneInputHandler;
-        private readonly IRecordingManager _asteriskRecordingManager;
-        private readonly DslProcessor _dslProcessor;
         private readonly Dictionary<string, string> _logFields;
         private readonly ArkePromptPlayer _promptPlayer;
-        private readonly ISipApiClient _sipApiClient;
-        private readonly ISipBridgingApi _sipBridgeApi;
-        private readonly ISipLineApi _sipLineApi;
         private ArkeCallState _callState;
         private CancellationToken _cancellationToken;
-        private readonly CallStateMachine _callStateMachine;
         
         public ArkeCall(ISipApiClient sipApiClient, ISipLineApi sipLineApi, ISipBridgingApi sipBridgeApi,
-            ISipPromptApi sipPromptApi, IRecordingManager recordingmanager, ILogger logger)
+            ISipPromptApi sipPromptApi, ISipRecordingApi sipRecordingApi, ILogger logger)
         {
             Logger = logger;
-            _sipApiClient = sipApiClient;
-            _sipLineApi = sipLineApi;
-            _sipBridgeApi = sipBridgeApi;
+            SipApiClient = sipApiClient;
+            SipLineApi = sipLineApi;
+            SipBridgingApi= sipBridgeApi;
             _logFields = new Dictionary<string, string>();
             _promptPlayer = new ArkePromptPlayer(this, sipPromptApi);
             _asteriskPhoneInputHandler = new AsteriskPhoneInputHandler(this, _promptPlayer);
-            _asteriskRecordingManager = recordingmanager;
-            _dslProcessor = new DslProcessor(this);
-            _arkeBridgeFactory = new ArkeBridgeFactory(_sipBridgeApi);
-            _callStateMachine = new CallStateMachine(this, _promptPlayer);
-            _callStateMachine.SetupFiniteStateMachine();
+            RecordingManager = new ArkeRecordingManager(sipRecordingApi, this);
+            DslProcessor = new DslProcessor(this);
+            _arkeBridgeFactory = new ArkeBridgeFactory(SipBridgingApi);
+            CallStateMachine = new CallStateMachine(this, _promptPlayer);
+            CallStateMachine.SetupFiniteStateMachine();
             LanguageSelectionPromptPlayer = new AsteriskLanguageSelectionPromptPlayer(this, sipPromptApi, sipApiClient);
         }
         
@@ -68,18 +64,18 @@ namespace Arke.IVR.CallObjects
             }
         }
 
-        public CallStateMachine CallStateMachine => _callStateMachine;
-        public DslProcessor DslProcessor => _dslProcessor;
+        public CallStateMachine CallStateMachine { get; set; }
+        public DslProcessor DslProcessor { get; set; }
         public IPhoneInputHandler InputProcessor => _asteriskPhoneInputHandler;
         public ILanguageSelectionPromptPlayer LanguageSelectionPromptPlayer { get; private set; }
         public Dictionary<string, string> LogData => _logFields;
         public ILogger Logger { get; }
         public IPromptPlayer PromptPlayer => _promptPlayer;
-        public IRecordingManager RecordingManager => _asteriskRecordingManager;
+        public IRecordingManager RecordingManager { get; set; }
         public NodeProperties StepSettings { get; set; }
-        public ISipApiClient SipApiClient => _sipApiClient;
-        public ISipBridgingApi SipBridgingApi => _sipBridgeApi;
-        public ISipLineApi SipLineApi => _sipLineApi;
+        public ISipApiClient SipApiClient { get; set; }
+        public ISipBridgingApi SipBridgingApi { get; set; }
+        public ISipLineApi SipLineApi { get; set; }
         public string SipProviderId { get; set; }
 
         public async Task AddLineToBridgeAsync(string lineId, string bridgeId)
@@ -104,7 +100,7 @@ namespace Arke.IVR.CallObjects
         {
             _logFields.Add("ChannelID", _callState.IncomingSipChannel.Channel.Id);
             Logger.Debug("Answering Channel");
-            var answerCall = _sipLineApi.AnswerLineAsync(_callState.IncomingSipChannel.Channel.Id);
+            var answerCall = SipLineApi.AnswerLineAsync(_callState.IncomingSipChannel.Channel.Id);
             await answerCall;
             Logger.Debug("Channel Answered");
             _callState.TimeOffHook = DateTimeOffset.Now;
@@ -121,8 +117,8 @@ namespace Arke.IVR.CallObjects
                 return;
             Logger.Debug("OnStasisEndEvent");
             await CallStateMachine.FireAsync(Trigger.FinishCall);
-            _sipApiClient.OnDtmfReceivedEvent -= _asteriskPhoneInputHandler.AriClient_OnChannelDtmfReceivedEvent;
-            _sipApiClient.OnPromptPlaybackFinishedAsyncEvent -= _promptPlayer.AriClient_OnPlaybackFinishedEvent;
+            SipApiClient.OnDtmfReceivedEvent -= _asteriskPhoneInputHandler.AriClient_OnChannelDtmfReceivedEvent;
+            SipApiClient.OnPromptPlaybackFinishedAsyncEvent -= _promptPlayer.AriClient_OnPlaybackFinishedEvent;
             
         }
 
@@ -135,7 +131,7 @@ namespace Arke.IVR.CallObjects
         {
             if (CallState.GetBridgeId() != null)
             {
-                await _sipBridgeApi.DestroyBridgeAsync(CallState.GetBridgeId());
+                await SipBridgingApi.DestroyBridgeAsync(CallState.GetBridgeId());
             }
         }
 
@@ -152,14 +148,14 @@ namespace Arke.IVR.CallObjects
             {
                 return;
             }
-            await _sipLineApi.HangupLineAsync(_callState.IncomingSipChannel.Channel.Id);
+            await SipLineApi.HangupLineAsync(_callState.IncomingSipChannel.Channel.Id);
         }
         
         private async Task DisposeOfOutgoingSipLineChannel()
         {
             if (_callState.OutgoingSipChannel?.Channel != null)
             {
-                await _sipLineApi.HangupLineAsync(_callState.OutgoingSipChannel.Channel.Id);
+                await SipLineApi.HangupLineAsync(_callState.OutgoingSipChannel.Channel.Id);
             }
         }
 
@@ -244,9 +240,10 @@ namespace Arke.IVR.CallObjects
         {
             CallState.TerminationCode = TerminationCode.NormalCallCompletion;
             _callState.StepAttempts = 0;
-            _sipApiClient.OnDtmfReceivedEvent += _asteriskPhoneInputHandler.AriClient_OnChannelDtmfReceivedEvent;
-            _sipApiClient.OnPromptPlaybackFinishedAsyncEvent += _promptPlayer.AriClient_OnPlaybackFinishedEvent;
-            _sipApiClient.OnLineHangupAsyncEvent += AriClient_OnStasisEndEvent;
+            SipApiClient.OnDtmfReceivedEvent += _asteriskPhoneInputHandler.AriClient_OnChannelDtmfReceivedEvent;
+            SipApiClient.OnPromptPlaybackFinishedAsyncEvent += _promptPlayer.AriClient_OnPlaybackFinishedEvent;
+            SipApiClient.OnLineHangupAsyncEvent += AriClient_OnStasisEndEvent;
+            SipApiClient.OnRecordingFinishedAsyncEvent += RecordingManager.AriClient_OnRecordingFinishedEvent;
         }
 
         private async Task StartCallFlowDslProcessor()
@@ -274,16 +271,31 @@ namespace Arke.IVR.CallObjects
 
         public async Task ForceCallEndAsync()
         {
+            if (!CallState.CallCleanupRun)
+            {
+                // hack - needs to be cleaned up later
+                try
+                {
+                    var step = DslProcessor.Dsl.First(d => d.Value.NodeData.Category == "CleanupStep");
+                    await DslProcessor.ProcessStepAsync(step.Key);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e, "Error trying to call cleanup step.");
+                }
+            }
+
+            _callState.CallCanBeAbandoned = true;
             await HangupAsync();
         }
 
         public async Task StartCallRecordingAsync()
         {
             if (_callState.IncomingSipChannel != null)
-                await _asteriskRecordingManager.StartRecordingOnLine(_callState.IncomingSipChannel.Channel.Id, "I",
+                await RecordingManager.StartRecordingOnLine(_callState.IncomingSipChannel.Channel.Id, "I",
                     CallState);
             if (_callState.OutgoingSipChannel != null)
-                await _asteriskRecordingManager.StartRecordingOnLine(_callState.OutgoingSipChannel.Channel.Id, "O",
+                await RecordingManager.StartRecordingOnLine(_callState.OutgoingSipChannel.Channel.Id, "O",
                     CallState);
         }
 
@@ -302,17 +314,17 @@ namespace Arke.IVR.CallObjects
             await CallStateMachine.FireAsync(Trigger.StartCallFlow);
         }
 
+        public async Task StopHoldingBridgeAsync()
+        {
+            await _arkeBridgeFactory.StopHoldingBridge(CallState).ConfigureAwait(false);
+        }
+
         public async Task StopCallRecordingAsync()
         {
             if (_callState.IncomingSipChannel != null)
-                await _asteriskRecordingManager.StopRecordingOnLine(_callState.IncomingSipChannel.Channel.Id);
+                await RecordingManager.StopRecordingOnLine(_callState.IncomingSipChannel.Channel.Id);
             if (_callState.OutgoingSipChannel != null)
-                await _asteriskRecordingManager.StopRecordingOnLine(_callState.OutgoingSipChannel.Channel.Id);
-        }
-
-        public async Task StopHoldingBridgeAsync()
-        {
-            await _arkeBridgeFactory.StopHoldingBridge(CallState);
+                await RecordingManager.StopRecordingOnLine(_callState.OutgoingSipChannel.Channel.Id);
         }
     }
 }
