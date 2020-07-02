@@ -16,4 +16,7 @@
     <ProjectReference Include="..\Arke.SipEngine\Arke.SipEngine.csproj" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="$(ProjectDir)\$(OutDir)\Arke.Steps.dll" DestinationFolder="$(SolutionDir)\Arke.ServiceHost\bin\$(ConfigurationName)\netcoreapp3.1\Plugins\" />
+  </Target>
 </Project>
