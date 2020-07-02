@@ -29,7 +29,7 @@ namespace Arke.ServiceHost
             }
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Arke API"));
-            app.UseMvc();
+            app.UseRouting();
         }
 
     }

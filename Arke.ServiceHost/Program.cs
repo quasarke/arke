@@ -3,8 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Threading;
 using Arke.DependencyInjection;
 using Arke.IVR;
 using Arke.IVR.CallObjects;
@@ -18,6 +20,7 @@ using AsterNET.ARI;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using SimpleInjector;
 
@@ -31,13 +34,20 @@ namespace Arke.ServiceHost
         private static ArkeSipApiClient _sipApi;
         private static string _pluginDirectory = "/app";
         private static IConfiguration _configuration;
+        private static ICallFlowService _service;
+        private static CancellationTokenSource _cancellationToken;
+
+        public static ICallFlowService GetCurrentCallEngine() => _service;
 
         public static void Main(string[] args)
         {
             InitializeConfigurationFileDependencies();
-            _logger = new LoggerConfiguration()
+            Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_configuration)
                 .CreateLogger();
+            _logger = Log.Logger;
+
+            _logger.Information($"Server Hostname is {Dns.GetHostName()}");
             RegisterDependencies();
             LoadPlugins();
             
@@ -54,17 +64,48 @@ namespace Arke.ServiceHost
             try
             {
                 _logger.Information("Starting Web Host services.");
-                BuildWebHost(args).Run();
+                BuildWebHost(args).RunAsync();
             }
             catch (Exception e)
             {
                 _logger.Fatal(e, "Host terminated unexpectedly.");
             }
+
+            _service = ObjectContainer.GetInstance().GetObjectInstance<ICallFlowService>();
+            _service.Start();
+            AssemblyLoadContext.Default.Unloading += SigTermEventHandler;
+            Console.CancelKeyPress += CancelHandler;
+
+            _logger.Information("Service running, press CTRL-C to terminate.");
+            while (true)
+            {
+                Thread.Sleep(200);
+            }
         }
 
-        private static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<WebApiStartup>()
+        private static void CancelHandler(object sender, ConsoleCancelEventArgs e)
+        {
+            _cancellationToken.Cancel();
+            _service.Stop();
+        }
+
+        private static void SigTermEventHandler(AssemblyLoadContext obj)
+        {
+            _cancellationToken.Cancel();
+            _service.Stop();
+        }
+
+        private static IHost BuildWebHost(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.ConfigureKestrel(options =>
+                        {
+                            options.ListenAnyIP(5000);
+                        })
+                        .UseContentRoot(Directory.GetCurrentDirectory())
+                        .UseStartup<WebApiStartup>();
+                })
                 .Build();
 
         private static void LoadPlugins()
@@ -80,7 +121,8 @@ namespace Arke.ServiceHost
 
         private static void InitializeConfigurationFileDependencies()
         {
-            ArkeCallFlowService.Configuration = GetAppSettingsByHostName();
+            _configuration = GetAppSettingsByHostName();
+            ArkeCallFlowService.Configuration = _configuration;
         }
         
         public static void SetupAriEndpoint()
@@ -118,8 +160,8 @@ namespace Arke.ServiceHost
             _logger.Information("Creating Container.");
             var container = ObjectContainer.GetInstance();
             _logger.Information("Registering Dependencies");
+            container.RegisterSingleton<ILogger>(Log.Logger);
             container.Register<IServiceClientBuilder, ServiceClientBuilder>();
-            container.Register<IRecordingManager, ArkeRecordingManager>();
             container.Register<ICallFlowService, ArkeCallFlowService>();
             container.Register<ICall, ArkeCall>(ObjectLifecycle.Transient);
             _logger.Information("Dependencies registered.");
@@ -127,12 +169,11 @@ namespace Arke.ServiceHost
         
         public static IConfiguration GetAppSettingsByHostName()
         {
-            _logger.Information("Loading Configuration");
             var hostName = Dns.GetHostName();
-            _logger.Information($"Server Hostname is {hostName}");
             var configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJsonFile("appsettings.json"); 
-            _logger.Information("Building config.");
+            configBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            configBuilder.AddJsonFile($"appsettings.{hostName}.json", optional: true, reloadOnChange: true);
+            configBuilder.AddEnvironmentVariables();
             return configBuilder.Build();
         }
     }

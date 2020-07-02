@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Arke.SipEngine\Arke.SipEngine.csproj" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy $(ProjectDir)\bin\Debug\netstandard2.0\Arke.Steps.dll $(SolutionDir)\Arke.ServiceHost\bin\Debug\netcoreapp3.1\Plugins\Arke.Steps.dll /y" />
+  </Target>
+
 </Project>
