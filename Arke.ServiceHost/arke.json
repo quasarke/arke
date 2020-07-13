@@ -1,225 +1,103 @@
 ﻿{
-  "0": {
-    "Type": "DeviceConnectedStep",
-    "Direction": "Incoming",
-    "Settings": {
-      "NextStep": 1
-    }
-  },
-  "1": {
-    "Type": "LanguageStep",
-    "Direction": "Incoming",
-    "Settings": {
-      "Prompts": [
-        "continue-english-press",
-        "digits/1"
-      ],
-      "LanguageSettings": {
-        "1": "en",
-        "2": "es"
+  "class": "go.GraphLinksModel",
+  "linkFromPortIdProperty": "fromPort",
+  "linkToPortIdProperty": "toPort",
+  "nodeDataArray": [
+    {
+      "text": "DeviceConnected",
+      "color": "lightgreen",
+      "category": "DeviceConnected",
+      "properties": {
+        "Direction": "INCOMING"
       },
-      "NextStep": 2,
-      "MaxDigitTimeoutInSeconds": 10
-    }
-  },
-  "2": {
-    "Type": "StartRecording",
-    "Direction": "Incoming",
-    "Settings": {
-      "ItemsToRecord": [
-        "InboundLine"
-      ],
-      "NextStep": 3
-    }
-  },
-  "3": {
-    "Type": "PlayPromptStep",
-    "Direction": "Incoming",
-    "Settings": {
-      "IsInterruptible": true,
-      "Prompts": [
-        "for-tech-support",
-        "press-1",
-        "for-accounting",
-        "press-9"
-      ],
-      "NextStep": 6
-    }
-  },
-  "6": {
-    "Type": "InputStep",
-    "Direction": "Incoming",
-    "Settings": {
-      "Options": [
+      "description": "Must be first step, fires when device connects",
+      "outArray": [
         {
-          "Input": "1",
-          "NextStep": 7
-        },
-        {
-          "Input": "9",
-          "NextStep": 12
+          "portId": "NextStep"
         }
       ],
-      "NoAction": 7,
-      "Invalid": 7,
-      "MaxDigitTimeoutInSeconds": 10,
-      "NumberOfDigitsToWaitForNextStep": 1,
-      "NextStep": 7,
-      "TerminationDigit": "#",
-      "SetValueAsDestination": false,
-      "MaxAttempts": 3,
-      "MaxAttemptsReachedStep": 99
-    }
-  },
-  "7": {
-    "Type": "PlayPromptStep",
-    "Direction": "Incoming",
-    "Settings": {
-      "IsInterruptible": true,
-      "Prompts": [
-        "technical-support"
-      ],
-      "NextStep": 99
-    }
-  },
-  "8": {
-    "Type": "InputStep",
-    "Direction": "Outgoing",
-    "Settings": {
-      "Options": [
-      ],
-      "NoAction": 8,
-      "Invalid": 8,
-      "MaxDigitTimeoutInSeconds": 20,
-      "NumberOfDigitsToWaitForNextStep": 11,
-      "NextStep": 9,
-      "TerminationDigit": "",
-      "SetValueAsDestination": true,
-      "MaxAttempts": 3,
-      "MaxAttemptsReachedStep": 99
-    }
-  },
-  "9": {
-    "Type": "OutboundCallStep",
-    "Direction": "Outgoing",
-    "Settings": {
-      "NextStep": 10
-    }
-  },
-  "10": {
-    "Type": "PlayPromptStep",
-    "Direction": "Outgoing",
-    "Settings": {
-      "IsInterruptible": true,
-      "Prompts": [
-        "holdfordial",
-        "goahead"
-      ],
-      "NextStep": 19
-    }
-  },
-  "11": {
-    "Type": "PlayPromptStep",
-    "Direction": "Outgoing",
-    "Settings": {
-      "IsInterruptible": true,
-      "Prompts": [
-        "howtoblock"
-      ],
-      "NextStep": 12
-    }
-  },
-  "12": {
-    "Type": "PlayPromptStep",
-    "Direction": "Outgoing",
-    "Settings": {
-      "IsInterruptible": true,
-      "Prompts": [
-        "accounting"
-      ],
-      "NextStep": 99
-    }
-  },
-  "13": {
-    "Type": "PlayPromptStep",
-    "Direction": "Incoming",
-    "Settings": {
-      "IsInterruptible": true,
-      "Prompts": [
-        "enter-phone-number10",
-        "followed_pound"
-      ],
-      "NextStep": 13
-    }
-  },
-  "14": {
-    "Type": "InputStep",
-    "Direction": "Incoming",
-    "Settings": {
-      "Options": [],
-      "NoAction": 10,
-      "Invalid": 10,
-      "MaxDigitTimeoutInSeconds": 10,
-      "NumberOfDigitsToWaitForNextStep": 0,
-      "NextStep": 14,
-      "TerminationDigit": "#",
-      "SetValueAsDestination": true,
-      "MaxAttempts": 3,
-      "MaxAttemptsReachedStep": 99
-    }
-  },
-  "15": {
-    "Type": "OutboundCallStep",
-    "Direction": "Outgoing",
-    "Settings": {
-      "NextStep": 16,
-      "SkipCallerPresentataion":  19 
-    }
-  },
-  "16": {
-    "Type": "StartRecording",
-    "Direction": "Outgoing",
-    "Settings": {
-      "ItemsToRecord": [
-        "OutboundLine"
-      ],
-      "NextStep": 99
-    }
-  },
-  "18": {
-    "Type": "ParallelStep",
-    "Direction": "Both",
-    "Settings": {
-      "IncomingNextStep": 6,
-      "OutgoingNextStep": 14
-    }
-  },
-  "19": {
-    "Type": "BridgeCallStep",
-    "Direction": "Both",
-    "Settings": {
-      "NextStep": 99
-    }
-  },
-  "20": {
-    "Type": "HoldStep",
-    "Direction": "Incoming",
-    "Settings": {
-      "HoldMusic": false,
-      "WaitPrompt": "prompt1",
-      "PromptChanges": {
-        "16": "prompt2"
+      "key": 0
+    },
+    {
+      "text": "DisconnectDevice",
+      "color": "salmon",
+      "category": "DisconnectDevice",
+      "properties": {
+        "Direction": "BOTH",
+        "HangUp": true
       },
-      "Triggers": {
-        "15": 3 
-      }
-    } 
-  },
-  "99": {
-    "Type": "DeviceDisconnectedStep",
-    "Direction": "Both",
-    "Settings": {
-      "HangUp": true
+      "description": "Ends the call flow",
+      "inArray": [
+        {
+          "portId": "IN"
+        }
+      ],
+      "key": -2
+    },
+    {
+      "text": "ArkeInit",
+      "color": "lightblue",
+      "category": "ArkeInit",
+      "properties": {
+        "Direction": "INCOMING"
+      },
+      "description": "Initialize and Load Settings for device",
+      "inArray": [
+        {
+          "portId": "IN"
+        }
+      ],
+      "outArray": [
+        {
+          "portId": "FailStep"
+        },
+        {
+          "portId": "NextStep"
+        }
+      ],
+      "key": -3
+    },
+    {
+      "text": "PlayPrompt",
+      "color": "lightblue",
+      "category": "PlayPrompt",
+      "properties": {
+        "IsInterruptible": false,
+        "Direction": "INCOMING",
+        "Prompts": [ "zombies" ]
+      },
+      "description": "Plays a prompt or series of prompts to a line",
+      "inArray": [
+        {
+          "portId": "IN"
+        }
+      ],
+      "outArray": [
+        {
+          "portId": "NextStep"
+        }
+      ],
+      "key": -6
     }
-  }
+  ],
+  "linkDataArray": [
+    {
+      "from": 0,
+      "to": -3,
+      "fromPort": "NextStep",
+      "toPort": "IN"
+    },
+    {
+      "from": -3,
+      "to": -6,
+      "fromPort": "NextStep",
+      "toPort": "IN"
+    },
+    {
+      "from": -6,
+      "to": -2,
+      "fromPort": "NextStep",
+      "toPort": "IN"
+    }
+  ]
 }

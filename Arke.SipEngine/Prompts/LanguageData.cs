@@ -9,6 +9,8 @@ namespace Arke.SipEngine.Prompts
         public string FolderName { get; set; }
         public string AzureLanguageCode { get; set; }
 
+        public static LanguageData English => new LanguageData("en");
+
         public LanguageData(string shortCode)
         {
             switch (shortCode)
