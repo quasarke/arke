@@ -24,6 +24,7 @@ namespace Arke.IVR.Prompts
             _arkeCall = arkeCall;
             _sipPromptApi = sipPromptApi;
             _promptQueue = new Queue<IPrompt>();
+            _languageData = LanguageData.English;
         }
 
         public void AddPromptToQueue(IPrompt prompt)

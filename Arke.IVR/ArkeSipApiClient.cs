@@ -126,7 +126,7 @@ namespace Arke.IVR
         {
             try
             {
-                await _ariClient.Channels.HangupAsync(lineId, "normal").ConfigureAwait(false);
+                await _ariClient.Channels.HangupAsync(lineId, reason: "normal").ConfigureAwait(false);
             }
             catch (HttpRequestException e)
             {
