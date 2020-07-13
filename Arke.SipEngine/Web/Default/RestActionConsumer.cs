@@ -25,7 +25,7 @@ namespace Arke.SipEngine.Web.Default
         public async Task<IRestCommandResult<T>> ProcessRestCommand<T>(IRestCommand command) where T : new()
         {
             var cmd = (Command) command;
-            var result = await cmd.Client.ExecuteTaskAsync<T>(cmd.Request);
+            var result = await cmd.Client.ExecuteAsync<T>(cmd.Request);
 
             var rtn = new CommandResult<T>
             {
@@ -38,7 +38,7 @@ namespace Arke.SipEngine.Web.Default
         public async Task<IRestCommandResult> ProcessRestCommand(IRestCommand command)
         {
             var cmd = (Command) command;
-            var result = await cmd.Client.ExecuteTaskAsync(cmd.Request);
+            var result = await cmd.Client.ExecuteAsync(cmd.Request);
             var rtn = new CommandResult()
             {
                 StatusCode = result.StatusCode

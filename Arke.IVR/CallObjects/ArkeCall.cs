@@ -131,7 +131,14 @@ namespace Arke.IVR.CallObjects
         {
             if (CallState.GetBridgeId() != null)
             {
-                await SipBridgingApi.DestroyBridgeAsync(CallState.GetBridgeId());
+                try
+                {
+                    await SipBridgingApi.DestroyBridgeAsync(CallState.GetBridgeId());
+                }
+                catch (Exception e)
+                {
+                    Logger.Warning($"Problem destroying bridge: {e.Message}");
+                }
             }
         }
 
@@ -148,14 +155,28 @@ namespace Arke.IVR.CallObjects
             {
                 return;
             }
-            await SipLineApi.HangupLineAsync(_callState.IncomingSipChannel.Channel.Id);
+            try
+            {
+                await SipLineApi.HangupLineAsync(_callState.IncomingSipChannel.Channel.Id);
+            }
+            catch (Exception e)
+            {
+                Logger.Warning($"Problem while hanging up incoming line: {e.Message}");
+            }
         }
         
         private async Task DisposeOfOutgoingSipLineChannel()
         {
             if (_callState.OutgoingSipChannel?.Channel != null)
             {
-                await SipLineApi.HangupLineAsync(_callState.OutgoingSipChannel.Channel.Id);
+                try
+                {
+                    await SipLineApi.HangupLineAsync(_callState.OutgoingSipChannel.Channel.Id);
+                }
+                catch (Exception e)
+                {
+                    Logger.Warning($"Problem while hanging up outgoing line: {e.Message}");
+                }
             }
         }
 

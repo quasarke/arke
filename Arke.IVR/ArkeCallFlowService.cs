@@ -26,6 +26,7 @@ namespace Arke.IVR
         public static IConfiguration Configuration { get; set; }
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly ArkeSipApiClient _sipApi;
+        private List<string> processingCalls = new List<string>();
         
         public ArkeCallFlowService(ILogger logger)
         {
@@ -112,6 +113,8 @@ namespace Arke.IVR
         [SuppressMessage("ReSharper", "FormatStringProblem", Justification = "NLog will use args in the output format instead of string format.")]
         private async void AriClientOnStasisStartEvent(IAriClient sender, StasisStartEvent e)
         {
+            _logger.Debug($"Line Connecting: {e.Channel.Name}");
+            
             ICall line;
             if (e.Args.Contains("dialed") || e.Args.Contains("SnoopChannel"))
                 return;
@@ -130,6 +133,7 @@ namespace Arke.IVR
         
             // call answered and started
             await line.RunCallScriptAsync(_cancellationTokenSource.Token);
+            await Task.Delay(1000);
             _logger.Information("Call Script Complete", new { ChannelId = e.Channel.Id });
         }
 
@@ -138,7 +142,15 @@ namespace Arke.IVR
             _logger.Information("Channel {channelId} hungup", new { channelId = stasisEndEvent.Channel.Id});
             if (!ConnectedLines.ContainsKey(stasisEndEvent.Channel.Id))
                 return;
-            await ConnectedLines[stasisEndEvent.Channel.Id].HangupAsync();
+
+            try
+            {
+                await ConnectedLines[stasisEndEvent.Channel.Id].HangupAsync();
+            }
+            catch (AriException e)
+            {
+                _logger.Warning($"Exception while hanging up, most likely ok: {e.Message}");
+            }
             
             while (!ConnectedLines[stasisEndEvent.Channel.Id].CallState.CallCanBeAbandoned)
             {
