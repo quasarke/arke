@@ -4,6 +4,9 @@ Arke is an IVR written using .NET Core 2.0 for Asterisk using the ARI interface 
 ## Find the developers
 [![Join the chat at https://gitter.im/arkeivr/Lobby](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/arkeivr/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+## Build Status
+![.NET Core](https://github.com/quasarke/arke/workflows/.NET%20Core/badge.svg?branch=master)
+
 ## Setup
 * Clone the repo and run `dotnet restore` then `dotnet build`
 * Setup the appsettings.json:
