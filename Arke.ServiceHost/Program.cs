@@ -56,9 +56,6 @@ namespace Arke.ServiceHost
             _logger.Information("Verifying DI Container", new { DIContainer = "SimpleInjector"});
             ObjectContainer.GetInstance().Verify();
             
-            var service = new ArkeCallFlowService(_logger);
-            service.Start();
-            
             _logger.Information("Service running, press CTRL-C to terminate.");
 
             try
@@ -162,7 +159,7 @@ namespace Arke.ServiceHost
             _logger.Information("Registering Dependencies");
             container.RegisterSingleton<ILogger>(Log.Logger);
             container.Register<IServiceClientBuilder, ServiceClientBuilder>();
-            container.Register<ICallFlowService, ArkeCallFlowService>();
+            container.RegisterSingleton<ICallFlowService>(() => new ArkeCallFlowService(Log.Logger));
             container.Register<ICall, ArkeCall>(ObjectLifecycle.Transient);
             _logger.Information("Dependencies registered.");
         }
