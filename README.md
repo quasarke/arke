@@ -12,14 +12,21 @@ Arke is an IVR written using .NET Core 2.0 for Asterisk using the ARI interface 
 * Setup the appsettings.json:
    * Set your asterisk host IP
    * Set the username and password for your Asterisk ARI Setup
-   * Set the AsteriskAppName to the stasis app name you are using in your dialplan
+   * Set the AsteriskAppName to the stasis app name you are using in your dialplan (sample dialplan below)
    * Set your application to the name of the json file you wish to use for your call flow (you can copy arte.json for a starting point)
    * Set the Plugin Directory to the location you are going to copy all your plugins.
+* Setup extensions.conf on your asterisk server (sample):
+   ```
+   [from-internal]
+   exten => 6000,1,NoOp()
+   same => n,Stasis(arke)
+   same => n,Hangup()
+   ```
 * Finally run `dotnet run --project Arke.ServiceHost`
 
 ## Dependencies
-* AsterNET.ARI 1.2+
-* .NET Core 2.2
+* AsterNET.ARI 1.3+
+* .NET Core 3.1
 * SimpleInjector 4
 * Serilog 3
 
@@ -44,8 +51,7 @@ Arke is an IVR written using .NET Core 2.0 for Asterisk using the ARI interface 
 * Tested on Windows, Linux and Docker on both platforms.
 
 ## Known Issues
-* Bridge Call Step still needs work
-* Outbound calling hasn't been finalized yet. Needs some work on that as well
+* Need to document how to setup outbound calls.
 * No Steps for Voicemail and a few other basic IVR functions yet
 
 ## Planned Future Features
