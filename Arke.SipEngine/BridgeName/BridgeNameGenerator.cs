@@ -69,7 +69,7 @@ namespace Arke.SipEngine.BridgeName
             {
                 item = File.ReadAllText(file);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 

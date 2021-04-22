@@ -12,15 +12,12 @@ namespace Arke.DependencyInjection
     {
         public object GetContainerSpecificLifecycle(ObjectLifecycle lifecycle)
         {
-            switch (lifecycle)
+            return lifecycle switch
             {
-                case ObjectLifecycle.Singleton:
-                    return Lifestyle.Singleton;
-                case ObjectLifecycle.Transient:
-                    return Lifestyle.Transient;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(lifecycle), lifecycle, null);
-            }
+                ObjectLifecycle.Singleton => Lifestyle.Singleton,
+                ObjectLifecycle.Transient => Lifestyle.Transient,
+                _ => throw new ArgumentOutOfRangeException(nameof(lifecycle), lifecycle, null),
+            };
         }
     }
 }

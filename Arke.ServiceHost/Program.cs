@@ -1,23 +1,19 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 using Arke.DependencyInjection;
 using Arke.IVR;
 using Arke.IVR.CallObjects;
-using Arke.IVR.Recording;
 using Arke.SipEngine;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.Interfaces;
 using Arke.SipEngine.Services;
 using AsterNET.ARI;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -26,7 +22,6 @@ using SimpleInjector;
 
 namespace Arke.ServiceHost
 {
-    [SuppressMessage("ReSharper", "FormatStringProblem", Justification = "NLog will use args in the output format instead of string format.")]
     internal static class Program
     {
         private static ILogger _logger;
@@ -41,6 +36,7 @@ namespace Arke.ServiceHost
 
         public static void Main(string[] args)
         {
+            _cancellationToken = new CancellationTokenSource();
             InitializeConfigurationFileDependencies();
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_configuration)
@@ -69,7 +65,7 @@ namespace Arke.ServiceHost
             }
 
             _service = ObjectContainer.GetInstance().GetObjectInstance<ICallFlowService>();
-            _service.Start();
+            _service.Start(_cancellationToken.Token);
             AssemblyLoadContext.Default.Unloading += SigTermEventHandler;
             Console.CancelKeyPress += CancelHandler;
 
@@ -129,7 +125,7 @@ namespace Arke.ServiceHost
 
             var endpoint = new StasisEndpoint(
                 ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskHost").Value,
-                8088,
+                int.Parse(ArkeCallFlowService.Configuration.GetSection("appSettings:AriPort").Value),
                 ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskUser").Value,
                 ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskPassword").Value
                 );
@@ -159,7 +155,7 @@ namespace Arke.ServiceHost
             _logger.Information("Registering Dependencies");
             container.RegisterSingleton<ILogger>(Log.Logger);
             container.Register<IServiceClientBuilder, ServiceClientBuilder>();
-            container.RegisterSingleton<ICallFlowService>(() => new ArkeCallFlowService(Log.Logger));
+            container.Register<ICallFlowService, ArkeCallFlowService>(ObjectLifecycle.Singleton);
             container.Register<ICall, ArkeCall>(ObjectLifecycle.Transient);
             _logger.Information("Dependencies registered.");
         }

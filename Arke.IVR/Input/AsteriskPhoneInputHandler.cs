@@ -64,7 +64,7 @@ namespace Arke.IVR.Input
                 DigitTimeoutTimer.Start();
         }
 
-        public void AriClient_OnChannelDtmfReceivedEvent(ISipApiClient sipApiClient, DtmfReceivedEvent dtmfReceivedEvent)
+        public async void AriClient_OnChannelDtmfReceivedEvent(ISipApiClient sipApiClient, DtmfReceivedEvent dtmfReceivedEvent)
         {
             DigitTimeoutTimer.Stop();
             _call.Logger.Debug($"OnChannel Dtmf Received Event {dtmfReceivedEvent.LineId}");
@@ -78,9 +78,9 @@ namespace Arke.IVR.Input
             CaptureDigitIfInValidState(dtmfReceivedEvent);
 
             if (_call.GetCurrentState() == State.PlayingInterruptiblePrompt)
-                _promptPlayer.StopPromptAsync();
+                await _promptPlayer.StopPromptAsync();
 
-            ProcessDigitsReceived();
+            await ProcessDigitsReceived();
         }
 
         private void DigitTimeoutEvent(object sender, ElapsedEventArgs e)
