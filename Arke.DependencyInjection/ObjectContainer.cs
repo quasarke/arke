@@ -37,7 +37,7 @@ namespace Arke.DependencyInjection
 
         public static ObjectContainer GetInstance()
         {
-            return _instance ?? (_instance = new ObjectContainer());
+            return _instance ??= new ObjectContainer();
         }
 
         public virtual Container GetSimpleInjectorContainer()
