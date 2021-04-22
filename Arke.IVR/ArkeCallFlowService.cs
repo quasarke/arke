@@ -1,41 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Arke.DependencyInjection;
 using Arke.IVR.CallObjects;
 using Arke.SipEngine;
+using Arke.SipEngine.Api;
 using Arke.SipEngine.CallObjects;
 using AsterNET.ARI;
 using AsterNET.ARI.Models;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 
-#if !MONO
-#endif
-
 namespace Arke.IVR
 {
     public class ArkeCallFlowService : ICallFlowService
     {
         private readonly IAriClient _ariClient;
-        public Dictionary<string, ICall> ConnectedLines { get; set; }
         private readonly ILogger _logger;
+        private CancellationToken _cancellationToken;
+        private readonly ISipApiClient _sipApi;
+
+        public Dictionary<string, ICall> ConnectedLines { get; set; }
         public static IConfiguration Configuration { get; set; }
-        private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly ArkeSipApiClient _sipApi;
-        private List<string> processingCalls = new List<string>();
-        
-        public ArkeCallFlowService(ILogger logger)
+
+        public ArkeCallFlowService(ILogger logger, IAriClient ariClient, ISipApiClient sipApi)
         {
             _logger = logger;
             _logger.Information("ArkeCallFlowService Created");
             ConnectedLines = new Dictionary<string, ICall>();
-            _cancellationTokenSource = new CancellationTokenSource();
-            _ariClient = ObjectContainer.GetInstance().GetObjectInstance<IAriClient>();
-            _sipApi = ObjectContainer.GetInstance().GetObjectInstance<ArkeSipApiClient>();
+            _ariClient = ariClient;
+            _sipApi = sipApi;
         }
         
         public static string GetConfigValue(string key)
@@ -43,8 +38,10 @@ namespace Arke.IVR
             return Configuration?[key];
         }
 
-        public bool Start()
+        public bool Start(CancellationToken token)
         {
+            _cancellationToken = token;
+            _cancellationToken.Register(OnTokenCancellation);
             try
             {
                 _logger.Information("ArkeCallFlowService Start() Initiated");
@@ -58,7 +55,12 @@ namespace Arke.IVR
                 return false;
             }
         }
-        
+
+        private async void OnTokenCancellation()
+        {
+            await EndAllCallsAsync();
+        }
+
         public virtual void ConnectAri()
         {
             ((AriClient)_ariClient).Connect();
@@ -78,8 +80,7 @@ namespace Arke.IVR
         {
             _logger.Information("Unregistering events...");
             var disconnectionTask = DisconnectAri();
-            disconnectionTask.Wait();
-            _cancellationTokenSource.Cancel();
+            disconnectionTask.Wait(_cancellationToken);
             _logger.Information("Shutdown complete.");
             return true;
         }
@@ -105,17 +106,15 @@ namespace Arke.IVR
         public bool Pause()
         {
             var disconnectTask = DisconnectAri();
-            disconnectTask.Wait();
+            disconnectTask.Wait(_cancellationToken);
             return true;
         }
 
         
-        [SuppressMessage("ReSharper", "FormatStringProblem", Justification = "NLog will use args in the output format instead of string format.")]
         private async void AriClientOnStasisStartEvent(IAriClient sender, StasisStartEvent e)
         {
             _logger.Debug($"Line Connecting: {e.Channel.Name}");
             
-            ICall line;
             if (e.Args.Contains("dialed") || e.Args.Contains("SnoopChannel"))
                 return;
             _logger.Information("Line Offhook", new
@@ -124,7 +123,7 @@ namespace Arke.IVR
                 CallerIdName = e.Channel.Caller.Number,
                 CallerIdNumber = e.Channel.Caller.Name
             });
-            line = ArkeCallFactory.CreateArkeCall(e.Channel);
+            var line = ArkeCallFactory.CreateArkeCall(e.Channel);
             ConnectedLines.Add(e.Channel.Id, line);
             _logger.Information("Starting Call Script", new
             {
@@ -132,8 +131,8 @@ namespace Arke.IVR
             });
         
             // call answered and started
-            await line.RunCallScriptAsync(_cancellationTokenSource.Token);
-            await Task.Delay(1000);
+            await line.RunCallScriptAsync(_cancellationToken);
+            await Task.Delay(1000, _cancellationToken);
             _logger.Information("Call Script Complete", new { ChannelId = e.Channel.Id });
         }
 
@@ -154,14 +153,13 @@ namespace Arke.IVR
             
             while (!ConnectedLines[stasisEndEvent.Channel.Id].CallState.CallCanBeAbandoned)
             {
-                await Task.Delay(1000);
+                await Task.Delay(1000, _cancellationToken);
             }
             ConnectedLines.Remove(stasisEndEvent.Channel.Id);
         }
 
         private async Task EndAllCallsAsync()
         {
-            _cancellationTokenSource.Cancel();
             foreach (var line in ConnectedLines.Where(c => c.Value.CallState.CallCanBeAbandoned))
             {
                 await line.Value.HangupAsync();
@@ -169,7 +167,7 @@ namespace Arke.IVR
             foreach (var line in ConnectedLines.Where(c => !c.Value.CallState.CallCanBeAbandoned))
             {
                 while (!line.Value.CallState.CallCanBeAbandoned)
-                    await Task.Delay(1000);
+                    await Task.Delay(1000, _cancellationToken);
                 await line.Value.HangupAsync();
             }
         }

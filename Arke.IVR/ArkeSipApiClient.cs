@@ -15,7 +15,6 @@ using RecordingFinishedEventHandler = Arke.SipEngine.Api.RecordingFinishedEventH
 
 namespace Arke.IVR
 {
-    [SuppressMessage("ReSharper", "FormatStringProblem", Justification = "NLog will use args in the output format instead of string format.")]
     public class ArkeSipApiClient : ISipApiClient, ISipBridgingApi, ISipLineApi, ISipPromptApi, ISipRecordingApi, ISoundsApi
     {
         private readonly IAriClient _ariClient;
@@ -39,7 +38,7 @@ namespace Arke.IVR
 
         public static ArkeSipApiClient GetInstance(IAriClient ariClient, ILogger logger)
         {
-            return _instance ?? (_instance = new ArkeSipApiClient(ariClient, logger));
+            return _instance ??= new ArkeSipApiClient(ariClient, logger);
         }
 
         public async Task AnswerLineAsync(string lineId)
@@ -55,7 +54,7 @@ namespace Arke.IVR
             }
             catch (Exception e)
             {
-                _logger.Warning(e, "Error transfering line");
+                _logger.Warning(e, "Error transferring line");
             }
         }
 

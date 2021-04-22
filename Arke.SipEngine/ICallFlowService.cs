@@ -1,8 +1,10 @@
-﻿namespace Arke.SipEngine
+﻿using System.Threading;
+
+namespace Arke.SipEngine
 {
     public interface ICallFlowService
     {
-        bool Start();
+        bool Start(CancellationToken cancellationToken);
         bool Stop();
         bool Continue();
         bool Pause();
