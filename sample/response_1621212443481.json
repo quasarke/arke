@@ -1,0 +1,254 @@
+[
+  {
+    "stepName": "Transfer",
+    "properties": [
+      {
+        "propertyType": "System.String",
+        "propertyName": "Endpoint"
+      },
+      {
+        "propertyType": "System.String",
+        "propertyName": "DialString"
+      },
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "StopRecording",
+    "properties": [
+      {
+        "propertyType": "Arke.DSL.Step.RecordingItems",
+        "propertyName": "ItemsToStop"
+      },
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "StartRecordingLine",
+    "properties": [
+      {
+        "propertyType": "Arke.DSL.Step.RecordingItems",
+        "propertyName": "ItemsToRecord"
+      },
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "PlayValueStep",
+    "properties": [
+      {
+        "propertyType": "System.Boolean",
+        "propertyName": "IsInterruptible"
+      },
+      {
+        "propertyType": "System.String",
+        "propertyName": "Value"
+      },
+      {
+        "propertyType": "System.String",
+        "propertyName": "ValueType"
+      },
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "PlayPrompt",
+    "properties": [
+      {
+        "propertyType": "System.Boolean",
+        "propertyName": "IsInterruptible"
+      },
+      {
+        "propertyType": "string[]",
+        "propertyName": "Prompts"
+      },
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "ParallelStart",
+    "properties": [
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "CallOutbound",
+    "properties": [
+      {
+        "propertyType": "System.String",
+        "propertyName": "OutboundEndpointName"
+      },
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "LanguageStep",
+    "properties": [
+      {
+        "propertyType": "string[]",
+        "propertyName": "Prompts"
+      },
+      {
+        "propertyType": "Dictionary<string,string>",
+        "propertyName": "LanguageSettings"
+      },
+      {
+        "propertyType": "System.Int32",
+        "propertyName": "MaxDigitTimeoutInSeconds"
+      },
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "GetInput",
+    "properties": [
+      {
+        "propertyType": "Arke.DSL.Step.Settings.InputOptions",
+        "propertyName": "Options"
+      },
+      {
+        "propertyType": "System.Int32",
+        "propertyName": "MaxDigitTimeoutInSeconds"
+      },
+      {
+        "propertyType": "System.Int32",
+        "propertyName": "NumberOfDigitsToWaitForNextStep"
+      },
+      {
+        "propertyType": "System.String",
+        "propertyName": "TerminationDigit"
+      },
+      {
+        "propertyType": "System.Boolean",
+        "propertyName": "SetValueAsDestination"
+      },
+      {
+        "propertyType": "System.Int32",
+        "propertyName": "MaxAttempts"
+      },
+      {
+        "propertyType": "System.String",
+        "propertyName": "SetValueAs"
+      },
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "HoldStep",
+    "properties": [
+      {
+        "propertyType": "System.Boolean",
+        "propertyName": "HoldMusic"
+      },
+      {
+        "propertyType": "System.String",
+        "propertyName": "WaitPrompt"
+      },
+      {
+        "propertyType": "System.Int32",
+        "propertyName": "HoldTimeoutInSeconds"
+      },
+      {
+        "propertyType": "Dictionary<string,string>",
+        "propertyName": "PromptChanges"
+      },
+      {
+        "propertyType": "Dictionary<string,string>",
+        "propertyName": "Triggers"
+      },
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "DisconnectDevice",
+    "properties": [
+      {
+        "propertyType": "System.Boolean",
+        "propertyName": "HangUp"
+      },
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "DeviceConnected",
+    "properties": [
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "CheckAttemptStep",
+    "properties": [
+      {
+        "propertyType": "System.Int32",
+        "propertyName": "MaxAttempts"
+      },
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "CallLoop",
+    "properties": [
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "BridgeCall",
+    "properties": [
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  },
+  {
+    "stepName": "ArkeInit",
+    "properties": [
+      {
+        "propertyType": "Arke.DSL.Step.Direction",
+        "propertyName": "Direction"
+      }
+    ]
+  }
+]

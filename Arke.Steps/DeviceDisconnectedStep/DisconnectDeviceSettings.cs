@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Newtonsoft.Json.Linq;
@@ -14,5 +15,10 @@ namespace Arke.Steps.DeviceDisconnectedStep
         }
 
         public bool HangUp { get; set; }
+
+        public new static List<string> GetOutputNodes()
+        {
+            return new List<string>() {  };
+        }
     }
 }

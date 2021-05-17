@@ -9,18 +9,13 @@ namespace Arke.Steps.InputStep
 {
     public class GetInputSettings : NodeProperties
     {
-        private const string NextStep = "NextStep";
-        private const string NoAction = "NoAction";
-        private const string Invalid = "Invalid";
-        private const string MaxAttemptsReachedStep = "MaxAttemptsReachedStep";
-        private const string PhoneInputs = "0123456789*#";
-
+        public List<InputOptions> Options { get; set; }
         public int MaxDigitTimeoutInSeconds { get; set; }
         public int NumberOfDigitsToWaitForNextStep { get; set; }
         public string TerminationDigit { get; set; }
         public bool SetValueAsDestination { get; set; }
-        public string SetValueAs { get; set; }
         public int MaxAttempts { get; set; }
+        public string SetValueAs { get; set; }
 
         public override NodeProperties ConvertFromJObject(JObject jObject)
         {
@@ -31,6 +26,16 @@ namespace Arke.Steps.InputStep
             SetValueAsDestination = jObject.GetValue("SetValueAsDestination").Value<bool>();
             SetValueAs = jObject.GetValue("SetValueAs").Value<string>();
             MaxAttempts = jObject.GetValue("MaxAttempts").Value<int>();
+            Options = new List<InputOptions>();
+            var options = jObject.GetValue("Options").Value<JArray>();
+            foreach (var option in options.Select(o => new InputOptions()
+            {
+                Input = o.Value<JObject>().GetValue("Input").Value<string>(),
+                NextStep = o.Value<JObject>().GetValue("NextStep").Value<int>()
+            }))
+            {
+                Options.Add(option);
+            }
             return this;
         }
 
@@ -39,20 +44,23 @@ namespace Arke.Steps.InputStep
             return new PhoneInputHandlerSettings()
             {
                 Direction = Direction,
-                Invalid = step.GetStepFromConnector(Invalid),
+                Invalid = step.GetStepFromConnector("Invalid"),
                 MaxDigitTimeoutInSeconds = MaxDigitTimeoutInSeconds,
-                NextStep = step.GetStepFromConnector(NextStep),
-                NoAction = step.GetStepFromConnector(NoAction),
+                NextStep = step.GetStepFromConnector("NextStep"),
+                NoAction = step.GetStepFromConnector("NoAction"),
                 NumberOfDigitsToWaitForNextStep = NumberOfDigitsToWaitForNextStep,
-                Options = step.LinkedSteps
-                    .Where(s => PhoneInputs.Contains(s.FromPort))
-                    .Select(s => new InputOptions { Input = s.FromPort, NextStep = s.To }).ToList(),
+                Options = Options,
                 SetValueAsDestination = SetValueAsDestination,
                 SetValueAs = SetValueAs,
                 TerminationDigit = TerminationDigit,
-                MaxAttemptsReachedStep = step.GetStepFromConnector(MaxAttemptsReachedStep),
+                MaxAttemptsReachedStep = step.GetStepFromConnector("MaxAttemptsReachedStep"),
                 MaxRetryCount = MaxAttempts
             };
+        }
+
+        public new static List<string> GetOutputNodes()
+        {
+            return new List<string>() { "Invalid", "NextStep", "NoAction", "MaxAttemptsReachedStep" };
         }
     }
 }

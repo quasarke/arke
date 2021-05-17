@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using System.Timers;
 using System.Linq;
 using System.Threading.Tasks;
 using Arke.DSL.Extensions;
 using Arke.DSL.Step;
+using Arke.DSL.Step.Settings;
 using Arke.SipEngine.Api;
 using Arke.SipEngine.CallObjects;
 using Arke.SipEngine.Events;
@@ -20,6 +22,7 @@ namespace Arke.IVR.Input
         {
             _call = call;
             _promptPlayer = promptPlayer;
+            _settings = new PhoneInputHandlerSettings();
             DigitsReceived = "";
             DigitTimeoutTimer = new Timer();
             DigitTimeoutTimer.Elapsed += DigitTimeoutEvent;
@@ -34,15 +37,29 @@ namespace Arke.IVR.Input
         public int NumberOfDigitsToWaitForNextStep { get; set; }
         public string TerminationDigit { get; set; }
         public string SetValueAs { get; set; }
+        public Direction Direction { get; set; }
 
         public void ChangeInputSettings(PhoneInputHandlerSettings settings)
         {
-            _settings = settings;
-            MaxDigitTimeoutInSeconds = _settings.MaxDigitTimeoutInSeconds;
-            SetValueAs = _settings.SetValueAs;
-            SetTimerInterval();
-            NumberOfDigitsToWaitForNextStep = _settings.NumberOfDigitsToWaitForNextStep;
-            TerminationDigit = _settings.TerminationDigit;
+            if (_settings != null)
+            {
+                _settings = settings;
+                MaxDigitTimeoutInSeconds = _settings.MaxDigitTimeoutInSeconds;
+                SetValueAs = _settings.SetValueAs;
+                SetTimerInterval();
+                NumberOfDigitsToWaitForNextStep = _settings.NumberOfDigitsToWaitForNextStep;
+                TerminationDigit = _settings.TerminationDigit;
+                Direction = _settings.Direction;
+            }
+            else
+            {
+                NumberOfDigitsToWaitForNextStep = -1;
+                TerminationDigit = "D";
+                Direction = Direction.Both;
+                _settings.SetValueAs = "";
+                _settings.SetValueAsDestination = false;
+                _settings.Options = new List<InputOptions>();
+            }
         }
 
         private void SetTimerInterval()
@@ -67,11 +84,11 @@ namespace Arke.IVR.Input
         public async void AriClient_OnChannelDtmfReceivedEvent(ISipApiClient sipApiClient, DtmfReceivedEvent dtmfReceivedEvent)
         {
             DigitTimeoutTimer.Stop();
-            _call.Logger.Debug($"OnChannel Dtmf Received Event {dtmfReceivedEvent.LineId}");
             if (_call.GetCurrentState() == State.LanguagePrompts)
                 return;
-            if (dtmfReceivedEvent.LineId != _call.CallState.GetIncomingLineId())
+            if (!ShouldProcessDigit(dtmfReceivedEvent))
                 return;
+            _call.Logger.Debug($"OnChannel Dtmf Received Event {dtmfReceivedEvent.LineId}");
 
             LogDtmfValue(dtmfReceivedEvent);
 
@@ -83,12 +100,28 @@ namespace Arke.IVR.Input
             await ProcessDigitsReceived();
         }
 
-        private void DigitTimeoutEvent(object sender, ElapsedEventArgs e)
+        private bool ShouldProcessDigit(DtmfReceivedEvent dtmfReceivedEvent)
         {
-            FailCaptureWhenTimeoutExpires();
+            switch (Direction)
+            {
+                case Direction.Incoming:
+                    return (dtmfReceivedEvent.LineId == _call.CallState.GetIncomingLineId());
+                case Direction.Outgoing:
+                    return (dtmfReceivedEvent.LineId == _call.CallState.GetOutgoingLineId());
+                case Direction.Both:
+                    return (dtmfReceivedEvent.LineId == _call.CallState.GetIncomingLineId()
+                        || dtmfReceivedEvent.LineId == _call.CallState.GetOutgoingLineId());
+                default:
+                    return false;
+            }
         }
 
-        public void FailCaptureWhenTimeoutExpires()
+        private async void DigitTimeoutEvent(object sender, ElapsedEventArgs e)
+        {
+            await FailCaptureWhenTimeoutExpires();
+        }
+
+        public async Task FailCaptureWhenTimeoutExpires()
         {
             if (_call.GetCurrentState() != State.CapturingInput)
                 return;
@@ -96,20 +129,34 @@ namespace Arke.IVR.Input
             if (_call.CallState.InputRetryCount > _settings.MaxRetryCount && _settings.MaxRetryCount > 0)
             {
                 ResetInputRetryCount();
-                if (_settings.Direction != Direction.Outgoing)
-                    _call.CallState.AddStepToIncomingQueue(_settings.MaxAttemptsReachedStep);
-                else
-                    _call.CallState.AddStepToOutgoingQueue(_settings.MaxAttemptsReachedStep);
+                AddStepToProperQueue(_settings.MaxAttemptsReachedStep);
             }
             else
             {
-                if (_settings.Direction != Direction.Outgoing)
-                    _call.CallState.AddStepToIncomingQueue(_settings.NoAction);
-                else
-                    _call.CallState.AddStepToOutgoingQueue(_settings.NoAction);
+                AddStepToProperQueue(_settings.NoAction);
             }
 
-            _call.FireStateChange(Trigger.FailedInputCapture);
+            await _call.FireStateChange(Trigger.FailedInputCapture);
+        }
+
+        private void AddStepToProperQueue(int step)
+        {
+            switch (Direction)
+            {
+                case Direction.Both:
+                    _call.CallState.AddStepToIncomingQueue(step);
+                    _call.CallState.AddStepToOutgoingQueue(step);
+                    break;
+                case Direction.Incoming:
+                    _call.CallState.AddStepToIncomingQueue(step);
+                    break;
+                case Arke.DSL.Step.Direction.Outgoing:
+                    _call.CallState.AddStepToOutgoingQueue(step);
+                    break;
+                default:
+                    _call.CallState.AddStepToIncomingQueue(step);
+                    break;
+            }
         }
 
         private void ResetInputRetryCount()
@@ -120,6 +167,7 @@ namespace Arke.IVR.Input
         public void CaptureDigitIfInValidState(DtmfReceivedEvent e)
         {
             if (_call.GetCurrentState() == State.PlayingInterruptiblePrompt ||
+                _call.GetCurrentState() == State.CallFlow ||
                 _call.GetCurrentState() == State.CapturingInput)
                 DigitsReceived += e.Digit;
         }
@@ -136,8 +184,7 @@ namespace Arke.IVR.Input
 
         public async Task ProcessDigitsReceived()
         {
-            if (_call.GetCurrentState() != State.CapturingInput ||
-                DigitsReceived.Length < NumberOfDigitsToWaitForNextStep)
+            if (DigitsReceived.Length < NumberOfDigitsToWaitForNextStep)
             {
                 DigitTimeoutTimer.Start();
                 return;
@@ -156,12 +203,10 @@ namespace Arke.IVR.Input
                 {
                     if (_settings.SetValueAsDestination)
                         _call.CallState.Destination = DigitsReceived.Substring(0, DigitsReceived.Length - 1);
+                    else if (!string.IsNullOrEmpty(_settings.SetValueAs))
+                        DynamicState.SetProperty(_call.CallState, _settings.SetValueAs, DigitsReceived);
 
-                    if (_settings.Direction != Direction.Outgoing)
-                        _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
-                    else
-                        _call.CallState.AddStepToOutgoingQueue(_settings.NextStep);
-
+                    AddStepToProperQueue(_settings.NextStep);
                     _call.CallState.InputData = DigitsReceived.Substring(0, DigitsReceived.Length - 1);
                     ResetInputRetryCount();
                     await _call.FireStateChange(Trigger.InputReceived);
@@ -171,22 +216,18 @@ namespace Arke.IVR.Input
             else if (_settings.SetValueAsDestination)
             {
                 _call.CallState.Destination = DigitsReceived.Substring(0, DigitsReceived.Length);
-                
-                if (_settings.Direction != Direction.Outgoing)
-                    _call.CallState.AddStepToIncomingQueue(_settings.NextStep);
-                else
-                    _call.CallState.AddStepToOutgoingQueue(_settings.NextStep);
-
+                AddStepToProperQueue(_settings.NextStep);
                 _call.CallState.InputData = DigitsReceived.Substring(0, DigitsReceived.Length);
                 ResetInputRetryCount();
                 await _call.FireStateChange(Trigger.InputReceived);
                 return;
             }
-            else if (DigitsReceived.Length == NumberOfDigitsToWaitForNextStep
-                     && !string.IsNullOrEmpty(SetValueAs))
+            else if (!string.IsNullOrEmpty(_settings.SetValueAs))
             {
-                DynamicState.SetProperty(_call.CallState, SetValueAs, DigitsReceived);
+                DynamicState.SetProperty(_call.CallState, _settings.SetValueAs, DigitsReceived);
+                _call.CallState.InputData = DigitsReceived;
                 ResetInputRetryCount();
+                AddStepToProperQueue(_settings.NextStep);
                 await _call.FireStateChange(Trigger.InputReceived);
                 return;
             }
@@ -202,10 +243,7 @@ namespace Arke.IVR.Input
             {
                 ResetInputRetryCount();
                 
-                if (_settings.Direction != Direction.Outgoing)
-                    _call.CallState.AddStepToIncomingQueue(option.NextStep);
-                else
-                    _call.CallState.AddStepToOutgoingQueue(option.NextStep);
+                AddStepToProperQueue(option.NextStep);
 
                 validStep = true;
             }
@@ -216,17 +254,11 @@ namespace Arke.IVR.Input
                 {
                     ResetInputRetryCount();
 
-                    if (_settings.Direction != Direction.Outgoing)
-                        _call.CallState.AddStepToIncomingQueue(_settings.MaxAttemptsReachedStep);
-                    else
-                        _call.CallState.AddStepToOutgoingQueue(_settings.MaxAttemptsReachedStep);
+                    AddStepToProperQueue(_settings.MaxAttemptsReachedStep);
                 }
                 else
                 {
-                    if (_settings.Direction != Direction.Outgoing)
-                        _call.CallState.AddStepToIncomingQueue(_settings.Invalid);
-                    else
-                        _call.CallState.AddStepToOutgoingQueue(_settings.Invalid);
+                    AddStepToProperQueue(_settings.Invalid);
                 }
             }
             await _call.FireStateChange(Trigger.InputReceived);

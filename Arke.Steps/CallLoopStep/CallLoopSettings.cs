@@ -7,5 +7,9 @@ namespace Arke.Steps.CallLoopStep
 {
     public class CallLoopSettings : NodeProperties
     {
+        public new static List<string> GetOutputNodes()
+        {
+            return new List<string>() {"NextIncomingStep", "NextOutgoingStep"};
+        }
     }
 }
