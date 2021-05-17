@@ -22,5 +22,10 @@ namespace Arke.Steps.HoldStep
             HoldTimeoutInSeconds = jObject.GetValue("HoldTimeoutInSeconds").Value<int>();
             return this;
         }
+
+        public new static List<string> GetOutputNodes()
+        {
+            return new List<string>() { "TimeoutStep" };
+        }
     }
 }

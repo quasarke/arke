@@ -25,6 +25,22 @@ namespace Arke.DSL.Step
         }
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false)]
+    public class StepDescription : System.Attribute
+    {
+        private string _description;
+
+        public StepDescription(string description)
+        {
+            _description = description;
+        }
+
+        public string GetDescription()
+        {
+            return _description;
+        }
+    }
+
     public abstract class NodeProperties
     {
         [JsonConverter(typeof(StringEnumConverter))]
@@ -50,6 +66,15 @@ namespace Arke.DSL.Step
                     Direction = Direction.Both;
                     break;
             }
+        }
+
+        /// <summary>
+        /// If you add Output Nodes you should override this method and return your own nodes.
+        /// </summary>
+        /// <returns>List of Output Node names</returns>
+        public static List<string> GetOutputNodes()
+        {
+            return new List<string>() {"NextStep"};
         }
     }
 

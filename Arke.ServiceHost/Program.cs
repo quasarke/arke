@@ -129,7 +129,7 @@ namespace Arke.ServiceHost
                 ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskUser").Value,
                 ArkeCallFlowService.Configuration.GetSection("appSettings:AsteriskPassword").Value
                 );
-            _logger.Information("Registering endpoint with AriClient");
+            _logger.Information($"Registering endpoint {endpoint.AriEndPoint}:{endpoint.Host}:{endpoint.Port} with AriClient");
             _ariClient = new AriClient(endpoint,
                 appName);
 

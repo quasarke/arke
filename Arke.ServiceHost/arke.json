@@ -62,9 +62,9 @@
       "color": "lightblue",
       "category": "PlayPrompt",
       "properties": {
-        "IsInterruptible": false,
+        "IsInterruptible": true,
         "Direction": "INCOMING",
-        "Prompts": [ "zombies" ]
+        "Prompts": [ "welcome" ]
       },
       "description": "Plays a prompt or series of prompts to a line",
       "inArray": [
@@ -78,6 +78,90 @@
         }
       ],
       "key": -6
+    },
+    {
+      "text": "GetInput",
+      "color": "lightblue",
+      "category": "GetInput",
+      "properties": {
+        "Direction": "INCOMING",
+        "MaxDigitTimeoutInSeconds": 5,
+        "NumberOfDigitsToWaitForNextStep": 1,
+        "TerminationDigit": "",
+        "SetValueAsDestination": false,
+        "SetValueAs": "",
+        "MaxAttempts": 3,
+        "Options": [
+          {
+            "Input": "1",
+            "NextStep": -10 
+          }
+        ] 
+      },
+      "description": "Plays a prompt or series of prompts to a line",
+      "inArray": [
+        {
+          "portId": "IN"
+        }
+      ],
+      "outArray": [
+        {
+          "portId": "Invalid"
+        },
+        {
+          "portId": "NoAction"
+        },
+        {
+          "portId": "MaxAttemptsReachedStep"
+        },
+        {
+          "portId": "NextStep" 
+        }
+      ],
+      "key": -7
+    },
+    {
+      "text": "CallOutbound",
+      "color": "lightblue",
+      "category": "CallOutbound",
+      "properties": {
+        "OutboundEndpointName": "",
+        "Direction": "INCOMING"
+      },
+      "description": "Plays a prompt or series of prompts to a line",
+      "inArray": [
+        {
+          "portId": "IN"
+        }
+      ],
+      "outArray": [
+        {
+          "portId": "NextStep"
+        }
+      ],
+      "key": -10
+    },
+    {
+      "text": "PlayPrompt",
+      "color": "lightblue",
+      "category": "PlayPrompt",
+      "properties": {
+        "IsInterruptible": false,
+        "Direction": "INCOMING",
+        "Prompts": [ "welcome" ]
+      },
+      "description": "Plays a prompt or series of prompts to a line",
+      "inArray": [
+        {
+          "portId": "IN"
+        }
+      ],
+      "outArray": [
+        {
+          "portId": "NextStep"
+        }
+      ],
+      "key": -8
     }
   ],
   "linkDataArray": [
@@ -95,8 +179,38 @@
     },
     {
       "from": -6,
-      "to": -2,
+      "to": -7,
       "fromPort": "NextStep",
+      "toPort": "IN"
+    },
+    {
+      "from": -7,
+      "to": -10,
+      "fromPort": "NextStep",
+      "toPort": "IN"
+    },
+    {
+      "from": -7,
+      "to": -10,
+      "fromPort": "1",
+      "toPort": "IN"
+    },
+    {
+      "from": -7,
+      "to": -6,
+      "fromPort": "Invalid",
+      "toPort": "IN"
+    },
+    {
+      "from": -7,
+      "to": -6,
+      "fromPort": "NoAction",
+      "toPort": "IN"
+    },
+    {
+      "from": -7,
+      "to": -2,
+      "fromPort": "MaxAttemptsReachedStep",
       "toPort": "IN"
     }
   ]

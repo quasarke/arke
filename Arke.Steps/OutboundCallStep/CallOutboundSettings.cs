@@ -1,4 +1,5 @@
-﻿using Arke.DSL.Step;
+﻿using System.Collections.Generic;
+using Arke.DSL.Step;
 using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.OutboundCallStep
@@ -11,6 +12,11 @@ namespace Arke.Steps.OutboundCallStep
             base.ConvertFromJObject(jObject);
             OutboundEndpointName = jObject.GetValue("OutboundEndpointName").Value<string>();
             return this;
+        }
+
+        public new static List<string> GetOutputNodes()
+        {
+            return new List<string>() { "Error", "NoAnswer", "NextStep" };
         }
     }
 }
