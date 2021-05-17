@@ -132,8 +132,7 @@ namespace Arke.IVR
         
             // call answered and started
             await line.RunCallScriptAsync(_cancellationToken);
-            await Task.Delay(1000, _cancellationToken);
-            _logger.Information("Call Script Complete", new { ChannelId = e.Channel.Id });
+            _logger.Information("Call Setup Script Complete", new { ChannelId = e.Channel.Id });
         }
 
         private async void AriClientOnStasisEndEvent(IAriClient sender, StasisEndEvent stasisEndEvent)

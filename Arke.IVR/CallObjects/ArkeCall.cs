@@ -201,13 +201,19 @@ namespace Arke.IVR.CallObjects
 
         public virtual async Task ProcessCallLogicAsync()
         {
+            if (_cancellationToken.IsCancellationRequested)
+            {
+                await ForceCallEndAsync();
+                return;
+            }
+
             if (_callState.GetStepsOnIncomingQueue() > 0)
             {
                 Logger.Debug("Processing next step on incoming line.");
                 var step = _callState.GetNextIncomingStep();
                 AddOrUpdateStepIdToLogFields(step);
                 Logger.Debug($"Processing Step ID {step}");
-                await DslProcessor.ProcessStepAsync(step);
+                await DslProcessor.ProcessStepAsync(step).ConfigureAwait(false);
                 OnWorkflowStep?.Invoke(this, new OnWorkflowStepEvent()
                 {
                     LineId = _callState.IncomingSipChannel.Channel.Id,
@@ -220,7 +226,7 @@ namespace Arke.IVR.CallObjects
                 Logger.Debug("Processing next step on outgoing line.");
                 var step = _callState.GetNextOutgoingStep();
                 AddOrUpdateStepIdToLogFields(step);
-                await DslProcessor.ProcessStepAsync(step);
+                await DslProcessor.ProcessStepAsync(step).ConfigureAwait(false);
                 OnWorkflowStep?.Invoke(this, new OnWorkflowStepEvent()
                 {
                     LineId = _callState.OutgoingSipChannel.Channel.Id,

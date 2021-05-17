@@ -1,4 +1,5 @@
-﻿using Arke.DSL.Step;
+﻿using System.Collections.Generic;
+using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Newtonsoft.Json.Linq;
 
@@ -14,5 +15,10 @@ namespace Arke.Steps.CheckAttemptStep
         }
 
         public int MaxAttempts { get; set; }
+
+        public new static List<string> GetOutputNodes()
+        {
+            return new List<string>() { "NextStep", "MaxAttemptsStep" };
+        }
     }
 }
