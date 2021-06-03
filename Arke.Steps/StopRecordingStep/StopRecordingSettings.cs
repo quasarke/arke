@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.StopRecordingStep
 {
+    [StepDescription("Stops the recording on a designated line.")]
     public class StopRecordingSettings : NodeProperties
     {
         public List<RecordingItems> ItemsToStop { get; set; }

@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.PlayValueStep
 {
+    [StepDescription("Plays a value from the call state to the designated line.")]
     public class PlayValueStepSettings : NodeProperties
     {
         public bool IsInterruptible { get; set; }

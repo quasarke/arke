@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.InputStep
 {
+    [StepDescription("Gets input from the user.")]
     public class GetInputSettings : NodeProperties
     {
         public List<InputOptions> Options { get; set; }
