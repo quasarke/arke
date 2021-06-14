@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="5.0.0" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
-    <PackageReference Include="SimpleInjector" Version="5.2.1" />
+    <PackageReference Include="SimpleInjector" Version="5.3.1" />
   </ItemGroup>
 
   <ItemGroup>
