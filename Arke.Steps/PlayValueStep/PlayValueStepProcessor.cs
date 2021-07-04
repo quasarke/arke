@@ -10,7 +10,7 @@ namespace Arke.Steps.PlayValueStep
 {
     public class PlayValueStepProcessor : IStepProcessor
     {
-        private const string NextStep = "NextStep";
+        private const string next_step = "NextStep";
         public string Name => "PlayValueStep";
         public async Task DoStepAsync(Step step, ICall call)
         {
@@ -35,7 +35,7 @@ namespace Arke.Steps.PlayValueStep
             var promptSettings = new PlayerPromptSettings()
             {
                 IsInterruptible = stepSettings.IsInterruptible,
-                NextStep = step.GetStepFromConnector(NextStep),
+                NextStep = step.GetStepFromConnector(next_step),
                 Direction = stepSettings.Direction
             };
 
@@ -52,9 +52,9 @@ namespace Arke.Steps.PlayValueStep
                     : call.CallState.GetOutgoingLineId());
 
             if (stepSettings.Direction != Direction.Outgoing)
-                call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
+                call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(next_step));
             else
-                call.CallState.AddStepToOutgoingQueue(step.GetStepFromConnector(NextStep));
+                call.CallState.AddStepToOutgoingQueue(step.GetStepFromConnector(next_step));
         }
 
         private static Task PlayMoneyValue(Step step, ICall call, PlayValueStepSettings stepSettings)
@@ -70,16 +70,16 @@ namespace Arke.Steps.PlayValueStep
             var promptSettings = new PlayerPromptSettings()
             {
                 IsInterruptible = stepSettings.IsInterruptible,
-                NextStep = step.GetStepFromConnector(NextStep),
+                NextStep = step.GetStepFromConnector(next_step),
                 Prompts = prompts,
                 Direction = stepSettings.Direction
             };
 
             call.PromptPlayer.DoStepAsync(promptSettings);
             if (stepSettings.Direction != Direction.Outgoing)
-                call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(NextStep));
+                call.CallState.AddStepToIncomingQueue(step.GetStepFromConnector(next_step));
             else
-                call.CallState.AddStepToOutgoingQueue(step.GetStepFromConnector(NextStep));
+                call.CallState.AddStepToOutgoingQueue(step.GetStepFromConnector(next_step));
             return Task.CompletedTask;
         }
     }

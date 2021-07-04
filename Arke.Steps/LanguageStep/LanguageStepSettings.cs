@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.LanguageStep
 {
+    [StepDescription("Sets the language for the call.")]
     public class LanguageStepSettings : NodeProperties
     {
         public List<string> Prompts { get; set; }

@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.DeviceDisconnectedStep
 {
+    [StepDescription("Disconnects a device from the flow.")]
     public class DisconnectDeviceSettings : NodeProperties
     {
         public override NodeProperties ConvertFromJObject(JObject jObject)
