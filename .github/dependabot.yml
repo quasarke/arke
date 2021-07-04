@@ -1,0 +1,67 @@
+version: 2
+updates:
+- package-ecosystem: nuget
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "10:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: Swashbuckle.AspNetCore.SwaggerUi
+    versions:
+    - 6.0.2
+    - 6.0.4
+    - 6.0.5
+    - 6.0.7
+    - 6.1.0
+    - 6.1.1
+    - 6.1.2
+  - dependency-name: Swashbuckle.AspNetCore.SwaggerGen
+    versions:
+    - 6.0.2
+    - 6.0.4
+    - 6.0.5
+    - 6.0.7
+    - 6.1.0
+    - 6.1.1
+    - 6.1.2
+  - dependency-name: Swashbuckle.AspNetCore
+    versions:
+    - 6.0.2
+    - 6.0.4
+    - 6.0.5
+    - 6.0.7
+    - 6.1.0
+    - 6.1.1
+    - 6.1.2
+  - dependency-name: Swashbuckle.AspNetCore.Swagger
+    versions:
+    - 6.0.2
+    - 6.0.4
+    - 6.0.5
+    - 6.0.7
+    - 6.1.0
+    - 6.1.1
+    - 6.1.2
+  - dependency-name: libphonenumber-csharp
+    versions:
+    - 8.12.17
+    - 8.12.18
+    - 8.12.19
+  - dependency-name: Serilog.Extensions.Hosting
+    versions:
+    - 4.0.0
+    - 4.1.0
+  - dependency-name: Stateless
+    versions:
+    - 5.1.8
+    - 5.10.0
+  - dependency-name: Serilog
+    versions:
+    - 2.10.0
+  - dependency-name: Microsoft.Extensions.Configuration.Json
+    versions:
+    - 5.0.0
+  - dependency-name: System.ServiceModel.Http
+    versions:
+    - 4.8.0
