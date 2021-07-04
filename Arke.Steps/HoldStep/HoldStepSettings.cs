@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.HoldStep
 {
+    [StepDescription("Places a line in a hold queue.")]
     public class HoldStepSettings : NodeProperties
     {
         public bool HoldMusic { get; set; }

@@ -160,6 +160,8 @@ namespace Arke.Steps.OutboundCallStep
                     return dialString;
                 case ThinqTrunkName:
                     return dialString;
+                case TwilioTrunkName:
+                    return dialString;
                 default:
                     return dialString;
             }
@@ -184,6 +186,6 @@ namespace Arke.Steps.OutboundCallStep
         private const string SonusTrunkName = "PJSIP/{exten}@sonus-trunk";
         private const string ThinqTrunkName = "PJSIP/{exten}@thinq-trunk";
         private const string CciTrunkName = "PJSIP/{exten}@cci-trunk";
-
+        private const string TwilioTrunkName = "PJSIP/{exten}@twilio-na-us";
     }
 }

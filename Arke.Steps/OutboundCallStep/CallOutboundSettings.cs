@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.OutboundCallStep
 {
+    [StepDescription("Creates an outbound call on the designated endpoint.")]
     public class CallOutboundSettings : NodeProperties
     {
         public string OutboundEndpointName { get; set; }

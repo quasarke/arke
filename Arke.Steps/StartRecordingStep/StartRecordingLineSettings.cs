@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.StartRecordingStep
 {
+    [StepDescription("Starts recording on a designated line. InboundLine, OutboundLine, or Bridge.")]
     public class StartRecordingLineSettings : NodeProperties
     {
         public List<RecordingItems> ItemsToRecord { get; set; }

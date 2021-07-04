@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.CheckAttemptStep
 {
+    [StepDescription("Check if the number of attempts at an input have been exceeded.")]
     public class CheckAttemptStepSettings : NodeProperties
     {
         public override NodeProperties ConvertFromJObject(JObject jObject)

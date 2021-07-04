@@ -125,7 +125,7 @@
       "color": "lightblue",
       "category": "CallOutbound",
       "properties": {
-        "OutboundEndpointName": "",
+        "OutboundEndpointName": "PJSIP/{exten}@twilio-na-us",
         "Direction": "INCOMING"
       },
       "description": "Plays a prompt or series of prompts to a line",

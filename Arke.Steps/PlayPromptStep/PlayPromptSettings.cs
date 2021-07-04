@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Arke.Steps.PlayPromptStep
 {
+    [StepDescription("Plays a series of prompts to the line or conference.")]
     public class PlayPromptSettings : NodeProperties
     {
         private const string NextStep = "NextStep";
