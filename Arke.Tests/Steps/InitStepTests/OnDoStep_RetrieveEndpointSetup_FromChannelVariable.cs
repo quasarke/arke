@@ -10,7 +10,7 @@ namespace Arke.Tests.Steps.InitStepTests
 {
     public class OnDoStep_RetrieveEndpointSetup_FromChannelVariable
     {
-        private ISipLineApi _sipLineApiMock;
+        private Mock<ISipLineApi> _sipLineApiMock;
         private void Setup()
         {
             var mockSipApi = new Mock<ISipLineApi>();
@@ -18,15 +18,14 @@ namespace Arke.Tests.Steps.InitStepTests
                 .ReturnsAsync("TEST_ENDPOINT");
             mockSipApi.Setup(api => api.GetLineVariableAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync("TEST_PORT");
-            mockSipApi.VerifyAll();
-            _sipLineApiMock = mockSipApi.Object;
+            _sipLineApiMock = mockSipApi;
         }
 
         [Fact]
         public async void EnsureEndpointSetupGetsCalledOnDoStep()
         {
             Setup();
-            var initStep = new ArkeInitProcessor(_sipLineApiMock);
+            var initStep = new ArkeInitProcessor(_sipLineApiMock.Object);
             //await initStep.DoStepAsync();
         }
     }
