@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Zachary Way</Authors>
+    <Company>Quasarke</Company>
+    <Description>Arke SIP Engine Implementation Sample</Description>
+    <Copyright>2021</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/quasarke/arke</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/quasarke/arke</RepositoryUrl>
+    <PackageReleaseNotes>Initial release of nuget packages.</PackageReleaseNotes>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <Version>1.1.0-beta</Version>
   </PropertyGroup>
 
   <ItemGroup>
