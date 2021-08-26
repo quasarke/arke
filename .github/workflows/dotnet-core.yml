@@ -28,4 +28,4 @@ jobs:
     - name: Create NuGet Packages
       run: dotnet pack --configuration Release
     - name: Publish NuGet Packages
-      run: dotnet nuget push "**/*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
+      run: dotnet nuget push "**/*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github" --skip-duplicate
