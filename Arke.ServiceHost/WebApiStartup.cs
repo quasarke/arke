@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using Arke.DependencyInjection;
 using Arke.ManagementApi.Controllers;
 using Microsoft.AspNetCore.Builder;
@@ -9,11 +10,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SimpleInjector.Integration.AspNetCore.Mvc;
+using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using System.Linq;
 
 namespace Arke.ServiceHost
 {
     public class WebApiStartup
     {
+        const string apiScope = "Arke.Editor.Api";
+
         public WebApiStartup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -34,6 +40,20 @@ namespace Arke.ServiceHost
                 apm.ApplicationParts.Add(part);
                 
             });
+
+            //services.AddMicrosoftIdentityWebApiAuthentication(Configuration, "AzureAd");
+            
+            
+            var corsOrigins = Configuration.GetSection("appSettings:corsOrigins").GetChildren().ToArray().Select(c => c.Value).ToArray();
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "ArkeAllowedOrigins", builder =>
+                {
+                    builder.WithOrigins(corsOrigins)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
             
             services.AddSwaggerGen();
         }
@@ -44,6 +64,8 @@ namespace Arke.ServiceHost
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseCors("ArkeAllowedOrigins");
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Arke API"));
             app.UseRouting();

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Arke.DSL.Extensions;
 using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Newtonsoft.Json.Linq;
@@ -11,7 +12,9 @@ namespace Arke.Steps.HoldStep
         public bool HoldMusic { get; set; }
         public string WaitPrompt { get; set; }
         public int HoldTimeoutInSeconds { get; set; }
+        [ApiValue("StepId", "Prompt")]
         public Dictionary<string, string> PromptChanges { get; set; }
+        [ApiValue("StepId", "StepId")]
         public Dictionary<string, string> Triggers { get; set; }
 
         public override NodeProperties ConvertFromJObject(JObject jObject)

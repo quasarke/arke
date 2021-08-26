@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Arke.DSL.Extensions;
 using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Newtonsoft.Json.Linq;
@@ -9,6 +10,8 @@ namespace Arke.Steps.LanguageStep
     public class LanguageStepSettings : NodeProperties
     {
         public List<string> Prompts { get; set; }
+
+        [ApiValue("Numeric","System.String")]
         public Dictionary<string, string> LanguageSettings { get; set; }
         public int MaxDigitTimeoutInSeconds { get; set; }
         public override NodeProperties ConvertFromJObject(JObject jObject)

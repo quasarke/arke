@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Arke.DSL.Extensions;
 using Arke.DSL.Step;
 using Arke.DSL.Step.Settings;
 using Arke.SipEngine.CallObjects;
@@ -10,6 +11,7 @@ namespace Arke.Steps.InputStep
     [StepDescription("Gets input from the user.")]
     public class GetInputSettings : NodeProperties
     {
+        [ApiValue("Numeric", "StepId")]
         public List<InputOptions> Options { get; set; }
         public int MaxDigitTimeoutInSeconds { get; set; }
         public int NumberOfDigitsToWaitForNextStep { get; set; }

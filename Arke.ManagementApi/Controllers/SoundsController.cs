@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Arke.SipEngine.Api;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arke.ManagementApi.Controllers
 {
+    [Authorize]
     [Produces("application/json")]
     [Route("api/sounds")]
     public class SoundsController : ControllerBase

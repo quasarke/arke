@@ -2,10 +2,27 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>Zachary Way</Authors>
+    <Company>Quasarke</Company>
+    <Copyright>2021</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/quasarke/arke</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/quasarke/arke</RepositoryUrl>
+    <Description>Base IVR Objects for Arke Engine</Description>
+    <Version>1.1.0-beta</Version>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\LICENSE" Link="LICENSE">
+      <PackagePath></PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Arke.ARI" Version="1.3.0" />
+    <PackageReference Include="Microsoft.Coyote" Version="1.3.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
   </ItemGroup>

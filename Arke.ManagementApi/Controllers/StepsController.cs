@@ -7,11 +7,14 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Arke.DependencyInjection;
+using Arke.DSL.Extensions;
 using Arke.DSL.Step;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arke.ManagementApi.Controllers
 {
+    //[Authorize]
     [Produces("application/json")]
     [Route("api/steps")]
     public class StepsController
@@ -34,10 +37,55 @@ namespace Arke.ManagementApi.Controllers
 
                 foreach (var property in step.GetProperties())
                 {
+                    string[] values = null;
+                    if (property.PropertyType.IsEnum)
+                    {
+                        values = property.PropertyType.GetEnumNames();
+                    }
+                    string key = null;
+                    string value = null;
+                    bool array = false;
+                    var name = GetPropertyTypeName(property.PropertyType.FullName);
+
+                    if (typeof(System.Collections.IList).IsAssignableFrom(property.PropertyType))
+                    {
+                        foreach (var prop in property.PropertyType.GetProperties())
+                        {
+                            if ("Item" == prop.Name && typeof(object) != prop.PropertyType)
+                            {
+                                var ipa = prop.GetIndexParameters();
+                                if (ipa.Length == 1 && ipa[0].ParameterType == typeof(int))
+                                {
+                                    if (prop.PropertyType.IsEnum)
+                                        values = prop.PropertyType.GetEnumNames();
+                                }
+                            }
+                        }
+                    }
+
+                    if (property.PropertyType.GetInterfaces().Contains(typeof(System.Collections.IEnumerable))
+                        && property.PropertyType.FullName != "System.String")
+                    {
+                        array = true;
+                    }
+
+                    foreach (var attr in System.Attribute.GetCustomAttributes(property))
+                    {
+                        if (attr is ApiValue a)
+                        {
+                            key = a.Key;
+                            value = a.Value;
+                        }
+                    }
+
                     stepType.Properties.Add(new StepProperty()
                     {
-                        PropertyType = GetPropertyTypeName(property.PropertyType.FullName), 
-                        PropertyName = property.Name
+                        Type = name,
+                        Name = property.Name,
+                        Values = values,
+                        Key = key,
+                        Value = value,
+                        IsArray = array
                     });
                 }
 
@@ -94,8 +142,12 @@ namespace Arke.ManagementApi.Controllers
 
     public class StepProperty
     {
-        public string PropertyType { get; set; }
-        public string PropertyName { get; set; }
+        public string Type { get; set; }
+        public string Name { get; set; }
+        public string[] Values { get; set; }
+        public string Key { get; set; }
+        public string Value { get; set; }
+        public bool IsArray { get; set; }
     }
 
     public class StepDescription
