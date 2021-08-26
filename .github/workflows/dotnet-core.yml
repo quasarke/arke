@@ -26,6 +26,6 @@ jobs:
     - name: GitHub Package Auth
       run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/OWNER/index.json"
     - name: Create NuGet Packages
-      run: dotnet pack --configuration Release Arke.sln --include-symbols --include-source
+      run: dotnet pack --configuration Release "**/Arke.sln" --include-symbols --include-source
     - name: Publish NuGet Packages
       run: dotnet nuget push "**/*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github" --skip-duplicate
