@@ -1,5 +1,5 @@
 ﻿{
-  "class": "go.GraphLinksModel",
+  "class": "GraphLinksModel",
   "linkFromPortIdProperty": "fromPort",
   "linkToPortIdProperty": "toPort",
   "nodeDataArray": [
@@ -7,31 +7,21 @@
       "text": "DeviceConnected",
       "color": "lightgreen",
       "category": "DeviceConnected",
-      "properties": {
-        "Direction": "INCOMING"
-      },
+      "properties": { "Direction": "" },
       "description": "Must be first step, fires when device connects",
-      "outArray": [
-        {
-          "portId": "NextStep"
-        }
-      ],
-      "key": 0
+      "outArray": [ { "portId": "nextStep" } ],
+      "key": -1
     },
     {
       "text": "DisconnectDevice",
       "color": "salmon",
       "category": "DisconnectDevice",
       "properties": {
-        "Direction": "BOTH",
-        "HangUp": true
+        "Direction": "",
+        "HangUp": ""
       },
       "description": "Ends the call flow",
-      "inArray": [
-        {
-          "portId": "IN"
-        }
-      ],
+      "inArray": [ { "portId": "IN" } ],
       "key": -2
     },
     {
@@ -63,20 +53,12 @@
       "category": "PlayPrompt",
       "properties": {
         "IsInterruptible": true,
-        "Direction": "INCOMING",
-        "Prompts": [ "welcome" ]
+        "Prompts": ["welcome"],
+        "Arke.DSL.Step.Direction":  "Incoming"
       },
-      "description": "Plays a prompt or series of prompts to a line",
-      "inArray": [
-        {
-          "portId": "IN"
-        }
-      ],
-      "outArray": [
-        {
-          "portId": "NextStep"
-        }
-      ],
+      "description": "Plays a series of prompts to the line or conference.",
+      "inArray": [ "IN" ],
+      "outArray": [ { "portId": "NextStep" } ],
       "key": -6
     },
     {
@@ -84,133 +66,224 @@
       "color": "lightblue",
       "category": "GetInput",
       "properties": {
-        "Direction": "INCOMING",
+        "Options": [ { "Input": 1, "NextStep": -8 } ],
         "MaxDigitTimeoutInSeconds": 5,
         "NumberOfDigitsToWaitForNextStep": 1,
         "TerminationDigit": "",
         "SetValueAsDestination": false,
         "SetValueAs": "",
         "MaxAttempts": 3,
-        "Options": [
-          {
-            "Input": "1",
-            "NextStep": -10 
-          }
-        ] 
+        "SetValueAs": "",
+        "Direction": "Incoming"
       },
-      "description": "Plays a prompt or series of prompts to a line",
-      "inArray": [
-        {
-          "portId": "IN"
-        }
-      ],
+      "description": "Gets input from the user.",
+      "inArray": [ "IN" ],
       "outArray": [
-        {
-          "portId": "Invalid"
-        },
-        {
-          "portId": "NoAction"
-        },
-        {
-          "portId": "MaxAttemptsReachedStep"
-        },
-        {
-          "portId": "NextStep" 
-        }
-      ],
-      "key": -7
-    },
-    {
-      "text": "CallOutbound",
-      "color": "lightblue",
-      "category": "CallOutbound",
-      "properties": {
-        "OutboundEndpointName": "PJSIP/{exten}@twilio-na-us",
-        "Direction": "INCOMING"
-      },
-      "description": "Plays a prompt or series of prompts to a line",
-      "inArray": [
-        {
-          "portId": "IN"
-        }
-      ],
-      "outArray": [
-        {
-          "portId": "NextStep"
-        }
+        { "portId": "Invalid" },
+        { "portId": "NextStep" },
+        { "portId": "NoAction" },
+        { "portId": "MaxAttemptsReachedStep" }
       ],
       "key": -10
     },
-    {
-      "text": "PlayPrompt",
+          {
+      "text": "CheckAttemptStep",
       "color": "lightblue",
-      "category": "PlayPrompt",
-      "properties": {
-        "IsInterruptible": false,
-        "Direction": "INCOMING",
-        "Prompts": [ "welcome" ]
+      "category": "CheckAttemptStep",
+      "properties": [
+        {
+          "type": "System.Int32",
+          "name": "MaxAttempts",
+          "values": null,
+          "key": null,
+          "value": null,
+          "isArray": false
       },
       "description": "Plays a prompt or series of prompts to a line",
       "inArray": [
         {
-          "portId": "IN"
+          "type": "Arke.DSL.Step.Direction",
+          "name": "Direction",
+          "values": [ "Incoming", "Outgoing", "Both" ],
+          "key": null,
+          "value": null,
+          "isArray": false
         }
       ],
+      "description": "Check if the number of attempts at an input have been exceeded.",
+      "inArray": [ "IN" ],
       "outArray": [
+        { "portId": "NextStep" },
+        { "portId": "MaxAttemptsStep" }
+      ],
+      "key": -14
+        },
         {
-          "portId": "NextStep"
+      "text": "PlayPrompt",
+      "color": "lightblue",
+      "category": "PlayPrompt",
+      "properties": [
+        {
+          "type": "System.Boolean",
+          "name": "IsInterruptible",
+          "values": null,
+          "key": null,
+          "value": null,
+          "isArray": false
+        },
+        {
+          "type": "string[]",
+          "name": "Prompts",
+          "values": null,
+          "key": null,
+          "value": null,
+          "isArray": true
+        },
+        {
+          "type": "Arke.DSL.Step.Direction",
+          "name": "Direction",
+          "values": [ "Incoming", "Outgoing", "Both" ],
+          "key": null,
+          "value": null,
+          "isArray": false
         }
       ],
+      "description": "Plays a series of prompts to the line or conference.",
+      "inArray": [ "IN" ],
+      "outArray": [ { "portId": "NextStep" } ],
+      "key": -7
+    },
+    {
+      "text": "Transfer",
+      "color": "lightblue",
+      "category": "Transfer",
+      "properties": [
+        {
+          "type": "System.String",
+          "name": "Endpoint",
+          "values": null,
+          "key": null,
+          "value": null,
+          "isArray": false
+      },
+      "description": "Plays a prompt or series of prompts to a line",
+      "inArray": [
+        {
+          "type": "System.String",
+          "name": "DialString",
+          "values": null,
+          "key": null,
+          "value": null,
+          "isArray": false
+        },
+        {
+          "type": "Arke.DSL.Step.Direction",
+          "name": "Direction",
+          "values": [ "Incoming", "Outgoing", "Both" ],
+          "key": null,
+          "value": null,
+          "isArray": false
+        }
+      ],
+      "description": "Transfers a call to a new endpoint in Asterisk.",
+      "inArray": [ "IN" ],
+      "outArray": [ { "portId": "NextStep" } ],
       "key": -8
+    },
+    {
+      "text": "CallLoop",
+      "color": "lightblue",
+      "category": "CallLoop",
+      "properties": [
+        {
+          "type": "Arke.DSL.Step.Direction",
+          "name": "Direction",
+          "values": [ "Incoming", "Outgoing", "Both" ],
+          "key": null,
+          "value": null,
+          "isArray": false
+        }
+      ],
+      "description": "Process a call loop waiting for max time limits.",
+      "inArray": [ "IN" ],
+      "outArray": [
+        { "portId": "NextIncomingStep" },
+        { "portId": "NextOutgoingStep" }
+      ],
+      "key": -15
     }
   ],
   "linkDataArray": [
     {
-      "from": 0,
-      "to": -3,
-      "fromPort": "NextStep",
-      "toPort": "IN"
-    },
-    {
-      "from": -3,
+      "from": -1,
       "to": -6,
-      "fromPort": "NextStep",
-      "toPort": "IN"
+      "fromPort": "nextStep",
+      "toPort": ""
     },
     {
       "from": -6,
-      "to": -7,
-      "fromPort": "NextStep",
-      "toPort": "IN"
-    },
-    {
-      "from": -7,
       "to": -10,
       "fromPort": "NextStep",
-      "toPort": "IN"
+      "toPort": ""
     },
     {
-      "from": -7,
-      "to": -10,
-      "fromPort": "1",
-      "toPort": "IN"
-    },
-    {
-      "from": -7,
-      "to": -6,
+      "from": -10,
+      "to": -14,
       "fromPort": "Invalid",
-      "toPort": "IN"
+      "toPort": ""
     },
     {
-      "from": -7,
+      "from": -14,
       "to": -6,
+      "fromPort": "NextStep",
+      "toPort": ""
+    },
+    {
+      "from": -10,
+      "to": -14,
       "fromPort": "NoAction",
-      "toPort": "IN"
+      "toPort": ""
+    },
+    {
+      "from": -10,
+      "to": -7,
+      "fromPort": "MaxAttemptsReachedStep",
+      "toPort": ""
+    },
+    {
+      "from": -14,
+      "to": -7,
+      "fromPort": "MaxAttemptsStep",
+      "toPort": ""
     },
     {
       "from": -7,
       "to": -2,
-      "fromPort": "MaxAttemptsReachedStep",
+      "fromPort": "NextStep",
+      "toPort": "IN"
+    },
+    {
+      "from": -10,
+      "to": -8,
+      "fromPort": "NextStep",
+      "toPort": ""
+    },
+    {
+      "from": -8,
+      "to": -15,
+      "fromPort": "NextStep",
+      "toPort": ""
+    },
+    {
+      "from": -15,
+      "to": -2,
+      "fromPort": "NextIncomingStep",
+      "toPort": "IN"
+    },
+    {
+      "from": -15,
+      "to": -2,
+      "fromPort": "NextOutgoingStep",
       "toPort": "IN"
     }
   ]

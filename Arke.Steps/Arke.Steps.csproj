@@ -5,6 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\LICENSE" Link="LICENSE">
+      <PackagePath></PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Coyote" Version="1.3.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="SimpleInjector.Packaging" Version="5.0.0" />
@@ -17,6 +25,6 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Copy SourceFiles="$(ProjectDir)\$(OutDir)\Arke.Steps.dll" DestinationFolder="$(SolutionDir)\Arke.ServiceHost\bin\$(ConfigurationName)\netcoreapp3.1\Plugins\" />
+    <Copy SourceFiles="$(ProjectDir)$(OutDir)Arke.Steps.dll" DestinationFolder="$(SolutionDir)\Arke.ServiceHost\bin\$(ConfigurationName)\net5.0\Plugins\" />
   </Target>
 </Project>

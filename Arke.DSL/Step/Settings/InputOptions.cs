@@ -1,4 +1,6 @@
-﻿namespace Arke.DSL.Step.Settings
+﻿using Arke.DSL.Extensions;
+
+namespace Arke.DSL.Step.Settings
 {
     public class InputOptions
     {
