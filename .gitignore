@@ -214,3 +214,4 @@ FakesAssemblies/
 .sonarqube/
 /NDependOutput
 Arke.ServiceHost/appsettings.json
+Arke.ServiceHost/appsettings.local.json
