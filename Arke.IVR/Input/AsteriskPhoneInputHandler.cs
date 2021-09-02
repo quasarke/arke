@@ -58,7 +58,7 @@ namespace Arke.IVR.Input
                 Direction = Direction.Both;
                 _settings.SetValueAs = "";
                 _settings.SetValueAsDestination = false;
-                _settings.Options = new List<InputOptions>();
+                _settings.Options = new Dictionary<string, int>();
             }
         }
 
@@ -239,11 +239,11 @@ namespace Arke.IVR.Input
             }
 
             var validStep = false;
-            foreach (var option in _settings.Options.Where(option => option.Input == DigitsReceived.Substring(0, NumberOfDigitsToWaitForNextStep)))
+            foreach (var option in _settings.Options.Where(option => option.Key == DigitsReceived.Substring(0, NumberOfDigitsToWaitForNextStep)))
             {
                 ResetInputRetryCount();
                 
-                AddStepToProperQueue(option.NextStep);
+                AddStepToProperQueue(option.Value);
 
                 validStep = true;
             }

@@ -17,7 +17,7 @@ namespace Arke.ManagementApi.Controllers
     //[Authorize]
     [Produces("application/json")]
     [Route("api/steps")]
-    public class StepsController
+    public class StepsController : ControllerBase
     {
         [HttpGet]
         public async Task<List<StepDescription>> GetSteps()
@@ -78,13 +78,16 @@ namespace Arke.ManagementApi.Controllers
                         }
                     }
 
+                    if (property.Name == "Prompts" || value == "Prompt")
+                        value = $"{Request.Scheme}://{Request.Host}/api/sounds";
+
                     stepType.Properties.Add(new StepProperty()
                     {
                         Type = name,
                         Name = property.Name,
-                        Values = values,
-                        Key = key,
-                        Value = value,
+                        Options = values,
+                        KeyType = key,
+                        ValueType = value,
                         IsArray = array
                     });
                 }
@@ -126,13 +129,15 @@ namespace Arke.ManagementApi.Controllers
         {
             switch (propertyFullName)
             {
-                case "System.Collections.Generic.List`1[[Arke.DSL.Step.RecordingItems, Arke.DSL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]":
+                case "System.Collections.Generic.List`1[[Arke.DSL.Step.RecordingItems, Arke.DSL, Version=1.1.0.0, Culture=neutral, PublicKeyToken=null]]":
                     return "Arke.DSL.Step.RecordingItems";
                 case "System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]":
                     return "string[]";
                 case "System.Collections.Generic.Dictionary`2[[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]":
                     return "Dictionary<string,string>";
-                case "System.Collections.Generic.List`1[[Arke.DSL.Step.Settings.InputOptions, Arke.DSL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]":
+                case "System.Collections.Generic.Dictionary`2[[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]":
+                    return "Dictionary<string,int>";
+                case "System.Collections.Generic.List`1[[Arke.DSL.Step.Settings.InputOptions, Arke.DSL, Version=1.1.0.0, Culture=neutral, PublicKeyToken=null]]":
                     return "Arke.DSL.Step.Settings.InputOptions";
                 default:
                     return propertyFullName;
@@ -144,9 +149,9 @@ namespace Arke.ManagementApi.Controllers
     {
         public string Type { get; set; }
         public string Name { get; set; }
-        public string[] Values { get; set; }
-        public string Key { get; set; }
-        public string Value { get; set; }
+        public string[] Options { get; set; }
+        public string KeyType { get; set; }
+        public string ValueType { get; set; }
         public bool IsArray { get; set; }
     }
 
