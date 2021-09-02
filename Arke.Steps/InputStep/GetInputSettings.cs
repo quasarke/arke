@@ -12,7 +12,7 @@ namespace Arke.Steps.InputStep
     public class GetInputSettings : NodeProperties
     {
         [ApiValue("Numeric", "StepId")]
-        public List<InputOptions> Options { get; set; }
+        public Dictionary<string, int> Options { get; set; }
         public int MaxDigitTimeoutInSeconds { get; set; }
         public int NumberOfDigitsToWaitForNextStep { get; set; }
         public string TerminationDigit { get; set; }
@@ -29,16 +29,7 @@ namespace Arke.Steps.InputStep
             SetValueAsDestination = jObject.GetValue("SetValueAsDestination").Value<bool>();
             SetValueAs = jObject.GetValue("SetValueAs").Value<string>();
             MaxAttempts = jObject.GetValue("MaxAttempts").Value<int>();
-            Options = new List<InputOptions>();
-            var options = jObject.GetValue("Options").Value<JArray>();
-            foreach (var option in options.Select(o => new InputOptions()
-            {
-                Input = o.Value<JObject>().GetValue("Input").Value<string>(),
-                NextStep = o.Value<JObject>().GetValue("NextStep").Value<int>()
-            }))
-            {
-                Options.Add(option);
-            }
+            Options = jObject.GetValue("Options").ToObject<Dictionary<string, int>>();
             return this;
         }
 

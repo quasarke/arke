@@ -49,9 +49,7 @@ namespace Arke.ServiceHost
             
             _logger.Debug("Configuration Loaded.");
             SetupAriEndpoint();
-            _logger.Information("Verifying DI Container", new { DIContainer = "SimpleInjector"});
-            ObjectContainer.GetInstance().Verify();
-            
+                        
             _logger.Information("Service running, press CTRL-C to terminate.");
 
             try
@@ -64,6 +62,9 @@ namespace Arke.ServiceHost
                 _logger.Fatal(e, "Host terminated unexpectedly.");
             }
 
+
+            _logger.Information("Verifying DI Container", new { DIContainer = "SimpleInjector" });
+            ObjectContainer.GetInstance().Verify();
             _service = ObjectContainer.GetInstance().GetObjectInstance<ICallFlowService>();
             _service.Start(_cancellationToken.Token);
             AssemblyLoadContext.Default.Unloading += SigTermEventHandler;
@@ -165,6 +166,7 @@ namespace Arke.ServiceHost
             var hostName = Dns.GetHostName();
             var configBuilder = new ConfigurationBuilder();
             configBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            configBuilder.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
             configBuilder.AddJsonFile($"appsettings.{hostName}.json", optional: true, reloadOnChange: true);
             configBuilder.AddEnvironmentVariables();
             return configBuilder.Build();

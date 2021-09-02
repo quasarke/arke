@@ -13,6 +13,7 @@ using SimpleInjector.Integration.AspNetCore.Mvc;
 using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using System.Linq;
+using SimpleInjector;
 
 namespace Arke.ServiceHost
 {
@@ -54,7 +55,14 @@ namespace Arke.ServiceHost
                         .AllowAnyMethod();
                 });
             });
-            
+
+            services.AddSimpleInjector(ObjectContainer.GetInstance().GetSimpleInjectorContainer(), options =>
+            {
+                options.AddAspNetCore()
+                .AddControllerActivation();
+                options.AddLogging();
+            });
+
             services.AddSwaggerGen();
         }
 
@@ -65,6 +73,7 @@ namespace Arke.ServiceHost
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseSimpleInjector(ObjectContainer.GetInstance().GetSimpleInjectorContainer());
             app.UseCors("ArkeAllowedOrigins");
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Arke API"));

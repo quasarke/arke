@@ -12,7 +12,7 @@ namespace Arke.SipEngine.CallObjects
         public int NextStep { get; set; }
         public int NoAction { get; set; }
         public int NumberOfDigitsToWaitForNextStep { get; set; }
-        public List<InputOptions> Options { get; set; }
+        public Dictionary<string, int> Options { get; set; }
         public bool SetValueAsDestination { get; set; }
         public string TerminationDigit { get; set; }
         public int MaxRetryCount { get; set; }
