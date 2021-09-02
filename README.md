@@ -1,11 +1,11 @@
 # Arke for Asterisk ARI
-Arke is an IVR written using .NET Core 2.0 for Asterisk using the ARI interface through AsterNET.ARI. It is built to be extensible and with easily modifiable call flows. It's cross platform, supporting Linux, Raspberry Pi, and Windows.
+Arke is an IVR written using .NET 5.0 for Asterisk using the ARI interface through AsterNET.ARI. It is built to be extensible and with easily modifiable call flows. It's cross platform, supporting Linux, Raspberry Pi, and Windows.
 
 ## Find the developers
 [![Join the chat at https://gitter.im/arkeivr/Lobby](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/arkeivr/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Build Status
-![.NET Core](https://github.com/quasarke/arke/workflows/.NET%20Core/badge.svg?branch=master)
+![.NET 5.0](https://github.com/quasarke/arke/workflows/.NET%20Core/badge.svg?branch=master)
 
 ## Setup
 * Clone the repo and run `dotnet restore` then `dotnet build`
@@ -26,9 +26,9 @@ Arke is an IVR written using .NET Core 2.0 for Asterisk using the ARI interface 
 
 ## Dependencies
 * AsterNET.ARI 1.3+
-* .NET Core 3.1
-* SimpleInjector 4
-* Serilog 3
+* .NET 5.0
+* SimpleInjector 5
+* Serilog 4
 
 ## Extending and creating plugins for Arke
 * Create a .NET Core Library with the namespace Arke.*
