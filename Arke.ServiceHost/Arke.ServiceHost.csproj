@@ -26,7 +26,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
     <PackageReference Include="SimpleInjector" Version="5.3.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.2.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUi" Version="6.2.3" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
