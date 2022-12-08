@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Coyote" Version="1.4.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="6.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 
   <ItemGroup>
